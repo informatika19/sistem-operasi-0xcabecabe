@@ -29,22 +29,22 @@ IMG = $(OUT_DIR)/system.img
 
 BOCHS_CONFIG = if2230.config
 
-default: $(IMG)
+default: clean $(IMG)
 
 $(BOOTLOADER_OUT): $(BOOTLOADER_ASM)
-	$(AS) $< -o $@
+	$(AS) -o $@ $<
 
 $(KERNEL_C_OUT): $(KERNEL_C)
 	$(CC) -ansi -c -o $@ $<
 
 $(KERNEL_ASM_OUT): $(KERNEL_ASM)
-	$(AS) -f as86 $< -o $@
+	$(AS) -f as86 -o $@ $<
 
-$(KERNEL): $(KERNEL_ASM_OUT) $(KERNEL_C_OUT)
+$(KERNEL): $(KERNEL_C_OUT) $(KERNEL_ASM_OUT) # Urutan linker ternyata ngaruh :O
 	$(LD) -o $@ -d $^
 
 $(IMG): $(BOOTLOADER_OUT) $(KERNEL)
-	$(DD) if=/dev/zero of=$@ bs=512 count=1 conv=notrunc
+	$(DD) if=/dev/zero of=$@ bs=512 count=2880
 	$(DD) if=$(BOOTLOADER_OUT) of=$@ bs=512 count=1 conv=notrunc
 	$(DD) if=$(KERNEL) of=$@ bs=512 conv=notrunc seek=1
 
