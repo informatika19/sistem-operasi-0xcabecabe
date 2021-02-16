@@ -47,7 +47,7 @@ intr:	int 0x00	;call the interrupt (00 will be changed above)
 
 ;void makeInterrupt21()
 ;this sets up the interrupt 0x21 vector
-;when an interrupt 0x21 is called in the future, 
+;when an interrupt 0x21 is called in the future,
 ;_interrupt21ServiceRoutine will run
 
 _makeInterrupt21:
