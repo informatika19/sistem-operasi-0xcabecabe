@@ -4,7 +4,7 @@
 
 ;This is a simple bootloader that loads and executes a kernel at sector 1
 
-bits 16
+bits    16
 KSEG    equ 0x1000      ;Lokasi kernel = 0x10000
 KSIZE   equ 10      ;Ukuran kernel = 10 sektor
 KSTART  equ 1       ;Lokasi kernel = sektor 1
@@ -14,14 +14,14 @@ org 0h
 
 ;let's put the kernel at KSEG:0
 ;set up the segment registers
-mov ax,KSEG
-mov ds,ax
-mov ss,ax
-mov es,ax
+mov     ax,KSEG
+mov     ds,ax
+mov     ss,ax
+mov     es,ax
 ;let's have the stack start at KSEG:fff0
-mov ax,0xfff0
-mov sp,ax
-mov bp,ax
+mov     ax,0xfff0
+mov     sp,ax
+mov     bp,ax
 
 ;read in the kernel from the disk
 
@@ -35,9 +35,9 @@ mov     bx,0        ;read into 0 (in the segment)
 int     13h ;call BIOS disk read function
 
 ;call the kernel
-jmp KSEG:0
+jmp     KSEG:0
 
-times 510-($-$$) db 0
+times   510-($-$$) db 0
 
 ;AA55 tells BIOS that this is a valid bootloader
-dw 0xAA55
+dw      0xAA55
