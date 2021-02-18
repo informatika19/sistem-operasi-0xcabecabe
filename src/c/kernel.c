@@ -67,31 +67,64 @@ void readString(char *string);
  * @param length panjang/banyak 0 yang mau diisi
  */
 void clear(char *buffer, int length);
+/**
+ * Fungsi untuk membuat persegi berkukuran sisi x sisi
+ * @param sisi panjang sisi persegi
+ * @param warna warna persegi (diambil dari mode warna BIOS)
+ */
+void bikinPersegi(int sisi, int warna);
 
 int main()
 {
-    /*makeInterrupt21();*/
-    putInMemory(VIDEO_SEGMENT, OFFSET_CHAR, 'H');
-    putInMemory(VIDEO_SEGMENT, OFFSET_COLOR, 0xD);
-    putInMemory(VIDEO_SEGMENT, OFFSET_CHAR+2, 'A');
-    putInMemory(VIDEO_SEGMENT, OFFSET_COLOR+2, 0x2);
-    putInMemory(VIDEO_SEGMENT, OFFSET_CHAR+4, 'I');
-    putInMemory(VIDEO_SEGMENT, OFFSET_COLOR+4, 0x1);
+    makeInterrupt21();
+    // Set video mode
+    // http://www.ctyme.com/intr/rb-0069.htm
+    interrupt(0x10, 0x0013, 0, 0, 0);
 
+    // testing
+    printString("The quick brown fox jumps over the lazy dog lorem ipsum dor amet hello world");
+    bikinPersegi(128, RED);
     while(1);
 }
 
 void handleInterrupt21(int AX, int BX, int CX, int DX)
 {
-    /*switch(AX)*/
-    /*{*/
-        /*case 0x0:*/
-            /*printString(BX);*/
-            /*break;*/
+    switch(AX)
+    {
+        case 0x0:
+            printString((char *) BX);
+            break;
         /*case 0x1:*/
             /*printString(BX);*/
             /*break;*/
-        /*default:*/
-            /*printString("Invalid interrupt");*/
-    /*}*/
+        default:
+            printString("Invalid interrupt");
+    }
+}
+
+void printString(char *string)
+{
+    // Pake teletype output (basiclly yang AH=09h atau AH = 10h (?)
+    // tapi bisa otomatis geser kursor dan insert new line
+    // http://www.ctyme.com/intr/rb-0106.htm
+    int i = 0;
+    while (string[i] != '\0')
+    {
+        interrupt(0x10, 0x0E00 + string[i], 0x0000 + WHITE, 0x0000, 0x0000);
+        i++;
+    }
+}
+
+void bikinPersegi(int sisi, int warna)
+{
+    int i, j;
+    for (i = 0; i < sisi; ++i)
+    {
+        for (j = 0; j < sisi; ++j)
+        {
+            // Pake write graphics
+            // http://www.ctyme.com/intr/rb-0104.htm
+            interrupt(0x10, 0x0C00 + warna, 0x0000, i, j);
+        }
+    }
 }

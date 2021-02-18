@@ -31,13 +31,16 @@ BOCHS_CONFIG = if2230.config
 
 default: clean $(IMG)
 
-$(BOOTLOADER_OUT): $(BOOTLOADER_ASM)
+$(OUT_DIR):
+	mkdir $@
+
+$(BOOTLOADER_OUT): $(BOOTLOADER_ASM) $(OUT_DIR)
 	$(AS) -o $@ $<
 
-$(KERNEL_C_OUT): $(KERNEL_C)
+$(KERNEL_C_OUT): $(KERNEL_C) $(OUT_DIR)
 	$(CC) -ansi -c -o $@ $<
 
-$(KERNEL_ASM_OUT): $(KERNEL_ASM)
+$(KERNEL_ASM_OUT): $(KERNEL_ASM) $(OUT_DIR)
 	$(AS) -f as86 -o $@ $<
 
 $(KERNEL): $(KERNEL_C_OUT) $(KERNEL_ASM_OUT) # Urutan linker ternyata ngaruh :O
