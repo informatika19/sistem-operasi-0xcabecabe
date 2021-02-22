@@ -1,4 +1,5 @@
 /**
+ * kernel.h
  * Alvin W., Josep M., Rehagana C.K.
  * 20 Februari 2020
  *
@@ -30,6 +31,7 @@
 #define YELLOW      0xE
 #define WHITE       0xF
 
+/** *** Diimplementasikan di Assembly *** **/
 /**
  * Fungsi untuk menulis sebuah karakter pada segment memori dengan offset
  * tertentu
@@ -53,6 +55,8 @@ int interrupt(int number, int AX, int BX, int CX, int DX);
  * interrupt 0x21 dipanggil
  */
 void makeInterrupt21();
+
+/** *** Diimplementasikan di C *** **/
 /**
  * Fungsi yang dipanggil ketika terjadi interrupt 0x21
  * @param AX

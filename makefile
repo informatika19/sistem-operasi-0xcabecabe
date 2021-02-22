@@ -21,6 +21,8 @@ BOOTLOADER_ASM = $(ASM_DIR)/bootloader.asm
 
 LIB_C = $(C_DIR)/lib.c
 LIB_C_OUT = $(OUT_DIR)/lib.o
+LIB_ASM = $(ASM_DIR)/lib.asm
+LIB_ASM_OUT = $(OUT_DIR)/lib_asm.o
 
 KERNEL_C = $(C_DIR)/kernel.c
 KERNEL_ASM = $(ASM_DIR)/kernel.asm
@@ -43,13 +45,17 @@ $(BOOTLOADER_OUT): $(BOOTLOADER_ASM) $(OUT_DIR)
 $(LIB_C_OUT): $(LIB_C) $(OUT_DIR)
 	$(CC) -ansi -c -o $@ $<
 
+$(LIB_ASM_OUT): $(LIB_ASM) $(OUT_DIR)
+	$(AS) -f as86 -o $@ $<
+
 $(KERNEL_C_OUT): $(KERNEL_C) $(OUT_DIR)
 	$(CC) -ansi -c -o $@ $<
 
 $(KERNEL_ASM_OUT): $(KERNEL_ASM) $(OUT_DIR)
 	$(AS) -f as86 -o $@ $<
 
-$(KERNEL): $(KERNEL_C_OUT) $(LIB_C_OUT) $(KERNEL_ASM_OUT) # Urutan linker ternyata ngaruh :O
+$(KERNEL): $(KERNEL_C_OUT) $(LIB_C_OUT) $(KERNEL_ASM_OUT) $(LIB_ASM_OUT)
+	# Urutan linker ternyata ngaruh :O
 	$(LD) -o $@ -d $^
 
 $(IMG): $(BOOTLOADER_OUT) $(KERNEL)

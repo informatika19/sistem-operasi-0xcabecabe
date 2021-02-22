@@ -1,3 +1,8 @@
+/**
+ * kernel.h
+ * Alvin W., Josep M., Rehagana C.K.
+ * 20 Februari 2020
+ */
 #include "kernel.h"
 #include "lib.h"
 
@@ -12,7 +17,8 @@ int main()
     // Text mode, Basically 640x200 with 16 colors, 80x25 text resolution
     interrupt(0x10, 0x0003, 0, 0, 0);
 
-    printString("The quick brown fox jumps over the lazy dog lorem ipsum dor amet hello world");
+    printLogo();
+    printString("The quick brown fox jumps over the lazy dog\nlorem ipsum dor amet\nhello world");
     /*bikinPersegi(128, LTCYAN);*/
     while(1);
 }
@@ -37,10 +43,20 @@ void printString(char *string)
     // Pake teletype output (basiclly yang AH=09h atau AH = 10h (?)
     // tapi bisa otomatis geser kursor dan insert new line
     // http://www.ctyme.com/intr/rb-0106.htm
-    int i = 0;
+    int i = 0, baris;
+    char test;
     while (string[i] != '\0')
     {
-        interrupt(0x10, 0x0E00 + string[i], 0x0000 + WHITE, 0x0000, 0x0000);
+        // bikin new line pas ketemu \n
+        if (string[i] == '\n')
+        {
+            baris = (getCursor()+1)*0x100;
+            interrupt(0x10, 0x0200, 0x0000, 0x0000, baris);
+        }
+        else
+        {
+            interrupt(0x10, 0x0E00 + string[i], 0x0000 + WHITE, 0x0000, 0x0000);
+        }
         i++;
     }
 }
@@ -66,4 +82,18 @@ void clear(char *buffer, int length)
     {
         buffer[i] = 0;
     }
+}
+
+void printLogo()
+{
+    printString("   ___                _                    _          ");
+    printString("\n");
+    printString("  / _ \\__  _____ __ _| |__   ___  ___ __ _| |__   ___ ");
+    printString("\n");
+    printString(" | | | \\ \\/ / __/ _` | '_ \\ / _ \\/ __/ _` | '_ \\ / _ \\ ");
+    printString("\n");
+    printString(" | |_| |>  | (_| (_| | |_) |  __| (_| (_| | |_) |  __/ ");
+    printString("\n");
+    printString("  \\___//_/\\_\\___\\__,_|_.__/ \\___|\\___\\__,_|_.__/ \\___| ");
+    printString("\n");
 }
