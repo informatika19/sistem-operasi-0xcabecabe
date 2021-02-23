@@ -1,12 +1,14 @@
 ;kernel.asm
 ;Michael Black, 2007
 ;Modified by Asisten Sister, 2021
+; and Alvin W., Josep M., Rehagana K.C.S.
 
 ;kernel.asm contains assembly functions that you can use in your kernel
 
 global _putInMemory
 global _interrupt
 global _makeInterrupt21
+; global _printLogo
 extern _handleInterrupt21
 
 ;void putInMemory (int segment, int address, char character)
@@ -78,3 +80,28 @@ _interrupt21ServiceRoutine:
 	pop dx
 
 	iret
+
+; _printLogo:
+; 	; si = image source
+; 	; mov si, imageFile
+; 	pusha
+; 	xor ax, ax
+; 	lodsb
+; 	mov cx, ax ;x-position
+; 	lodsb
+; 	mov dx, ax ;y-position
+; 	.for_x:
+; 		push dx
+; 		.for_y:
+; 			mov bh, 0  ;page number
+; 			lodsb       ;al (color) -> next byte
+; 			mov ah, 0xC ;write pixel at coordinate
+; 			int 0x10 ;might "destroy" ax, si and di on some systems
+; 		sub dx, 1  ;decrease dx by one and set flags
+; 		jnz .for_y ;repeat for y-length
+; 		pop dx     ;restore dx
+; 	sub cx, 1      ;decrease si by one and set flags
+; 	jnz .for_x     ;repeat for x-length
+; 	popa
+; 	ret
+; imageFile: incbin "out/image.bin" ;include the image binary

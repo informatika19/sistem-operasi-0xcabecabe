@@ -13,6 +13,8 @@
 #define OFFSET_CHAR     0x8000
 #define OFFSET_COLOR    0x8001
 
+#define DEFAULT_BUFFER_SIZE 0xF // 16 byte
+
 // Defining colors
 #define BLACK       0x0
 #define BLUE        0x1
@@ -87,9 +89,5 @@ void clear(char *buffer, int length);
  * @param warna warna persegi (diambil dari mode warna BIOS)
  */
 void bikinPersegi(int sisi, int warna);
-/**
- * Fungsi untuk menuliskan logo
- */
-void printLogo();
 
 #endif

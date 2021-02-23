@@ -1,3 +1,5 @@
+// sudo ln -s "/mnt/c/path ke bochs installation>/bochs.exe" /bin/bochs
+// echo 'BXSHARE="/mnt/c/<foldernya bochs>"' >> ~/.bashrc
 /**
  * kernel.c
  * Alvin W., Josep M., Rehagana K.C.S.
@@ -10,17 +12,10 @@ int main()
 {
     // Set video mode
     // http://www.ctyme.com/intr/rb-0069.htm
-<<<<<<< HEAD
-    // Graphics mode, 320x200 with 256 colors, 40x25 text resolution
-    interrupt(0x10, 0x0013, 0, 0, 0);
-    // Text mode, Basically 640x200 with 16 colors, 80x25 text resolution
-    // interrupt(0x10, 0x0003, 0, 0, 0);
-=======
     // 320x200 with 256 colors, 40x25 text resolution
     /*interrupt(0x10, 0x0013, 0, 0, 0);*/
     // 640x200 with 16 colors, 80x30 text resolution
     interrupt(0x10, 0x0012, 0, 0, 0);
->>>>>>> 6b2a31c6aa139320d43425e1d162625863d88c90
 
     // drawImage();
     printLogo();
@@ -56,7 +51,7 @@ void printString(char *string)
         // bikin new line pas ketemu \n
         if (string[i] == '\n')
         {
-            baris = (getCursor()+1)*0x100;
+            baris = (getCursorRow()+1)*0x100;
             interrupt(0x10, 0x0200, 0x0000, 0x0000, baris);
         }
         else
@@ -66,7 +61,36 @@ void printString(char *string)
         i++;
     }
 }
+void readString(char *string) 
+{
+    // perlu loop -> break pas pencet enter? ASCII enter: 0xd
+    // perlu merhatiin backspace, ASCII bspc: 0x8
 
+    int i = 0; // indeks
+
+    while (1)
+    {
+        string[i] = interrupt(0x16,0x0000,0x0000,0x0000,0x0000);
+        if (string[i] == 0x8 && i>0)
+        {
+            // backspace
+            // idenya: mundurin cursor by 1, terus timpa karakter sblmnya dgn pixel hitam
+            i--;
+            interrupt(0x10, 0x0C00 + BLACK, 0x0000, getCursorRow(), i);
+        }
+        else if (string[i] == 0x0D)
+        {
+            printString("\n");
+            break;
+        }
+        else
+        {
+            interrupt(0x10, 0x0E00 + string[i], 0x0000 + WHITE, 0x0000, 0x0000);
+            i++;
+        }
+    }
+
+}
 void bikinPersegi(int sisi, int warna)
 {
     int i, j, k = 0;
@@ -90,19 +114,19 @@ void clear(char *buffer, int length)
     }
 }
 
-// void printLogo()
-// {
-//     printString("   ___                _                    _          ");
-//     printString("\n");
-//     printString("  / _ \\__  _____ __ _| |__   ___  ___ __ _| |__   ___ ");
-//     printString("\n");
-//     printString(" | | | \\ \\/ / __/ _` | '_ \\ / _ \\/ __/ _` | '_ \\ / _ \\ ");
-//     printString("\n");
-//     printString(" | |_| |>  | (_| (_| | |_) |  __| (_| (_| | |_) |  __/ ");
-//     printString("\n");
-//     printString("  \\___//_/\\_\\___\\__,_|_.__/ \\___|\\___\\__,_|_.__/ \\___| ");
-//     printString("\n");
-// }
+void printLogo()
+{
+    printString("   ___                _                    _          ");
+    printString("\n");
+    printString("  / _ \\__  _____ __ _| |__   ___  ___ __ _| |__   ___ ");
+    printString("\n");
+    printString(" | | | \\ \\/ / __/ _` | '_ \\ / _ \\/ __/ _` | '_ \\ / _ \\ ");
+    printString("\n");
+    printString(" | |_| |>  | (_| (_| | |_) |  __| (_| (_| | |_) |  __/ ");
+    printString("\n");
+    printString("  \\___//_/\\_\\___\\__,_|_.__/ \\___|\\___\\__,_|_.__/ \\___| ");
+    printString("\n");
+}
 
 // void printlogo()
 // {

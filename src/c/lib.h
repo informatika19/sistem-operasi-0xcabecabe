@@ -10,13 +10,17 @@
 
 /** *** Diimplementasikan di Assembly *** **/
 /**
- * Fungsi untuk mendapatkan posisi cursor di layar
+ * Fungsi untuk mendapatkan posisi baris cursor di layar
  */
-int getCursor();
+int getCursorRow();
 /**
  * Fungsi untuk load binary file dengan nama yang sudah ditentukan program
  */
 int *loadBin();
+/**
+ * Fungsi untuk menuliskan logo
+ */
+void printLogo();
 
 /** *** Diimplementasikan di C *** **/
 /**
