@@ -9,7 +9,7 @@
 
 int main()
 {
-    char testo[DEFAULT_BUFFER_SIZE];
+    char testo[100];
     // Set video mode
     // http://www.ctyme.com/intr/rb-0069.htm
     // 320x200 with 256 colors, 40x25 text resolution
@@ -17,9 +17,9 @@ int main()
     // 640x200 with 16 colors, 80x30 text resolution
     interrupt(0x10, 0x0012, 0, 0, 0);
 
-    // drawImage();
     // bikinPersegi(128, LTCYAN);
-    printLogo();
+    printLogoGrafik(140);
+    printLogoASCII();
     while(1)
     {
         printString("Tuliskan keluh-kesahmu hari ini: ");
@@ -125,7 +125,7 @@ void readString(char *string)
     string[i++] = 0x0; // == '\0'
 }
 
-void bikinPersegi(int sisi, int warna)
+void bikinPersegi(int sisi, int warna, int x, int y)
 {
     int i, j, k = 0;
     for (i = 0; i < sisi; ++i)
@@ -134,7 +134,7 @@ void bikinPersegi(int sisi, int warna)
         {
             // Pake write graphics
             // http://www.ctyme.com/intr/rb-0104.htm
-            interrupt(0x10, 0x0C00 + warna, 0x0000, i, j);
+            interrupt(0x10, 0x0C00 + mod(k++, 0xFF), 0x0000, i, j);
         }
     }
 }
@@ -148,7 +148,7 @@ void clear(char *buffer, int length)
     }
 }
 
-void printLogo()
+void printLogoASCII()
 {
     printString("   ___                _                    _          ");
     printString("\n");
@@ -162,7 +162,7 @@ void printLogo()
     printString("\n");
 }
 
-// void printlogo()
+// void printLogo()
 // {
 //     int *bin = loadBin();
 //     int x = *bin;
@@ -178,3 +178,17 @@ void printLogo()
 //         }
 //     }
 // }
+
+void printLogoGrafik(int sisi)
+{
+    int i, j, k = 0;
+    for (i = 0; i < sisi; ++i)
+    {
+        for (j = 0; j < sisi; ++j)
+        {
+            // Pake write graphics
+            // http://www.ctyme.com/intr/rb-0104.htm
+            interrupt(0x10, 0x0C00 + mod(k++, 0xFF), 0x0000, i, j);
+        }
+    }
+}

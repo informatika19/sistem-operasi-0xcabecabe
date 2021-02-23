@@ -17,14 +17,6 @@ int getCursorRow();
  * Fungsi untuk mendapatkan posisi kolom cursor di layar
  */
 int getCursorCol();
-/**
- * Fungsi untuk load binary file dengan nama yang sudah ditentukan program
- */
-int *loadBin();
-/**
- * Fungsi untuk menuliskan logo
- */
-void printLogo();
 
 /** *** Diimplementasikan di C *** **/
 /**

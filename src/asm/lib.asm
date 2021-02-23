@@ -5,23 +5,9 @@
 ; lib.asm berisi fungsi-fungsi bantuan kernel yang tidak bisa didefinisikan di
 ; file lib.c
 
-; global _loadBin
 global _getCursorRow
 global _getCursorCol
 
-# int *loadBinary()
-; _loadBin:
-; 	pusha
-; 	push bp
-; 	mov bp,sp
-; 	mov si,.binFile
-; 	mov ax,si
-; 	pop bp
-; 	popa
-
-; 	ret
-
-; 	.binFile: incbin "out/image.bin"
 
 ;int getCursorCol()
 _getCursorRow:
@@ -48,5 +34,3 @@ _getCursorCol:
 	mov ah,0	;return col yg ditaro di AL
 	pop bp
 	ret
-
-;int getCursorCol()

@@ -13,8 +13,6 @@
 #define OFFSET_CHAR     0x8000
 #define OFFSET_COLOR    0x8001
 
-#define DEFAULT_BUFFER_SIZE 16
-
 // Defining colors
 #define BLACK       0x0
 #define BLUE        0x1
@@ -86,9 +84,17 @@ void readString(char *string);
 void clear(char *buffer, int length);
 /**
  * Fungsi untuk membuat persegi berkukuran sisi x sisi
+ * Khusus video mode dengan 256 warna
  * @param sisi panjang sisi persegi
- * @param warna warna persegi (diambil dari mode warna BIOS)
  */
-void bikinPersegi(int sisi, int warna);
+void bikinPersegi(int sisi, int warna, int x, int y);
+/**
+ * Fungsi untuk menuliskan logo ASCII
+ */
+void printLogoASCII();
+/**
+ * Fungsi untuk menuliskan logo grafik
+ */
+void printLogoGrafik(int sisi);
 
 #endif

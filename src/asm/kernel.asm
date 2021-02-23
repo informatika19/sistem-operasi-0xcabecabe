@@ -83,7 +83,7 @@ _interrupt21ServiceRoutine:
 
 ; _printLogo:
 ; 	; si = image source
-; 	; mov si, imageFile
+; 	mov si, imageFile
 ; 	pusha
 ; 	xor ax, ax
 ; 	lodsb

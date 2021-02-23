@@ -1,15 +1,19 @@
+#/bin/python3
+
+# a script to turn an image to binary using Python's PIL
+# Taken from: https://0x00sec.org/t/realmode-assembly-writing-bootable-stuff-part-5/3667
+# Modified by Alvin W., Josep M., Rehagana K.C.S.
+
 from PIL import Image #Import Image from Pillow
-# import sys
+import sys
 
-paletteFile = "colors.png" #palette the BIOS uses
-convertFile = "fox.png" #image to turn into a binary
-outputFile  = "../../out/image.bin" #name of output file
+if len(sys.argv) < 4:
+    sys.stderr.write(f'Penggunaan: python3 {sys.argv[0]} [file gambar] [file color pallete] [file output]\n')
+    sys.exit(1)
 
-# convertFile = sys.argv[1]
-# outputFile  = sys.argv[2] #name of output file
-# if len(sys.argv) < 3:
-#     sys.stderr.write(f'Penggunaan: python3 {sys.argv[0]} [file gambar] [file output]')
-#     sys.exit(1)
+convertFile = sys.argv[1] #palette the BIOS uses
+paletteFile = sys.argv[2] #iamge to turn into a binary
+outputFile  = sys.argv[3] #name of output file
 
 pal = Image.open(paletteFile).convert('RGB')
 palette = pal.load() #load pixels of the palette
@@ -39,7 +43,7 @@ for x in range(image.width):
                 difference = dif
                 choice = index
             index += 1
-        print("x: "+str(x)+"- y:"+str(y))
+        # print("x: "+str(x)+"- y:"+str(y))
         binary.write(bytearray([choice&0xFF])) #write nearest palette index into binary file
 binary.close() # close file handle
 print("Done.")
