@@ -13,12 +13,13 @@ int main()
     // Set video mode
     // http://www.ctyme.com/intr/rb-0069.htm
     // Graphics mode, 320x200 with 256 colors, 40x25 text resolution
-    /*interrupt(0x10, 0x0013, 0, 0, 0);*/
+    interrupt(0x10, 0x0013, 0, 0, 0);
     // Text mode, Basically 640x200 with 16 colors, 80x25 text resolution
-    interrupt(0x10, 0x0003, 0, 0, 0);
+    // interrupt(0x10, 0x0003, 0, 0, 0);
 
+    // drawImage();
     printLogo();
-    printString("The quick brown fox jumps over the lazy dog\nlorem ipsum dor amet\nhello world");
+    // printString("The quick brown fox jumps over the lazy dog\nlorem ipsum dor amet\nhello world");
     /*bikinPersegi(128, LTCYAN);*/
     while(1);
 }
@@ -84,16 +85,33 @@ void clear(char *buffer, int length)
     }
 }
 
-void printLogo()
-{
-    printString("   ___                _                    _          ");
-    printString("\n");
-    printString("  / _ \\__  _____ __ _| |__   ___  ___ __ _| |__   ___ ");
-    printString("\n");
-    printString(" | | | \\ \\/ / __/ _` | '_ \\ / _ \\/ __/ _` | '_ \\ / _ \\ ");
-    printString("\n");
-    printString(" | |_| |>  | (_| (_| | |_) |  __| (_| (_| | |_) |  __/ ");
-    printString("\n");
-    printString("  \\___//_/\\_\\___\\__,_|_.__/ \\___|\\___\\__,_|_.__/ \\___| ");
-    printString("\n");
-}
+// void printLogo()
+// {
+//     printString("   ___                _                    _          ");
+//     printString("\n");
+//     printString("  / _ \\__  _____ __ _| |__   ___  ___ __ _| |__   ___ ");
+//     printString("\n");
+//     printString(" | | | \\ \\/ / __/ _` | '_ \\ / _ \\/ __/ _` | '_ \\ / _ \\ ");
+//     printString("\n");
+//     printString(" | |_| |>  | (_| (_| | |_) |  __| (_| (_| | |_) |  __/ ");
+//     printString("\n");
+//     printString("  \\___//_/\\_\\___\\__,_|_.__/ \\___|\\___\\__,_|_.__/ \\___| ");
+//     printString("\n");
+// }
+
+// void printlogo()
+// {
+//     int *bin = loadBin();
+//     int x = *bin;
+//     int y = *(bin+1);
+//     int i, j;
+//     bin += 2;
+
+//     for (i = 0; i < x; ++i)
+//     {
+//         for (j = 0; j < y; ++j)
+//         {
+//             interrupt(0x10, 0x0C00 + *(bin++), 0x0000, i, j);
+//         }
+//     }
+// }

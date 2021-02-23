@@ -13,6 +13,10 @@
  * Fungsi untuk mendapatkan posisi cursor di layar
  */
 int getCursor();
+/**
+ * Fungsi untuk load binary file dengan nama yang sudah ditentukan program
+ */
+int *loadBin();
 
 /** *** Diimplementasikan di C *** **/
 /**

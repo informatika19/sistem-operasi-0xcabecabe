@@ -11,6 +11,7 @@ DD = dd
 LD = ld86
 BOCHS = bochs
 AS = nasm
+PY = python3
 
 ASM_DIR = src/asm
 C_DIR = src/c
@@ -32,12 +33,19 @@ KERNEL = $(OUT_DIR)/kernel
 
 IMG = $(OUT_DIR)/system.img
 
+# BINARY_LOGO_SCRIPT = $(ASM_DIR)/imagetobinary.py
+# BINARY_LOGO_RAW = $(ASM_DIR)/cabekecil.png
+# BINARY_LOGO_OUT = $(OUT)/image.bin
+
 BOCHS_CONFIG = if2230.config
 
 default: clean $(IMG)
 
 $(OUT_DIR):
 	mkdir $@
+
+# $(BINARY_LOGO_OUT):	
+# 	$(PY) $(BINARY_LOGO_SCRIPT) $(BINARY_LOGO_RAW) $(BINARY_LOGO_OUT)
 
 $(BOOTLOADER_OUT): $(BOOTLOADER_ASM) $(OUT_DIR)
 	$(AS) -o $@ $<
@@ -63,7 +71,7 @@ $(IMG): $(BOOTLOADER_OUT) $(KERNEL)
 	$(DD) if=$(BOOTLOADER_OUT) of=$@ bs=512 count=1 conv=notrunc
 	$(DD) if=$(KERNEL) of=$@ bs=512 conv=notrunc seek=1
 
-run: $(IMG)
+run: $(IMG) #$(BINARY_LOGO_OUT)
 	$(BOCHS) -f $(BOCHS_CONFIG)
 
 clean:
