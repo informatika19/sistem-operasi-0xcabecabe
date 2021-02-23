@@ -1,6 +1,6 @@
 /**
- * kernel.h
- * Alvin W., Josep M., Rehagana C.K.
+ * kernel.c
+ * Alvin W., Josep M., Rehagana K.C.S.
  * 20 Februari 2020
  */
 #include "kernel.h"
@@ -8,14 +8,19 @@
 
 int main()
 {
-    makeInterrupt21();
-
     // Set video mode
     // http://www.ctyme.com/intr/rb-0069.htm
+<<<<<<< HEAD
     // Graphics mode, 320x200 with 256 colors, 40x25 text resolution
     interrupt(0x10, 0x0013, 0, 0, 0);
     // Text mode, Basically 640x200 with 16 colors, 80x25 text resolution
     // interrupt(0x10, 0x0003, 0, 0, 0);
+=======
+    // 320x200 with 256 colors, 40x25 text resolution
+    /*interrupt(0x10, 0x0013, 0, 0, 0);*/
+    // 640x200 with 16 colors, 80x30 text resolution
+    interrupt(0x10, 0x0012, 0, 0, 0);
+>>>>>>> 6b2a31c6aa139320d43425e1d162625863d88c90
 
     // drawImage();
     printLogo();
@@ -32,7 +37,7 @@ void handleInterrupt21(int AX, int BX, int CX, int DX)
             printString((char *) BX);
             break;
         /*case 0x1:*/
-            /*printString((char *) BX);*/
+            /*readString((char *) BX);*/
             /*break;*/
         default:
             printString("Invalid interrupt");
