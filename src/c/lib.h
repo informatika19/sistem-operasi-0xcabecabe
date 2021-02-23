@@ -1,6 +1,6 @@
 /**
  * lib.h
- * Alvin W., Josep M., Rehagana C.K.
+ * Alvin W., Josep M., Rehagana K.C.S.
  * 20 Februari 2020
  *
  * Header yang berisi fungsi-fungsi tambahan untuk kernel
@@ -20,6 +20,7 @@ int getCursor();
  * a % b
  * @param a
  * @param b
+ * @returns a mod b
  */
 int mod(int a, int b);
 #endif

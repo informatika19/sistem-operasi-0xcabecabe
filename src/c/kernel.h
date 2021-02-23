@@ -1,6 +1,6 @@
 /**
  * kernel.h
- * Alvin W., Josep M., Rehagana C.K.
+ * Alvin W., Josep M., Rehagana K.C.S.
  * 20 Februari 2020
  *
  * Header yang berisi fungsi-fungsi utama kernel

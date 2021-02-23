@@ -1,5 +1,5 @@
 ; lib.asm
-; Alvin W., Josep M., Rehagana C.K.
+; Alvin W., Josep M., Rehagana K.C.S.
 ; 20 Februari 2020
 
 ; lib.asm berisi fungsi-fungsi bantuan kernel yang tidak bisa didefinisikan di
