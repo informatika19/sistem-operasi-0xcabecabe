@@ -1,7 +1,7 @@
 /**
  * kernel.h
  * Alvin W., Josep M., Rehagana K.C.S.
- * 20 Februari 2020
+ * 20 Februari 2021
  *
  * Header yang berisi fungsi-fungsi utama kernel
  */
@@ -13,7 +13,7 @@
 #define OFFSET_CHAR     0x8000
 #define OFFSET_COLOR    0x8001
 
-#define DEFAULT_BUFFER_SIZE 0xF // 16 byte
+#define DEFAULT_BUFFER_SIZE 16
 
 // Defining colors
 #define BLACK       0x0
@@ -74,6 +74,7 @@ void handleInterrupt21(int AX, int BX, int CX, int DX);
 void printString(char *string);
 /**
  * Fungsi untuk membaca string dari keyboard
+ * Possible buffer overflow >:((((
  * @param *string string yang akan menampung bacaan dari keyboard
  */
 void readString(char *string);

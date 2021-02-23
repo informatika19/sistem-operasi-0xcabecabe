@@ -1,7 +1,7 @@
 /**
  * lib.h
  * Alvin W., Josep M., Rehagana K.C.S.
- * 20 Februari 2020
+ * 20 Februari 2021
  *
  * Header yang berisi fungsi-fungsi tambahan untuk kernel
  */
@@ -13,6 +13,10 @@
  * Fungsi untuk mendapatkan posisi baris cursor di layar
  */
 int getCursorRow();
+/**
+ * Fungsi untuk mendapatkan posisi kolom cursor di layar
+ */
+int getCursorCol();
 /**
  * Fungsi untuk load binary file dengan nama yang sudah ditentukan program
  */
