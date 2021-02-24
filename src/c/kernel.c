@@ -31,11 +31,11 @@ void handleInterrupt21(int AX, int BX, int CX, int DX)
     switch(AX)
     {
         case 0x0:
-            printString((char *) BX);
+            printString(BX);
             break;
-        /*case 0x1:*/
-            /*readString((char *) BX);*/
-            /*break;*/
+        case 0x1:
+            readString(BX);
+            break;
         default:
             printString("Invalid interrupt");
     }
@@ -46,21 +46,20 @@ void printString(char *string)
     // Pake teletype output (basiclly yang AH=09h atau AH = 10h (?)
     // tapi bisa otomatis geser kursor dan insert new line
     // http://www.ctyme.com/intr/rb-0106.htm
-    int i = 0, baris;
+    int i, baris;
     char test;
-    while (string[i] != '\0')
+    for (i = 0; string[i] != '\0'; ++i)
     {
-        // bikin new line pas ketemu \n
-        if (string[i] == '\n')
+        switch (string[i])
         {
-            baris = (getCursorRow()+1)*0x100;
-            interrupt(0x10, 0x0200, 0x0000, 0x0000, baris);
+            // bikin new line pas ketemu \n
+            case '\n':
+                baris = (getCursorRow()+1)*0x100;
+                interrupt(0x10, 0x0200, 0x0000, 0x0000, baris);
+                break;
+            default:
+                interrupt(0x10, 0x0E00 + string[i], 0x0000 + WHITE, 0x0000, 0x0000);
         }
-        else
-        {
-            interrupt(0x10, 0x0E00 + string[i], 0x0000 + WHITE, 0x0000, 0x0000);
-        }
-        i++;
     }
 }
 void readString(char *string)
