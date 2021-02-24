@@ -4,12 +4,12 @@
 _Interrupt_ adalah sebuah cara kerja dari komputer yang menghentikan _main line
 program_ dan menjalankan instruksi spesifik bernama _Interrupt Service Routine_
 (ISR) baru melanjutkan ke _main line program_. Ketika menge-_call interrupt_,
-maka _interrupt_ akan menyocokkan _type number_ dari IVT (_Interrupt Vector
+maka _interrupt_ akan mencocokkan _type number_ dari IVT (_Interrupt Vector
 Table_) dan _type number_ tersebut akan menentukan apa yang akan dilakukan
 _interrupt_ tersebut.
 
-BIOS _interrupt_ dapat dilihat seperti proses _passing message_ antara BIOS
-dan BIOS _client server_ (OS). _Message_ meminta data dari BIOS dan mengembalikan
+BIOS _interrupt_ dapat dilihat seperti proses _passing message_ antara BIOS dan
+BIOS _client server_ (OS). _Message_ meminta data dari BIOS dan mengembalikan
 data yang diminta, informasi status dan _product_ yang diminta pemanggil.
 _Messages_ dapat terdiri dari bebearapa kategori, masing-masing dengan
 _interrupt number_-nya sendiri dan kebanyakan kategori memiliki fungsi yang
@@ -31,18 +31,21 @@ untuk membantu program yang dibentuk dari kode sumber pada kernel.c
 berkomunikasi langsung dengan _hardware_ dan BIOS. Fungsi-fungsi ini akan
 disebut sebagai fungsi pembantu.
 
+### `putInMemory`
 Fungsi pembantu yang pertama adalah fungsi `putInMemory` yang memiliki 3
 parameter, `segment` (int 2 byte), `address` (int 2 byte), dan `character`
 (int 1 byte). Fungsi ini berfungsi "menaruh" `character` di memori pada
-`segment` dan `offset` tertentu.  Penggunaan segmen dan _offset_ ini karena
-cara _addressing_ memori pada prosesor yang diemulasikan pada tugas ini, Intel
-8086, memiliki rumus: `segment`
+`segment` dan `address` (`address` di sini sebenarnya adalah _offset_ dan
+`segment` adalah _base address_ untuk segmen di memori) tertentu. Penggunaan
+segmen dan _offset_ ini karena cara _addressing_ memori pada prosesor yang
+diemulasikan, Intel 8086, memiliki rumus: `segment`
 <img src="https://render.githubusercontent.com/render/math?math=\times%202^4%20%2B"/>
 `offset` agar dapat memiliki _address space_ sampai 1MB (selebihnya bisa lihat
 [di sini](https://www.sciencedirect.com/topics/engineering/address-offset)).
 Misalkan ingin diletakkan karakter 'A' di segmen video (0xB000) dengan _offset_
 0x0A, maka penggunaan fungsinya adalah `putInMemory(0xB000, 0x0A, 'A')`.
 
+### `interrupt`
 Selanjutnya adalah fungsi `interrupt` dengan parameter: `number` (int 2 byte),
 `AX` (int 2 byte), `BX` (int 2 byte), `CX` (int 2 byte), dan `DX` (int 2 byte).
 Fungsi `interrupt` adalah fungsi untuk membuat _interrupt_ dengan nomor
@@ -63,13 +66,15 @@ Untuk melihat isi _register_ yang harus digunakan untuk _interrupt_ tertentu,
 dapat dilihat [di
 sini](http://www.oldlinux.org/Linux.old/docs/interrupts/int-html/int.htm).
 
+### `makeInterrupt21`
 Fungsi bantuan terakhir pada kernel.asm adalah fungsi `makeInterrupt21`. Fungsi
-ini akan digunakan untuk menggunakan _syscall_ pada OS yang akan dibuat nanti.
+ini akan digunakan untuk menggunakan _syscall_ pada OS yang akan dibuat.
 Fungsi ini untuk menyiapkan vektor/tabel _interrupt_ dengan nomor _interrupt_
 0x21.
 
+### `interrupt21ServiceRoutine`
 Terakhir, pada kernel.asm terdapat sebuah fungsi yang digunakan pada fungsi
 `makeInterrupt21`, yaitu fungsi `interrupt21ServiceRoutine`. Fungsi ini
 digunakan untuk menyimpan nilai-nilai pada `register` prosesor ke _stack_
-sebelum melakukan operasi pada _interrupt_ 21 lalu mengembalikannya kembali
-setelah _interrupt_ selesai dioperasikan.
+sebelum melakukan operasi pada _interrupt_ 21h lalu mengembalikannya kembali
+setelah _interrupt_ 21h selesai dioperasikan.
