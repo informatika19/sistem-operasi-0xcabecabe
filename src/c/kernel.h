@@ -84,8 +84,9 @@ void readString(char *string);
 void clear(char *buffer, int length);
 /**
  * Fungsi untuk membuat persegi berkukuran sisi x sisi
- * Khusus video mode dengan 256 warna
  * @param sisi panjang sisi persegi
+ * @param x absis untuk bagian kiri persegi
+ * @param y ordinat untuk bagian atas persegi
  */
 void bikinPersegi(int sisi, int warna, int x, int y);
 /**

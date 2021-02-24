@@ -12,21 +12,17 @@ int main()
     char testo[100];
     // Set video mode
     // http://www.ctyme.com/intr/rb-0069.htm
-    // 320x200 with 256 colors, 40x25 text resolution
-    // interrupt(0x10, 0x0013, 0, 0, 0);
     // 640x200 with 16 colors, 80x30 text resolution
     interrupt(0x10, 0x0012, 0, 0, 0);
 
-    // bikinPersegi(128, LTCYAN);
     printLogoGrafik(140);
-    printLogoASCII();
+    interrupt(0x10, 0x0200, 0x0000, 0x0000, 9*0x100); // buat nurunin kursor
     while(1)
     {
         printString("Tuliskan keluh-kesahmu hari ini: ");
         readString(testo);
         printString(testo);
         printString("\n");
-        printString("The quick brown fox jumps over the lazy dog\nlorem ipsum dor amet\nhello world\n");
     }
 }
 
@@ -134,7 +130,7 @@ void bikinPersegi(int sisi, int warna, int x, int y)
         {
             // Pake write graphics
             // http://www.ctyme.com/intr/rb-0104.htm
-            interrupt(0x10, 0x0C00 + mod(k++, 0xFF), 0x0000, i, j);
+            interrupt(0x10, 0x0C00 + warna, 0x0000, i+x, j+y);
         }
     }
 }
@@ -162,33 +158,42 @@ void printLogoASCII()
     printString("\n");
 }
 
-// void printLogo()
-// {
-//     int *bin = loadBin();
-//     int x = *bin;
-//     int y = *(bin+1);
-//     int i, j;
-//     bin += 2;
-
-//     for (i = 0; i < x; ++i)
-//     {
-//         for (j = 0; j < y; ++j)
-//         {
-//             interrupt(0x10, 0x0C00 + *(bin++), 0x0000, i, j);
-//         }
-//     }
-// }
-
 void printLogoGrafik(int sisi)
 {
-    int i, j, k = 0;
-    for (i = 0; i < sisi; ++i)
+    int i, j, k = 0,
+        setSisi = sisi/2,
+        radius1 = sisi/20,
+        radius2 = sisi/10,
+        radius3 = sisi/15;
+    // implementasinya sekarang masih lemot karena ada nimpa-nimpa pixel yang
+    // udah digambar sebelumnya
+    bikinPersegi(sisi, LTCYAN, 0, 0);
+    for (i = setSisi-radius1; i < (setSisi+radius1); ++i)
     {
-        for (j = 0; j < sisi; ++j)
+        for (j = setSisi-radius1; j < (setSisi+radius1); ++j)
         {
-            // Pake write graphics
-            // http://www.ctyme.com/intr/rb-0104.htm
-            interrupt(0x10, 0x0C00 + mod(k++, 0xFF), 0x0000, i, j);
+            bikinPersegi(1, GREEN, i+40, j-25);
+        }
+    }
+    for (i = setSisi-radius2; i < (setSisi+radius2); ++i)
+    {
+        for (j = setSisi-radius2; j < (setSisi+radius2); ++j)
+        {
+            bikinPersegi(1, RED, i+20, j-10);
+        }
+    }
+    for (i = setSisi-radius2; i < (setSisi+radius2); ++i)
+    {
+        for (j = setSisi-radius2; j < (setSisi+radius2); ++j)
+        {
+            bikinPersegi(1, RED, i-5, j+10);
+        }
+    }
+    for (i = setSisi-radius3; i < (setSisi+radius3); ++i)
+    {
+        for (j = setSisi-radius3; j < (setSisi+radius3); ++j)
+        {
+            bikinPersegi(1, RED, i-25, j);
         }
     }
 }

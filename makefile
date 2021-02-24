@@ -33,22 +33,12 @@ KERNEL = $(OUT_DIR)/kernel
 
 IMG = $(OUT_DIR)/system.img
 
-LOGO_DIR = misc/logo
-LOGO_SCRIPT = $(LOGO_DIR)/imagetobinary.py
-LOGO_PALLETE = $(LOGO_DIR)/colors.png
-LOGO_RAW = $(LOGO_DIR)/cabesuperkecil.png
-LOGO_OUT = $(OUT_DIR)/image.bin
-
 BOCHS_CONFIG = if2230.config
 
-image: $(IMG)
 default: image
 
 $(OUT_DIR):
 	mkdir $@
-
-$(LOGO_OUT): $(LOGO_RAW) $(LOGO_PALLETE) $(OUT_DIR)
-	$(PY) $(LOGO_SCRIPT) $(LOGO_RAW) $(LOGO_PALLETE) $@
 
 $(BOOTLOADER_OUT): $(BOOTLOADER_ASM) $(OUT_DIR)
 	$(AS) -o $@ $<
@@ -62,7 +52,7 @@ $(LIB_ASM_OUT): $(LIB_ASM) $(OUT_DIR)
 $(KERNEL_C_OUT): $(KERNEL_C) $(OUT_DIR)
 	$(CC) -ansi -c -o $@ $<
 
-$(KERNEL_ASM_OUT): $(KERNEL_ASM) $(OUT_DIR) #$(LOGO_OUT)
+$(KERNEL_ASM_OUT): $(KERNEL_ASM) $(OUT_DIR)
 	$(AS) -f as86 -o $@ $<
 
 $(KERNEL): $(KERNEL_C_OUT) $(LIB_C_OUT) $(KERNEL_ASM_OUT) $(LIB_ASM_OUT)
@@ -73,6 +63,8 @@ $(IMG): $(BOOTLOADER_OUT) $(KERNEL)
 	$(DD) if=/dev/zero of=$@ bs=512 count=2880
 	$(DD) if=$(BOOTLOADER_OUT) of=$@ bs=512 count=1 conv=notrunc
 	$(DD) if=$(KERNEL) of=$@ bs=512 conv=notrunc seek=1
+
+image: $(IMG)
 
 run: $(IMG)
 	$(BOCHS) -f $(BOCHS_CONFIG)
