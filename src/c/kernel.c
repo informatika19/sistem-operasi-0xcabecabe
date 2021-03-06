@@ -4,12 +4,15 @@
  * 20 Februari 2021
  */
 #include "kernel.h"
-#include "lib.h"
-#include "boolean.h"
+#include "lib/boolean.h"
+#include "lib/math.h"
+#include "lib/lib.h"
+#include "lib/string.h"
 
 int main()
 {
     char testo[100];
+    char a[2];
     // Set video mode
     // http://www.ctyme.com/intr/rb-0069.htm
     // 640x200 with 16 colors, 80x30 text resolution
@@ -18,9 +21,15 @@ int main()
     printLogoGrafik(140);
     while(1)
     {
+        clear(testo, 100);
+        clear(a, 100);
         printString("Tuliskan keluh-kesahmu hari ini: ");
         readString(testo);
         printString(testo);
+        printString("\n");
+        a[0] = mod(strlen(testo), 10) + '0';
+        a[1] = '\0';
+        printString(a);
         printString("\n");
     }
 }
