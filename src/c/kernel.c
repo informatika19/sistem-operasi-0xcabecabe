@@ -16,7 +16,6 @@ int main()
     interrupt(0x10, 0x0012, 0, 0, 0);
 
     printLogoGrafik(140);
-    interrupt(0x10, 0x0200, 0x0000, 0x0000, 9*0x100); // buat nurunin kursor
     while(1)
     {
         printString("Tuliskan keluh-kesahmu hari ini: ");
@@ -159,7 +158,7 @@ void printLogoASCII()
 
 void printLogoGrafik(int sisi)
 {
-    int i, j, k = 0,
+    int i, j, k = 0, y = getCursorRow(),
         setSisi = sisi/2,
         radius1 = sisi/20,
         radius2 = sisi/10,
@@ -195,4 +194,6 @@ void printLogoGrafik(int sisi)
             bikinPersegi(1, RED, i-25, j);
         }
     }
+
+    interrupt(0x10, 0x0200, 0x0000, 0x0000, y+9*0x100); // buat nurunin kursor
 }
