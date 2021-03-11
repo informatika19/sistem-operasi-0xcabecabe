@@ -11,8 +11,9 @@
 
 int main()
 {
-    char testo[100];
-    char a[2];
+    char testo[10], apel[10];
+    char a[10], b[10];
+    int anjing;
     // Set video mode
     // http://www.ctyme.com/intr/rb-0069.htm
     // 640x200 with 16 colors, 80x30 text resolution
@@ -21,16 +22,34 @@ int main()
     printLogoGrafik(140);
     while(1)
     {
-        clear(testo, 100);
-        clear(a, 100);
+        clear(testo, 10);
+        clear(apel, 10);
+        clear(a, 10);
+        clear(b, 10);
+
         printString("Tuliskan keluh-kesahmu hari ini: ");
-        readString(testo);
-        printString(testo);
+
+        a[0] = 'a';
+        a[1] = 'b';
+        a[2] = 'c';
+
+        anjing = writeSector(a, 2879);
+        a[0] = anjing+'0';
+        a[1] = 0;
         printString("\n");
-        a[0] = mod(strlen(testo), 10) + '0';
-        a[1] = '\0';
         printString(a);
         printString("\n");
+
+        anjing = readSector(b, 2879);
+        a[0] = anjing+'0';
+        a[1] = 0;
+        printString("\n");
+        printString(a);
+        printString("\n");
+
+        readString(testo);
+        /*printString(testo);*/
+        /*printString("\n");*/
     }
 }
 
@@ -70,6 +89,7 @@ void printString(char *string)
         }
     }
 }
+
 void readString(char *string)
 {
     // perlu loop -> break pas pencet enter? ASCII enter: 0xd
@@ -205,4 +225,18 @@ void printLogoGrafik(int sisi)
     }
 
     interrupt(0x10, 0x0200, 0x0000, 0x0000, y+9*0x100); // buat nurunin kursor
+}
+
+int readSector(char *buffer, int sector)
+{
+    return interrupt(0x13, 0x0201, (int) buffer, // number, AX, BX
+            div(sector, 36) * 0x100 + mod(sector, 18) + 1, // CX
+            mod(div(sector, 18), 2) * 0x100); // DX
+}
+
+int writeSector(char *buffer, int sector)
+{
+    interrupt(0x13, 0x0301, (int) buffer,
+            div(sector, 36) * 0x100 + mod(sector, 18) + 1,
+            mod(div(sector, 18), 2) * 0x100);
 }

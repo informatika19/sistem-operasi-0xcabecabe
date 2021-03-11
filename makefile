@@ -11,6 +11,7 @@ DD = dd
 LD = ld86
 BOCHS = bochs
 AS = nasm
+PY = python3
 
 ASM_DIR = src/asm
 C_DIR = src/c
@@ -31,7 +32,10 @@ KERNEL_C_OUT = $(OUT_DIR)/kernel.o
 KERNEL_ASM_OUT = $(OUT_DIR)/kernel_asm.o
 KERNEL = $(OUT_DIR)/kernel
 
-IMG = $(OUT_DIR)/system.img
+OS = $(OUT_DIR)/system.img
+MAP = $(OUT_DIR)/map.img
+FILES = $(OUT_DIR)/files.img
+SECTORS = $(OUT_DIR)/sectors.img
 
 BOCHS_CONFIG = if2230.config
 
@@ -59,14 +63,21 @@ $(KERNEL): $(KERNEL_C_OUT) $(LIB_C_OUT) $(KERNEL_ASM_OUT) $(LIB_ASM_OUT)
 	# Urutan linker ternyata ngaruh :O
 	$(LD) -o $@ -d $^
 
-$(IMG): $(OUT_DIR) $(BOOTLOADER_OUT) $(KERNEL)
-	$(DD) if=/dev/zero of=$@ bs=512 count=2880
-	$(DD) if=$(BOOTLOADER_OUT) of=$@ bs=512 count=1 conv=notrunc
-	$(DD) if=$(KERNEL) of=$@ bs=512 conv=notrunc seek=1
+img: $(OUT_DIR) $(BOOTLOADER_OUT) $(KERNEL)
+	$(DD) if=/dev/zero of=$(OS) bs=512 count=2880
+	$(DD) if=/dev/zero of=$(MAP) bs=512 count=1
+	$(DD) if=/dev/zero of=$(FILES) bs=512 count=2
+	$(DD) if=/dev/zero of=$(SECTORS) bs=512 count=1
+	$(PY) -c "import sys; sys.stdout.buffer.write(b'\xFF'*10)" | $(DD) conv=notrunc bs=10 count=1 of=$(MAP)
+	$(DD) if=$(BOOTLOADER_OUT) of=$(OS) bs=512 count=1 conv=notrunc
+	$(DD) if=$(KERNEL) of=$(OS) bs=512 conv=notrunc seek=1
+	$(DD) if=$(MAP) of=$(OS) bs=512 conv=notrunc seek=256
+	$(DD) if=$(FILES) of=$(OS) bs=512 conv=notrunc seek=257
+	$(DD) if=$(SECTORS) of=$(OS) bs=512 conv=notrunc seek=259
 
-image: $(IMG)
+image: img
 
-run: $(IMG)
+run: img
 	$(BOCHS) -f $(BOCHS_CONFIG)
 
 clean:
