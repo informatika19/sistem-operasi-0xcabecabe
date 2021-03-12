@@ -13,6 +13,8 @@ BOCHS = bochs
 AS = nasm
 PY = python3
 
+CFLAG = -ansi -c
+
 ASM_DIR = src/asm
 C_DIR = src/c
 OUT_DIR = out
@@ -48,13 +50,13 @@ $(BOOTLOADER_OUT): $(BOOTLOADER_ASM)
 	$(AS) -o $@ $<
 
 $(OUT_DIR)/%.o: $(LIB_DIR)/%.c
-	$(CC) -ansi -c -o $@ $<
+	$(CC) $(CFLAG) -o $@ $<
 
 $(LIB_ASM_OUT): $(LIB_ASM)
 	$(AS) -f as86 -o $@ $<
 
 $(KERNEL_C_OUT): $(KERNEL_C)
-	$(CC) -ansi -c -o $@ $<
+	$(CC) $(CFLAG) -o $@ $<
 
 $(KERNEL_ASM_OUT): $(KERNEL_ASM)
 	$(AS) -f as86 -o $@ $<

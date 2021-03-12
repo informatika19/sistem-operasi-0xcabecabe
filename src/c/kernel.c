@@ -11,57 +11,38 @@
 
 int main()
 {
-    char testo[10], apel[10];
-    char a[10], b[10];
-    int anjing;
+    char testo[8*1024];
+    int res;
     // Set video mode
     // http://www.ctyme.com/intr/rb-0069.htm
     // 640x200 with 16 colors, 80x30 text resolution
     interrupt(0x10, 0x0012, 0, 0, 0);
+    makeInterrupt21();
 
-    printLogoGrafik(140);
-    while(1)
-    {
-        clear(testo, 10);
-        clear(apel, 10);
-        clear(a, 10);
-        clear(b, 10);
-
-        printString("Tuliskan keluh-kesahmu hari ini: ");
-
-        a[0] = 'a';
-        a[1] = 'b';
-        a[2] = 'c';
-
-        anjing = writeSector(a, 2879);
-        a[0] = anjing+'0';
-        a[1] = 0;
-        printString("\n");
-        printString(a);
-        printString("\n");
-
-        anjing = readSector(b, 2879);
-        a[0] = anjing+'0';
-        a[1] = 0;
-        printString("\n");
-        printString(a);
-        printString("\n");
-
-        readString(testo);
-        /*printString(testo);*/
-        /*printString("\n");*/
-    }
+    readFile(testo, "math.h", &res, 0xFF);
+    printString(testo);
+    printString("\n");
+    printLogoASCII();
 }
 
 void handleInterrupt21(int AX, int BX, int CX, int DX)
 {
     switch(AX)
     {
-        case 0x0:
+        case 0x00:
             printString(BX);
             break;
-        case 0x1:
+        case 0x01:
             readString(BX);
+            break;
+        case 0x03:
+            writeSector(BX, CX);
+            break;
+        case 0x04:
+            readFile(BX, CX, DX, ((unsigned) AX) >> 2);
+            break;
+        case 0x05:
+            writeFile(BX, CX, DX, ((unsigned) AX) >> 2);
             break;
         default:
             printString("Invalid interrupt");
@@ -74,7 +55,6 @@ void printString(char *string)
     // tapi bisa otomatis geser kursor dan insert new line
     // http://www.ctyme.com/intr/rb-0106.htm
     int i, baris;
-    char test;
     for (i = 0; string[i] != '\0'; ++i)
     {
         switch (string[i])
@@ -131,6 +111,7 @@ void readString(char *string)
         }
         else if (string[i] == 0x0D)
         {
+            string[i] = '\0';
             printString("\n");
             break;
         }
@@ -150,7 +131,7 @@ void readString(char *string)
 
 void bikinPersegi(int sisi, int warna, int x, int y)
 {
-    int i, j, k = 0;
+    int i, j;
     for (i = 0; i < sisi; ++i)
     {
         for (j = 0; j < sisi; ++j)
@@ -187,7 +168,7 @@ void printLogoASCII()
 
 void printLogoGrafik(int sisi)
 {
-    int i, j, k = 0, y = getCursorRow(),
+    int i, j, y = getCursorRow(),
         setSisi = sisi/2,
         radius1 = sisi/20,
         radius2 = sisi/10,
@@ -227,16 +208,105 @@ void printLogoGrafik(int sisi)
     interrupt(0x10, 0x0200, 0x0000, 0x0000, y+9*0x100); // buat nurunin kursor
 }
 
-int readSector(char *buffer, int sector)
+void readSector(char *buffer, int sector)
 {
-    return interrupt(0x13, 0x0201, (int) buffer, // number, AX, BX
+    interrupt(0x13, 0x0201, buffer, // number, AX, BX
             div(sector, 36) * 0x100 + mod(sector, 18) + 1, // CX
             mod(div(sector, 18), 2) * 0x100); // DX
 }
 
-int writeSector(char *buffer, int sector)
+void writeSector(char *buffer, int sector)
 {
-    interrupt(0x13, 0x0301, (int) buffer,
-            div(sector, 36) * 0x100 + mod(sector, 18) + 1,
-            mod(div(sector, 18), 2) * 0x100);
+    interrupt(0x13, 0x301, buffer,
+                div(sector, 36) * 0x100 + mod(sector, 18) + 1,
+                mod(div(sector, 18), 2) * 0x100);
+}
+
+void writeFile(char *buffer, char *path, int *sectors, char parentIndex)
+{
+    int i, dirSectorUsed, mapSectorCount, writeSectorCount;
+    byte map[SECTOR_SIZE],
+        dir1[SECTOR_SIZE],
+        dir2[SECTOR_SIZE],
+        dir[2*SECTOR_SIZE];
+    /*
+    -1 file sudah ada
+    -2 tidak cukup entri di files
+    -3 tidak cukup sektor kosong
+    -4 folder tidak valid
+    */
+
+    writeSectorCount = *sectors;
+    readSector(map, 0x100);
+    readSector(dir1, 0x101);
+    readSector(dir2, 0x102);
+
+    for (i = 0; i < 2*SECTOR_SIZE; ++i)
+        dir[i] = dir1[i] * (i < SECTOR_SIZE) + dir2[i-512] * (i >= SECTOR_SIZE);
+
+    i = 0;
+    // nyari sektor kosong
+    while (dir[i] && i < 2*SECTOR_SIZE)
+        i++;
+    if (i >= 2*SECTOR_SIZE)
+    {
+        *sectors = -2;
+        return;
+    }
+    dirSectorUsed = i;
+
+    i = 0;
+    // periksa map yang masih muat nampung buffer atau ngga
+    while (map[i] && i < SECTOR_SIZE)
+        i++;
+    if (writeSectorCount > (SECTOR_SIZE - i)) // tidak cukup sektor kosong
+    {
+        *sectors = -3;
+        return;
+    }
+    mapSectorCount = i;
+
+    clear(map+mapSectorCount, writeSectorCount);
+
+    // ini di akhir
+    *sectors = 0;
+}
+
+// bikin parsing
+void readFile(char *buffer, char *path, int *result, char parentIndex)
+{
+    int rowSize = 0xF, i;
+    bool success;
+    char dir[2*SECTOR_SIZE], sec[SECTOR_SIZE];
+    char *fileName, *entry, *secIdx, *secNo;
+    /*
+    -1 file tidak ditemukan
+    */
+
+    readSector(dir, 0x101);
+    readSector(dir+SECTOR_SIZE, 0x102);
+    readSector(sec, 0x103);
+
+    i = 0;
+    do
+    {
+        entry = dir+i;
+        fileName = entry+2;
+        success = strcmp(fileName, path) == 0;
+        i += rowSize;
+    } while (i < 2*SECTOR_SIZE && !success);
+
+    if (!success){ // file tidak ditemukan
+        *result = -1;
+        return;
+    }
+
+    i = 0;
+    secIdx = entry+1;
+    secNo = sec+((*secIdx)*rowSize);
+    while (*(secNo+i) != 0 && i < rowSize)
+    {
+        readSector(buffer+(i*SECTOR_SIZE), *(secNo+i));
+        i++;
+    }
 }

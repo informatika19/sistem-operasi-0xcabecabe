@@ -9,6 +9,10 @@
 #ifndef _KERNEL_CABECABE_H_
 #define _KERNEL_CABECABE_H_
 
+typedef char byte;
+
+#define SECTOR_SIZE 512
+
 #define VIDEO_SEGMENT   0xB000
 #define OFFSET_CHAR     0x8000
 #define OFFSET_COLOR    0x8001
@@ -67,13 +71,13 @@ void makeInterrupt21();
 void handleInterrupt21(int AX, int BX, int CX, int DX);
 /**
  * Fungsi menuliskan string ke output
- * @param *string string yang ingin dituliskan
+ * @param string string yang ingin dituliskan
  */
 void printString(char *string);
 /**
  * Fungsi untuk membaca string dari keyboard
  * Possible buffer overflow >:((((
- * @param *string string yang akan menampung bacaan dari keyboard
+ * @param string string yang akan menampung bacaan dari keyboard
  */
 void readString(char *string);
 /**
@@ -99,13 +103,31 @@ void printLogoASCII();
 void printLogoGrafik(int sisi);
 /**
  * Fungsi untuk membaca sector
+ * @param buffer
+ * @param sector
  */
-int readSector(char *buffer, int sector);
+void readSector(char *buffer, int sector);
 /**
- * Fungsi untuk menuliskan ke sector
+ * Fungsi untuk menulis ke sector
+ * @param buffer
+ * @param sector
  */
-int writeSector(char *buffer, int sector);
+void writeSector(char *buffer, int sector);
+/**
+ * Fungsi untuk menuliskan file
+ * @param buffer isi file yang ingin ditulis
+ * @param path path ke file
+ * @param sectors ukuran file
+ * @param parentIndex index parent di sektor files
+ */
 void writeFile(char *buffer, char *path, int *sectors, char parentIndex);
+/**
+ * Fungsi untuk membaca file
+ * @param buffer buffer untuk menampung isi file
+ * @param path path ke file
+ * @param result hasil pembacaan file
+ * @param parentIndex index parent di sektor files
+ */
 void readFile(char *buffer, char *path, int *result, char parentIndex);
 
 #endif

@@ -8,13 +8,14 @@
 
 #include "math.h"
 
-int mod(int a, int b)
-{
-    int hasil = a/b;
-    return a - b*hasil;
-}
-
 int div(int a, int b)
 {
+    // return a/b + ((a < 0) ^ (b < 0));
     return a/b;
+}
+
+int mod(int a, int b)
+{
+    int hasil = div(a,b);
+    return a - b*hasil;
 }
