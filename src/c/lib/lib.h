@@ -8,6 +8,10 @@
 #ifndef _LIB_CABECABE_H_
 #define _LIB_CABECABE_H_
 
+#include "boolean.h"
+#include "math.h"
+#include "string.h"
+
 /**
  * Fungsi untuk mendapatkan posisi baris cursor di layar
  */

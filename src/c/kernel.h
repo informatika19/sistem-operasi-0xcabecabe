@@ -3,7 +3,7 @@
  * Alvin W., Josep M., Rehagana K.C.S.
  * 20 Februari 2021
  *
- * Header yang berisi fungsi-fungsi utama kernel
+ * Header yang berisi untuk fungsi-fungsi "utama" kernel
  */
 
 #ifndef _KERNEL_CABECABE_H_
@@ -70,64 +70,10 @@ void makeInterrupt21();
  */
 void handleInterrupt21(int AX, int BX, int CX, int DX);
 /**
- * Fungsi menuliskan string ke output
- * @param string string yang ingin dituliskan
- */
-void printString(char *string);
-/**
- * Fungsi untuk membaca string dari keyboard
- * Possible buffer overflow >:((((
- * @param string string yang akan menampung bacaan dari keyboard
- */
-void readString(char *string);
-/**
  * Fungsi untuk mengosongkan buffer
  * @param buffer address ke buffer yang ingin dikosongkan
  * @param length panjang/banyak 0 yang mau diisi
  */
 void clear(char *buffer, int length);
-/**
- * Fungsi untuk membuat persegi berkukuran sisi x sisi
- * @param sisi panjang sisi persegi
- * @param x absis untuk bagian kiri persegi
- * @param y ordinat untuk bagian atas persegi
- */
-void bikinPersegi(int sisi, int warna, int x, int y);
-/**
- * Fungsi untuk menuliskan logo ASCII
- */
-void printLogoASCII();
-/**
- * Fungsi untuk menuliskan logo grafik
- */
-void printLogoGrafik(int sisi);
-/**
- * Fungsi untuk membaca sector
- * @param buffer
- * @param sector
- */
-void readSector(char *buffer, int sector);
-/**
- * Fungsi untuk menulis ke sector
- * @param buffer
- * @param sector
- */
-void writeSector(char *buffer, int sector);
-/**
- * Fungsi untuk menuliskan file
- * @param buffer isi file yang ingin ditulis
- * @param path path ke file
- * @param sectors ukuran file
- * @param parentIndex index parent di sektor files
- */
-void writeFile(char *buffer, char *path, int *sectors, char parentIndex);
-/**
- * Fungsi untuk membaca file
- * @param buffer buffer untuk menampung isi file
- * @param path path ke file
- * @param result hasil pembacaan file
- * @param parentIndex index parent di sektor files
- */
-void readFile(char *buffer, char *path, int *result, char parentIndex);
 
 #endif
