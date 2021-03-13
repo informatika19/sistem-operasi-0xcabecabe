@@ -47,3 +47,27 @@ char* strncpy(char *dest, char *src, int n)
 
     return dest;
 }
+
+char* strcat(char *dest, char *src) {
+    int n_dest = strlen(dest);
+    int i;
+    
+    for (i=0; src[i] != '\0'; i++) {
+        dest[n_dest+i] = src[i];
+    }
+    dest[n_dest+i] = '\0';
+    return dest;
+}
+
+char* strncat(char *dest, char *src, int n) {
+    int n_dest = strlen(dest);
+    int i;
+
+    for (i=0; i<n && src[i] != '\0'; i++) {
+        // disini '\0' dari dest keoverwrite sama src[0]
+        dest[n_dest+i] = src[i];
+    }
+    dest[n_dest + i] = '\0';
+    return dest;
+}
+
