@@ -10,6 +10,8 @@
 #ifndef _FILESYSTEM_CABECABE_H_
 #define _FILESYSTEM_CABECABE_H_
 
+#define SECTOR_USED 0xFF
+#define SECTOR_FREE 0x00
 #define ROOT_DIR_INDEX 0xFF
 #define DIR_SECTOR 0xFF
 
