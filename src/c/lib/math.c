@@ -8,11 +8,27 @@
 
 #include "math.h"
 
-int div(int a, int b)
-{
-    // return a/b + ((a < 0) ^ (b < 0));
-    return a/b;
-}
+int div(int tempdividend, int tempdivisor) {
+    int quotient = 1;
+    if (tempdivisor == tempdividend) {
+        return 1;
+    } else if (tempdividend < tempdivisor) {
+        return 0;
+    }   
+
+    do{
+
+        tempdivisor = tempdivisor << 1;
+        quotient = quotient << 1;
+
+     } while (tempdivisor <= tempdividend);
+
+
+     /* Call division recursively */
+    quotient = quotient + division(tempdividend - tempdivisor, tempdivisor);
+
+    return quotient;
+} 
 
 int mod(int a, int b)
 {
