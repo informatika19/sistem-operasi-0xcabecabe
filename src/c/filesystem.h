@@ -10,6 +10,9 @@
 #ifndef _FILESYSTEM_CABECABE_H_
 #define _FILESYSTEM_CABECABE_H_
 
+#define ROOT_DIR_INDEX 0xFF
+#define DIR_SECTOR 0xFF
+
 /**
  * Fungsi untuk membaca sector
  * @param buffer
@@ -38,5 +41,14 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex);
  * @param parentIndex index parent di sektor files
  */
 void readFile(char *buffer, char *path, int *result, char parentIndex);
+/**
+ * Fungsi untuk parsing path
+ * @param path path yang ingin di-parse
+ * @param parents array of char pointer, setiap elemen punya 14 byte, berisi
+ * nama direktori parent
+ * @param fname nama file/direktori terakhir pada path
+ * @return banyak direktori parent
+ */
+int parsePath(char *path, char *parents, char *fname);
 
 #endif
