@@ -25,3 +25,25 @@ int strcmp(char *s1, char *s2)
 
     return *(unsigned char*)s1 - *(unsigned char*)s2;
 }
+
+char* strcpy(char *dest, char *src)
+{
+    int i;
+
+    for (i = 0; src[i] != '\0'; i++)
+        dest[i] = src[i];
+
+    return dest;
+}
+
+char* strncpy(char *dest, char *src, int n)
+{
+    int i;
+
+    for (i = 0; i < n && src[i] != '\0'; i++)
+        dest[i] = src[i];
+    for ( ; i < n; i++)
+        dest[i] = '\0';
+
+    return dest;
+}

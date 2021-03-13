@@ -2,26 +2,41 @@
  * kernel.c
  * Alvin W., Josep M., Rehagana K.C.S.
  * 20 Februari 2021
+ *
+ * Catatan:
+ * - istilah direktori (dir) dan folder interchangable
  */
 #include "kernel.h"
 #include "filesystem.h"
 #include "io.h"
-#include "lib/lib.h"
+#include "lib.h"
 
 int main()
 {
     char testo[8*1024];
+    char parents[0x3E][14]; // jadi flat array dengan jarak antarelemen 14
+    char *filname;
     int res;
+    int i = 0;
     // Set video mode
     // http://www.ctyme.com/intr/rb-0069.htm
     // 640x200 with 16 colors, 80x30 text resolution
     interrupt(0x10, 0x0012, 0, 0, 0);
     makeInterrupt21();
 
-    readFile(testo, "math.h", &res, 0xFF);
+    printLogoASCII();
+    res = parsePath("/home/josep/projects/tubes/os/src/c/kernel.h", parents, filname);
+    testo[0] = res + '0';
+    testo[1] = 0;
     printString(testo);
     printString("\n");
-    printLogoASCII();
+    printString(filname);
+    printString("\n");
+    for (i = 0; i < res; ++i)
+    {
+        printString(parents[i]);
+        printString("\n");
+    }
 }
 
 void handleInterrupt21(int AX, int BX, int CX, int DX)

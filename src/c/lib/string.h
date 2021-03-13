@@ -29,4 +29,42 @@ int strlen(char *s);
  */
 int strcmp(char *s1, char *s2);
 
+/**
+ * Fungsi untuk menyalin string
+ * @param dest tempat untuk menampung string salinan
+ * @param src string yang akan disalin
+ * @return string di dest
+ */
+char* strcpy(char *dest, char *src);
+
+/**
+ * Fungsi untuk menyalin string sebanyak n
+ * @param dest tempat untuk menampung string salinan
+ * @param src string yang akan disalin
+ * @param n banyak string yang ingin disalin
+ * @return string di dest
+ */
+char* strncpy(char *dest, char *src, int n);
+
+/**
+ * Menggabungkan dua string, string hasil akan dikembalikan atau di-append
+ * ke argumen pertama
+ * @param dest string "original" (akan digabungkan dengan src)
+ * @param src string yang ingin di-append
+ * @param n banyak string yang ingin digabungkan
+ * @return string di dest
+ */
+char* strcat(char *dest, char *src);
+
+/**
+ * Menggabungkan dua string, string hasil akan dikembalikan atau di-append
+ * ke argumen pertama
+ * @param dest string "original" (akan digabungkan dengan src). Ukuran dest
+ * minimal strln(dest)+n+1
+ * @param src string yang ingin di-append
+ * @param n banyak string yang ingin digabungkan
+ * @return string di dest
+ */
+char* strncat(char *dest, char *src, int n);
+
 #endif
