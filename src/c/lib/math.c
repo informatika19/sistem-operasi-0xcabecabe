@@ -37,11 +37,11 @@ int div(int dividend, int divisor)
         quotient = quotient*neg + div(-(tempdividend-tempdivisor), divisor);
     else
         quotient = quotient*neg + div(tempdividend-tempdivisor, divisor);
-     return quotient;
+    return quotient;
  }
 
-int mod(int a, int b)
+int mod(int a, int b) // fix for negative numbers
 {
-    int hasil = div(a,b);
+    int hasil = a/b;
     return a - b*hasil;
 }

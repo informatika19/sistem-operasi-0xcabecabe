@@ -21,7 +21,8 @@ int parsePath(char *path, char *parents, char *fname)
     path = path + (1 * (*path == '/'));
     while (*path != '\0')
     {
-        switch (*path) {
+        switch (*path)
+        {
             case '/':
                 *(parents+j+i) = 0;
                 i = 0;
@@ -35,8 +36,6 @@ int parsePath(char *path, char *parents, char *fname)
     }
     *(parents+j+i) = 0;
     strncpy(fname, parents+j, 14);
-    printString(fname);
-    printString("\n");
 
     return div(j, 14);
 }
@@ -108,12 +107,11 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex)
 // bikin parsing
 void readFile(char *buffer, char *path, int *result, char parentIndex)
 {
-    int ROW_SIZE = 0xF;
     int i, banyakParent;
     bool success;
     char dir[2*SECTOR_SIZE], sec[SECTOR_SIZE];
-    char *fileName, *parentDirs[0x3E][14]; // array of strings untuk parent dari path
-    char *entry, *secIdx, *secNo;
+    char *fileName, *parentDirs[64][14]; // array of strings untuk parent dari path
+    char *entry, secIdx, *secNo;
     /*
     -1 file tidak ditemukan
     */
@@ -130,7 +128,7 @@ void readFile(char *buffer, char *path, int *result, char parentIndex)
         entry = dir+i;
         // *(entry+2) adalah posisi nama file pada entry
         success = strcmp(entry+2, fileName) == 0;
-        i += ROW_SIZE;
+        i += 0xF;
     } while (i < 2*SECTOR_SIZE && !success);
 
     if (!success) // file tidak ditemukan
@@ -140,11 +138,12 @@ void readFile(char *buffer, char *path, int *result, char parentIndex)
     }
 
     i = 0;
-    secIdx = entry+1;
-    secNo = sec+((*secIdx)*ROW_SIZE);
-    while (*(secNo+i) != 0 && i < ROW_SIZE)
+    secIdx = *(entry+1);
+    secNo = sec+(secIdx*0x10);
+    while (*secNo != 0 && i < 0x10)
     {
-        readSector(buffer+(i*SECTOR_SIZE), *(secNo+i));
+        readSector(buffer+(i*SECTOR_SIZE), *secNo);
         i++;
+        secNo += i;
     }
 }
