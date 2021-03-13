@@ -36,5 +36,9 @@ void printLogoASCII();
  * Fungsi untuk menuliskan logo grafik
  */
 void printLogoGrafik(int sisi);
+/*
+* Fungsi untuk menuliskan integer menjadi char 
+*/
+void printNumber (int number);
 
 #endif

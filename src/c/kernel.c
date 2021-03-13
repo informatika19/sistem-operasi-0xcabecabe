@@ -37,6 +37,7 @@ int main()
         printString(parents[i]);
         printString("\n");
     }
+    printNumber(12345);
 }
 
 void handleInterrupt21(int AX, int BX, int CX, int DX)

@@ -6,7 +6,7 @@
  * implementasi io.h
  */
 
-#include "lib/lib.h"
+#include "lib.h"
 #include "filesystem.h"
 #include "kernel.h"
 #include "io.h"
@@ -160,4 +160,16 @@ void printLogoGrafik(int sisi)
     }
 
     interrupt(0x10, 0x0200, 0x0000, 0x0000, y+9*0x100); // buat nurunin kursor
+}
+
+void printNumber(int number){
+    char c;
+    if (number < 10){
+        c = number + '0';
+        interrupt(0x10, 0x0E00 + c, 0x0000 + WHITE, 0x0000, 0x0000); 
+    }
+    else {
+        printNumber(number/10);
+        printNumber(mod(number,10));
+    }
 }

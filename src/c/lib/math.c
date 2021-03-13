@@ -10,15 +10,20 @@
 
 int div(int dividend, int divisor)
 {
-    int quotient = 1;
+    int quotient;
+    int neg;
+    unsigned int tempdividend;
+    unsigned int tempdivisor;
 
-    int neg = 1;
+    quotient = 1;
+    neg = 1;
+
     if ((dividend>0 &&divisor<0)||(dividend<0 && divisor>0))
         neg = -1;
 
     // Convert to positive
-    unsigned int tempdividend = (dividend < 0) ? -dividend : dividend;
-    unsigned int tempdivisor = (divisor < 0) ? -divisor : divisor;
+    tempdividend = (dividend < 0) ? -dividend : dividend;
+    tempdivisor = (divisor < 0) ? -divisor : divisor;
 
     if (tempdivisor == tempdividend) {
         return 1*neg;
@@ -42,6 +47,6 @@ int div(int dividend, int divisor)
 
 int mod(int a, int b) // fix for negative numbers
 {
-    int hasil = a/b;
+    int hasil = div(a,b);
     return a - b*hasil;
 }
