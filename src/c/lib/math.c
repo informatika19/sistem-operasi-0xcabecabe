@@ -8,27 +8,37 @@
 
 #include "math.h"
 
-int div(int tempdividend, int tempdivisor) {
+int div(int dividend, int divisor)
+{
     int quotient = 1;
+
+    int neg = 1;
+    if ((dividend>0 &&divisor<0)||(dividend<0 && divisor>0))
+        neg = -1;
+
+    // Convert to positive
+    unsigned int tempdividend = (dividend < 0) ? -dividend : dividend;
+    unsigned int tempdivisor = (divisor < 0) ? -divisor : divisor;
+
     if (tempdivisor == tempdividend) {
-        return 1;
-    } else if (tempdividend < tempdivisor) {
+        return 1*neg;
+    }
+    else if (tempdividend < tempdivisor) {
         return 0;
-    }   
-
-    do{
-
+    }
+    while (tempdivisor<<1 <= tempdividend)
+    {
         tempdivisor = tempdivisor << 1;
         quotient = quotient << 1;
+    }
 
-     } while (tempdivisor <= tempdividend);
-
-
-     /* Call division recursively */
-    quotient = quotient + division(tempdividend - tempdivisor, tempdivisor);
-
-    return quotient;
-} 
+    // Call division recursively
+    if(dividend < 0)
+        quotient = quotient*neg + div(-(tempdividend-tempdivisor), divisor);
+    else
+        quotient = quotient*neg + div(tempdividend-tempdivisor, divisor);
+     return quotient;
+ }
 
 int mod(int a, int b)
 {
