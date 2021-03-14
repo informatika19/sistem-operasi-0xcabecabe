@@ -51,7 +51,7 @@ char* strncpy(char *dest, char *src, int n)
 char* strcat(char *dest, char *src) {
     int n_dest = strlen(dest);
     int i;
-    
+
     for (i=0; src[i] != '\0'; i++) {
         dest[n_dest+i] = src[i];
     }

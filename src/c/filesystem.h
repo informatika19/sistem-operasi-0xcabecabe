@@ -10,6 +10,8 @@
 #ifndef _FILESYSTEM_CABECABE_H_
 #define _FILESYSTEM_CABECABE_H_
 
+#define KERNEL_SIZE 10
+
 /**
  * Fungsi untuk membaca sector
  * @param buffer

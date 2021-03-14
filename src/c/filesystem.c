@@ -56,11 +56,12 @@ void writeSector(char *buffer, int sector)
 
 void writeFile(char *buffer, char *path, int *sectors, char parentIndex)
 {
-    int i, dirSectorUsed, mapSectorCount, writeSectorCount;
+    int i, filesIdx, writeSectorCount;
     char map[SECTOR_SIZE],
-        dir1[SECTOR_SIZE],
-        dir2[SECTOR_SIZE],
-        dir[2*SECTOR_SIZE];
+         dir[2*SECTOR_SIZE],
+         sec[SECTOR_SIZE],
+         useSectors[16];
+    char *fileName, *parentDirs[64][14]; // array of strings untuk parent dari path
     /*
     -1 file sudah ada
     -2 tidak cukup entri di files
@@ -68,43 +69,39 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex)
     -4 folder tidak valid
     */
 
+    parsePath(path, parentDirs, fileName);
+
     writeSectorCount = *sectors;
     readSector(map, 0x100);
-    readSector(dir1, 0x101);
-    readSector(dir2, 0x102);
+    readSector(dir, 0x101);
+    readSector(dir+SECTOR_SIZE, 0x102);
+    readSector(sec, 0x103);
 
-    for (i = 0; i < 2*SECTOR_SIZE; ++i)
-        dir[i] = dir1[i] * (i < SECTOR_SIZE) + dir2[i-512] * (i >= SECTOR_SIZE);
-
-    i = 0;
-    // nyari sektor kosong
-    while (dir[i] && i < 2*SECTOR_SIZE)
-        i++;
-    if (i >= 2*SECTOR_SIZE)
+    // nyari index di sektor files yang kosong kosong
+    // ini harus cek parent directories
+    filesIdx = 0;
+    while (dir[filesIdx] && filesIdx < 2*SECTOR_SIZE)
+        filesIdx += 0x10;
+    if (filesIdx >= 2*SECTOR_SIZE)
     {
         *sectors = -2;
         return;
     }
-    dirSectorUsed = i;
+    clear(dir+filesIdx, 0xF); // nulis nama file
+    strncpy(dir+filesIdx+2, fileName, 14);
 
-    i = 0;
-    // periksa map yang masih muat nampung buffer atau ngga
-    while (map[i] && i < SECTOR_SIZE)
-        i++;
-    if (writeSectorCount > (SECTOR_SIZE - i)) // tidak cukup sektor kosong
-    {
-        *sectors = -3;
-        return;
-    }
-    mapSectorCount = i;
+    // nyari index di sektor
 
-    clear(map+mapSectorCount, writeSectorCount);
+    // nyari sektor-sektor di map yang kosong untuk diisi file
+    // sektor di byte ke-1 sampai ke-10 (indeks 0--9) dipakai untuk kernel
+    // indexing untuk map dimulai dari KERNEL_SIZE
+    i = KERNEL_SIZE;
+    /** cek jumlah sektor di map cukup untuk buffer file **/
 
     // ini di akhir
     *sectors = 0;
 }
 
-// bikin parsing
 void readFile(char *buffer, char *path, int *result, char parentIndex)
 {
     int i, banyakParent;
@@ -140,10 +137,12 @@ void readFile(char *buffer, char *path, int *result, char parentIndex)
     i = 0;
     secIdx = *(entry+1);
     secNo = sec+(secIdx*0x10);
-    while (*secNo != 0 && i < 0x10)
+    while (*secNo && i < 0x10)
     {
         readSector(buffer+(i*SECTOR_SIZE), *secNo);
         i++;
-        secNo += i;
+        secNo++;
     }
+
+    *result = i;
 }

@@ -24,20 +24,9 @@ int main()
     interrupt(0x10, 0x0012, 0, 0, 0);
     makeInterrupt21();
 
-    printLogoASCII();
-    res = parsePath("/home/josep/projects/tubes/os/src/c/kernel.h", parents, filname);
-    testo[0] = res + '0';
-    testo[1] = 0;
+    /*printLogoASCII();*/
+    readFile(testo, "/", &res, 0xFF);
     printString(testo);
-    printString("\n");
-    printString(filname);
-    printString("\n");
-    for (i = 0; i < res; ++i)
-    {
-        printString(parents[i]);
-        printString("\n");
-    }
-    printNumber(12345);
 }
 
 void handleInterrupt21(int AX, int BX, int CX, int DX)
