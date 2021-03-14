@@ -70,6 +70,8 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex)
     -4 folder tidak valid
     */
 
+    if (*sectors > 16) { *sectors = -3; return; }
+
     parsePath(path, parentDirs, fileName);
 
     sectorNeeded = *sectors;
@@ -135,8 +137,10 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex)
     for (i = 0; i < sectorNeeded; ++i, ++(*sectors))
         *(sec+entrySectors+i) = sectorsToUse[i];
 
-    writeSector(sec, 0x100);
-    writeSector(map, 0x103);
+    writeSector(map, 0x100);
+    writeSector(dir, 0x102);
+    writeSector(dir+SECTOR_SIZE, 0x103);
+    writeSector(sec, 0x103);
 }
 
 void readFile(char *buffer, char *path, int *result, char parentIndex)
