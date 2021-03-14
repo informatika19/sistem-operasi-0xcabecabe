@@ -16,24 +16,43 @@ int main()
     char testo[8*1024];
     char parents[0x3E][14]; // jadi flat array dengan jarak antarelemen 14
     char *filname;
-    int res;
-    int i = 0;
+    int res, hadeh;
     // Set video mode
     // http://www.ctyme.com/intr/rb-0069.htm
     // 640x200 with 16 colors, 80x30 text resolution
     interrupt(0x10, 0x0012, 0, 0, 0);
     makeInterrupt21();
 
-    /*printLogoASCII();*/
-    readFile(testo, "/", &res, 0xFF);
-    printString(testo);
+    res = 1;
+    writeFile("tolong saya\n", "/test.txt", &res, 0xFF);
+    if (res > 0)
+    {
+        printString("Berhasil nulis :D\n");
+        readFile(testo, "/test.txt", &hadeh, 0xFF);
+        if (hadeh > 0)
+        {
+            printString(testo);
+            printString("\n");
+        }
+        else
+        {
+            printString("ga bisa baca :(\n");
+        }
+    }
+    else
+    {
+        printString("menghangdeh: -");
+        hadeh = -1 * res;
+        printNumber(hadeh);
+        printString("\n");
+    }
 }
 
 void handleInterrupt21(int AX, int BX, int CX, int DX)
 {
     char AL, AH;
     AL = (char) AX;
-    AH = (char) (AX >> 8); // digeser 8 bit atau 1 byte
+    AH = (unsigned char) (AX >> 8); // digeser 8 bit atau 1 byte
     switch(AL)
     {
         case 0x00:

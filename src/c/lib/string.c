@@ -17,13 +17,14 @@ int strlen(char *s)
 
 int strcmp(char *s1, char *s2)
 {
-    while (*s1 && *s1 == *s2)
-    {
-        ++s1;
-        ++s2;
-    }
-
+    for (; *s1 && *s1 == *s2; s1++, s2++);
     return *(unsigned char*)s1 - *(unsigned char*)s2;
+}
+
+int strncmp(char *s1, char *s2, int n)
+{
+    for (; *s1 && n && *s1 == *s2; n--, s1++, s2++);
+    return (*(unsigned char*)s1 - *(unsigned char*)s2) * (n != 0);
 }
 
 char* strcpy(char *dest, char *src)
@@ -32,6 +33,7 @@ char* strcpy(char *dest, char *src)
 
     for (i = 0; src[i] != '\0'; i++)
         dest[i] = src[i];
+    dest[i] = 0;
 
     return dest;
 }

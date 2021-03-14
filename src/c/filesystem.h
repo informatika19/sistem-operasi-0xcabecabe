@@ -27,17 +27,17 @@ void writeSector(char *buffer, int sector);
 /**
  * Fungsi untuk menuliskan isi file ke filesystem
  * @param buffer isi file yang ingin ditulis
- * @param path path ke file
+ * @param path nama file yang ingin ditulis
  * @param sectors ukuran file
- * @param parentIndex index parent di sektor files
+ * @param parentIndex index parent dari file
  */
 void writeFile(char *buffer, char *path, int *sectors, char parentIndex);
 /**
  * Fungsi untuk membaca isi file di filesystem
  * @param buffer buffer untuk menampung isi file
- * @param path path ke file
+ * @param path nama file yang ingin dibaca
  * @param result hasil pembacaan file (banyak buffer yang dihasilkan)
- * @param parentIndex index parent di sektor files
+ * @param parentIndex index parent dari file
  */
 void readFile(char *buffer, char *path, int *result, char parentIndex);
 /**

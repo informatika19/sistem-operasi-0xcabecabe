@@ -30,6 +30,20 @@ int strlen(char *s);
 int strcmp(char *s1, char *s2);
 
 /**
+ * Fungsi untuk membandingkan panjang dua buah string. Pemeriksaan akan
+ * berhenti sampai salah satu string mencapai '\0' atau sudah dibandingkan n
+ * karakter
+ * @param *s1 null-terminated string pertama
+ * @param *s2 null-terminated string kedua
+ * @param n banyak karakter yang ingin dibandingkan
+ * @return mengembalikan:
+ * - 0 jika kedua string sama,
+ * - negatif jika s1 lebih
+ * - pendek, positif jika s1 lebih panjang
+ */
+int strncmp(char *s1, char *s2, int n);
+
+/**
  * Fungsi untuk menyalin string
  * @param dest tempat untuk menampung string salinan
  * @param src string yang akan disalin
