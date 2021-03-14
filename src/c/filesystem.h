@@ -36,7 +36,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex);
  * Fungsi untuk membaca isi file di filesystem
  * @param buffer buffer untuk menampung isi file
  * @param path path ke file
- * @param result hasil pembacaan file
+ * @param result hasil pembacaan file (banyak buffer yang dihasilkan)
  * @param parentIndex index parent di sektor files
  */
 void readFile(char *buffer, char *path, int *result, char parentIndex);

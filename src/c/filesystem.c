@@ -104,16 +104,16 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex)
 
 void readFile(char *buffer, char *path, int *result, char parentIndex)
 {
-    int i, banyakParent;
+    int i;
     bool success;
     char dir[2*SECTOR_SIZE], sec[SECTOR_SIZE];
-    char *fileName, *parentDirs[64][14]; // array of strings untuk parent dari path
+    char *fileName;//, *parentDirs[64][14]; // array of strings untuk parent dari path
     char *entry, secIdx, *secNo;
     /*
     -1 file tidak ditemukan
     */
 
-    banyakParent = parsePath(path, parentDirs, fileName);
+    parsePath(path, 0, fileName);
 
     readSector(dir, 0x101);
     readSector(dir+SECTOR_SIZE, 0x102);
@@ -124,11 +124,11 @@ void readFile(char *buffer, char *path, int *result, char parentIndex)
     {
         entry = dir+i;
         // *(entry+2) adalah posisi nama file pada entry
-        success = strcmp(entry+2, fileName) == 0;
-        i += 0xF;
+        success = *entry == parentIndex && strcmp(entry+2, fileName) == 0;
+        i += 0x10;
     } while (i < 2*SECTOR_SIZE && !success);
 
-    if (!success) // file tidak ditemukan
+    if (!success) // file tidak ditemukan di parent atau parent tidak ada
     {
         *result = -1;
         return;
@@ -144,5 +144,6 @@ void readFile(char *buffer, char *path, int *result, char parentIndex)
         secNo++;
     }
 
+    *(buffer+(i*SECTOR_SIZE)) = 0;
     *result = i;
 }

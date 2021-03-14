@@ -76,6 +76,4 @@ void handleInterrupt21(int AX, int BX, int CX, int DX);
  */
 void clear(char *buffer, int length);
 
-void printHex(unsigned int x);
-
 #endif
