@@ -11,88 +11,75 @@
 #include "io.h"
 #include "lib.h"
 
-bool isPathValid(char *path, char parentIndex, char *dir)
-{
-    char dir[2*SECTOR_SIZE];
-    char parent;
-    int i, j, banyakParent;
-    char *fileName, parents[64][14];
-    int isfound = true;
 
-    // bandingin nama dgn yg ada di path
-    // misalkan /usr/share/include/lib/asd
-    // bandingin "asd" dengan nama file yg lagi diperiksa
+int getFileIndex(char *path, char parentIndex, char *dir) {
+    // misalkan /usr/share/share/include/lib/asd
+    // path: include/lib/asd
+    // path: /usr/share/share/include/lib/asd
+    // parse path dari /usr/share/include/lib/asd jadi
+    // ['usr','share','include','lib','asd']
+    char *entry;
+    char parents[64][14], fname[14];
+    bool success = true;
+    bool found = false;
+    int i, tmp = SECTOR_SIZE*2;
+    int j;
+    int jmlParents;
 
-    // kalo udah, if (isPathValid("/usr/share/include/lib"))
-    // return true else repeat loop
+    jmlParents = parsePath(path,parents,fname);
+    success = jmlParents == 0 && parentIndex == 0xFF; //case udah di root
 
-    // perlu ngecek path di sector dari root?
-    // misalnya 02 00 74 65 73 74 00 ... 0x00
-    //          FF FF 74 65 73 74 00 ... 0x10
-    //          01 00 74 66 66 66 66 ... 0x10*2 dir+0x10*2
-    // simpen indeks terbesarnya berarti 01
-    // ngeceknya mundur berdasarkan indeks itu
-    // path = "/test/tffff/test"
-    // parents = ["/", "test", "tffff"]
-    // misalnya ./text.txt
-    // text.txt dicek sama yang di dir yang indeksnya 01
-    // cara ngakses dir nya gmn? (ngakses 74 65 73 ..) -> dir+offset (kelipatan 0x10)
-
-    // cek dlu index valid atau nggak:
-    // test = strncmp((dir+(parentIndex*0x10))+2, parents[banyakParent-1], 14) == 0
-    // test = test ? isPathValid(...) : false;
-    // return test;
-
-    banyakParent = parsePath(path, parents, fileName);
-    isfound = getFileIndex(fileName, parentIndex, dir) != -1;
-
-    // TODO: Optimasi
-    while (banyakParent-- && isfound)
-    {
-        // perbarui parent index ke parent selanjutnya
-        parentIndex = *(dir+parentIndex*0x10);
-        // path paling ujung kanan sebelum nama file
-        isfound = getFileIndex(parents+banyakParent+2, parentIndex, dir) != -1;
+    j = 0;
+    while (j < jmlParents && success && found) {
+        found = false;
+        i = 0;
+        // iterasi dalam file buat nyari yang parentIndexnya sesuai
+        //      kalo ketemu, cari yang namanya sama strncmp(entry+2,...)
+        //          kalo namanya ga sama, found = false
+        while (!found && i <= tmp) {
+            entry = dir+i;
+            found = *(entry) == parentIndex
+                    ? strncmp(entry+2,parents[j],14) == 0
+                    : found;
+            i += 0x10;
+        }
+        // kalo gaada file yang parentIndex dan namanya sesuai di path (bakal terminate loop)
+        // ganti parentIndex jadi indeks dari file/folder yang sesuai kriteria atas
+        parentIndex = *entry;
+        // kalo misalnya ga ketemu filenya, success jadi false
+        success = found;
+        j++;
     }
 
-    return isfound;
-}
-
-int getFileIndex(char *fileName, char parentIndex, char *dir) {
-    char *entry;
-    bool success = false;
-    int i, tmp = SECTOR_SIZE*2;
-    int a = 0;
-
-    readSector(dir, 0x101);
-    readSector(dir+512, 0x102);
-
+    // loop khusus buat nyari indeks dari file (soalnya array parents ga memuat nama filenya)
+    found = false;
     i = 0;
-    do
-    {
-        entry = dir + i;
-        success = *entry == parentIndex && strncmp(entry+2, fileName, 13) == 0;
-        i += 0x10;
-    } while (i < tmp && !success);
-    i -= 0x10;
+    j = 0;
+    if (success) {
+        while (!found && i < tmp) {
+            entry = dir+i;
+            found = *(entry) == parentIndex
+                    ? strncmp(entry+2,fname,14) == 0
+                    : found;
+            i += 0x10;
+            j++;
+        }
+    }
+    success = found;
 
-    return !success ? -1 : i;
+    return !success ? -1 : j-1;
 }
 
 int parsePath(char *path, char *parents, char *fname)
 {
+    // TODO: handle kasus ../path
     int i, j, n;
     char cur[14];
     bool isParentDone = false;
 
     i = 0, j = 0;
-    if (*path == '/')
-    {
-        *(parents+j+i) = '/';
-        *(parents+j+(i+1)) = '\0';
-        j += 14;
-        path++;
-    }
+    path = path + (1 * (*path == '/'));
+
     while (*path != '\0')
     {
         switch (*path)
@@ -233,33 +220,23 @@ void readFile(char *buffer, char *path, int *result, char parentIndex)
     int i;
     bool success;
     char dir[2*SECTOR_SIZE], sec[SECTOR_SIZE];
-    char fileName[14];
     char *entry, secIdx, *secNo;
     /*
     -1 file tidak ditemukan
     */
-
-    parsePath(path, 0, fileName);
 
     readSector(dir, 0x101);
     readSector(dir+SECTOR_SIZE, 0x102);
     readSector(sec, 0x103);
 
     // file tidak ditemukan di parent atau parent tidak ada
-    if (!isPathValid(path, parentIndex, dir))
-    {
-        *result = -1;
-        return;
-    }
-
-    // TODO: Optimasi? getFileIndex jadi kepanggil di sini dan isPathValid
-    i = getFileIndex(fileName, parentIndex, dir);
+    i = getFileIndex(path, parentIndex, dir);
     if (i == -1)
     {
         *result = -1;
         return;
     }
-    entry = dir + i;
+    entry = dir + (i * 0x10);
 
     i = 0;
     secIdx = *(entry+1);

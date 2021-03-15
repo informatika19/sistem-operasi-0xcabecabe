@@ -10,70 +10,70 @@
 #include "filesystem.h"
 #include "io.h"
 #include "lib.h"
+#include "shell.h"
 
 int main()
 {
     char testo[8*1024];
-    char parents[64][14]; // jadi flat array dengan jarak antarelemen 14
-    char buffer[512];
-    char filename[14];
+    char buffer[512], fname[14], parents[64][14];
     int res, hadeh;
     // Set video mode
     // http://www.ctyme.com/intr/rb-0069.htm
     // 640x200 with 16 colors, 80x30 text resolution
     interrupt(0x10, 0x0012, 0, 0, 0);
-    clear(buffer, 512);
+    // printLogoGrafik(140);
     makeInterrupt21();
 
-    strncpy(buffer, "tolong saya\n", 12);
+    strncpy(buffer, "Tolong, saya shinitai-desu:(", 70);
     res = 1;
     writeFile(buffer, "/test.txt", &res, 0xFF);
     if (res > 0)
     {
-        printString("Berhasil nulis :D\n");
-        readFile(testo, "/test.txt", &hadeh, 0xFF);
-        if (hadeh > 0)
+        readFile(testo, "/test.txt", &res, 0xFF);
+
+        if (res > 0)
+        {
             printString(testo);
+            printString("\n");
+        }
         else
-            printString("ga bisa baca :(\n");
+            printString("\nKesalahan dalam membaca file\n");
     }
     else
     {
-        printString("menghangdeh: -");
-        hadeh = -1 * res;
-        printNumber(hadeh);
-        printString("\n");
+        res *= -1;
+        printString("Menghangdeh: -");
+        printNumber(res);
+        printString("Kesalahan dalam menulis file\n");
     }
 
-    strncpy(buffer, "sini saya tolong\n", 17);
+    clear(buffer, 70);
+
+
+    strncpy(buffer, "hadeh", 10);
     res = 1;
-    writeFile(buffer, "/test2.txt", &res, 0xFF);
+    writeFile(buffer, "/testa2.txt", &res, 0xFF);
     if (res > 0)
     {
-        printString("Berhasil nulis :D\n");
-        readFile(testo, "/test2.txt", &hadeh, 0xFF);
-        if (hadeh > 0)
+        readFile(testo, "/testa2.txt", &res, 0xFF);
+
+        if (res > 0)
+        {
             printString(testo);
+            printString("\n");
+        }
         else
-            printString("ga bisa baca :(\n");
+            printString("\nKesalahan dalam membaca file\n");
     }
     else
     {
-        printString("menghangdeh: -");
-        hadeh = -1 * res;
-        printNumber(hadeh);
-        printString("\n");
+        res *= -1;
+        printString("Menghangdeh: -");
+        printNumber(res);
+        printString("Kesalahan dalam menulis file\n");
     }
 
-    // /usr/share/gcc-10.2.0/python/libstdcxx/__init__.py
-    res = parsePath("/usr/share/../share/gcc-10.2.0//..//gcc-10.2.0/./././../gcc-10.2.0/python/libstdcxx/__init__.py", parents, filename);
-    printString(filename);
-    printString("\n");
-    while (res--)
-    {
-        printString(parents[res]);
-        printString("\n");
-    }
+    // runShell();
 
     while (true);
 }
@@ -90,6 +90,9 @@ void handleInterrupt21(int AX, int BX, int CX, int DX)
             break;
         case 0x01:
             readString(BX);
+            break;
+        case 0x02:
+            readSector(BX, CX);
             break;
         case 0x03:
             writeSector(BX, CX);

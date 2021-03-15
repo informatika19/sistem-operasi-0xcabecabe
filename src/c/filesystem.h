@@ -53,15 +53,6 @@ void readFile(char *buffer, char *path, int *result, char parentIndex);
 int parsePath(char *path, char *parents, char *fname);
 
 /**
- * Fungsi untuk memeriksa apakah path yang diberikan valid (exists) atau tidak
- * @param char *path path yang ingin dicek kevalidan-nya
- * @param char parentIndex indeks parent dari file/direktori terakhir di path
- * @param char *dir sektor files di OS
- * @return true jika indeks valid (ada/exists); selain itu false
- */
-bool isPathValid(char *path, char parentIndex, char *dir);
-
-/**
  * Fungsi untuk mendapatkan nomor index/nomor entri dari sektor files untuk
  * suatu file dengan fileName dan parentIndex tertentu
  * @param char *fileName nama dari file yang akan dicek
@@ -69,6 +60,6 @@ bool isPathValid(char *path, char parentIndex, char *dir);
  * @param char *dir sektor files di OS
  * @return nomor index/nomor entri file yang dicari pada sektor files
  */
-int getFileIndex(char *fileName, char parentIndex, char *dir);
+int getFileIndex(char *path, char parentIndex, char *dir);
 
 #endif

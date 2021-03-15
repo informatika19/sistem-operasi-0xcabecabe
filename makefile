@@ -13,7 +13,7 @@ BOCHS = bochs
 AS = nasm
 PY = python3
 
-KSIZE = 12
+KSIZE = 14
 
 CFLAG = -ansi -c
 
