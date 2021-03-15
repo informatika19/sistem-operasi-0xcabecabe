@@ -12,6 +12,7 @@
 
 #include "lib/boolean.h"
 #define KERNEL_SIZE 10
+#define SECTOR_SIZE 512
 
 /**
  * Fungsi untuk membaca sector
@@ -52,19 +53,22 @@ void readFile(char *buffer, char *path, int *result, char parentIndex);
 int parsePath(char *path, char *parents, char *fname);
 
 /**
+ * Fungsi untuk memeriksa apakah path yang diberikan valid (exists) atau tidak
+ * @param char *path path yang ingin dicek kevalidan-nya
+ * @param char parentIndex indeks parent dari file/direktori terakhir di path
+ * @param char *dir sektor files di OS
+ * @return true jika indeks valid (ada/exists); selain itu false
  */
-bool isPathValid(char *path, char parentIndex);
-
-int getFileIndex(char *fileName, char parentIndex);
+bool isPathValid(char *path, char parentIndex, char *dir);
 
 /**
- * Fungsi untuk mengecek apakah kombinasi filename dan parentindex terdapat di
- * directory
+ * Fungsi untuk mendapatkan nomor index/nomor entri dari sektor files untuk
+ * suatu file dengan fileName dan parentIndex tertentu
  * @param char *fileName nama dari file yang akan dicek
  * @param char parentIndex indeks dari parent  dicek
  * @param char *dir sektor files di OS
- * @return bool kalau filename dan parentindex sesuai, return true
+ * @return nomor index/nomor entri file yang dicari pada sektor files
  */
-bool isIndexValid(char *fileName, char parentIndex, char *dir);
+int getFileIndex(char *fileName, char parentIndex, char *dir);
 
 #endif

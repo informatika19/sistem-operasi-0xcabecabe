@@ -11,16 +11,13 @@
 #include "io.h"
 #include "lib.h"
 
-bool isPathValid(char *path, char parentIndex)
+bool isPathValid(char *path, char parentIndex, char *dir)
 {
     char dir[2*SECTOR_SIZE];
     char parent;
     int i, j, banyakParent;
     char *fileName, parents[64][14];
-    bool isfound = true;
-
-    readSector(dir,0x101);
-    readSector(dir+SECTOR_SIZE, 0x102);
+    int isfound = true;
 
     // bandingin nama dgn yg ada di path
     // misalkan /usr/share/include/lib/asd
@@ -47,36 +44,38 @@ bool isPathValid(char *path, char parentIndex)
     // return test;
 
     banyakParent = parsePath(path, parents, fileName);
+    isfound = getFileIndex(fileName, parentIndex, dir) != -1;
 
-    // TODO: Optimasi?
+    // TODO: Optimasi
     while (banyakParent-- && isfound)
     {
-        // path paling ujung kanan sebelum nama file
-        isfound = isIndexValid(parents[banyakParent], parentIndex, dir);
         // perbarui parent index ke parent selanjutnya
         parentIndex = *(dir+parentIndex*0x10);
+        // path paling ujung kanan sebelum nama file
+        isfound = getFileIndex(parents+banyakParent+2, parentIndex, dir) != -1;
     }
 
     return isfound;
 }
 
-int getFileIndex(char *fileName, char parentIndex) {
-
-}
-
-bool isIndexValid(char *fileName, char parentIndex, char *dir) {
-    bool found = false;
+int getFileIndex(char *fileName, char parentIndex, char *dir) {
     char *entry;
-    int i = 0;
+    bool success = false;
+    int i, tmp = SECTOR_SIZE*2;
+    int a = 0;
 
+    readSector(dir, 0x101);
+    readSector(dir+512, 0x102);
+
+    i = 0;
     do
     {
-        entry = dir+i;
-        found = *entry == parentIndex && strncmp(entry+2, fileName, 14);
+        entry = dir + i;
+        success = *entry == parentIndex && strncmp(entry+2, fileName, 13) == 0;
         i += 0x10;
-    } while (i < 2*SECTOR_SIZE && !found);
+    } while (i < tmp && !success);
 
-    return found;
+    return !success ? -1 : i;
 }
 
 int parsePath(char *path, char *parents, char *fname)
@@ -247,11 +246,20 @@ void readFile(char *buffer, char *path, int *result, char parentIndex)
     readSector(sec, 0x103);
 
     // file tidak ditemukan di parent atau parent tidak ada
-    if (!isPathValid(path, parentIndex) && !isIndexValid(fileName, parentIndex, dir))
+    if (!isPathValid(path, parentIndex, dir))
     {
         *result = -1;
         return;
     }
+
+    // TODO: Optimasi? getFileIndex jadi kepanggil di sini dan isPathValid
+    i = getFileIndex(fileName, parentIndex, dir);
+    if (i == -1)
+    {
+        *result = -1;
+        return;
+    }
+    entry = dir + i;
 
     i = 0;
     secIdx = *(entry+1);

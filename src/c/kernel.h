@@ -11,8 +11,6 @@
 
 typedef char byte;
 
-#define SECTOR_SIZE 512
-
 #define VIDEO_SEGMENT   0xB000
 #define OFFSET_CHAR     0x8000
 #define OFFSET_COLOR    0x8001
