@@ -114,7 +114,7 @@ sektor dibutuhkan: {sectorsNeeded}", file=stderr)
         entrySectors += 1
 
     sectorsSec[entrySectors] = bytes(
-        [freeSectorsNo[i] if (i == 0) else 0 for i in range(16)])
+        [freeSectorsNo[i] if i < sectorsNeeded else 0 for i in range(16)])
 
     mapSec = bytes(tmp)
 
