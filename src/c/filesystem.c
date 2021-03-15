@@ -74,6 +74,7 @@ int getFileIndex(char *fileName, char parentIndex, char *dir) {
         success = *entry == parentIndex && strncmp(entry+2, fileName, 13) == 0;
         i += 0x10;
     } while (i < tmp && !success);
+    i -= 0x10;
 
     return !success ? -1 : i;
 }
@@ -140,7 +141,7 @@ void writeSector(char *buffer, int sector)
 
 void writeFile(char *buffer, char *path, int *sectors, char parentIndex)
 {
-    int i, j, entry, sectorNeeded, sectorUsed, sectorFree,
+    int i, j, entry, sectorNeeded, sectorUsed, sectorFree = 0,
         sectorsToUse[16], entrySectors;
     bool alreadyExists = false, parentExists = (parentIndex == 0xFF);
     char map[SECTOR_SIZE],
@@ -194,7 +195,6 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex)
         }
         ++i;
     }
-    // TODO: Bug aneh di sini
     if (sectorFree < sectorNeeded) { *sectors = -3; return; }
 
     // isi sektornya

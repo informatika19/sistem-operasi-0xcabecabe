@@ -48,8 +48,6 @@ int main()
     strncpy(buffer, "sini saya tolong\n", 17);
     res = 1;
     writeFile(buffer, "/test2.txt", &res, 0xFF);
-    printNumber(res);
-    printString("\n");
     if (res > 0)
     {
         printString("Berhasil nulis :D\n");
