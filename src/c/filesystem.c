@@ -14,7 +14,7 @@
 
 int getFileIndex(char *path, char parentIndex, char *dir) {
     // misalkan /usr/share/share/include/lib/asd
-    // path: include/lib/asd
+    // path: ../include/lib/asd
     // path: /usr/share/share/include/lib/asd
     // parse path dari /usr/share/include/lib/asd jadi
     // ['usr','share','include','lib','asd']
@@ -26,7 +26,7 @@ int getFileIndex(char *path, char parentIndex, char *dir) {
     int j;
     int jmlParents;
 
-    jmlParents = parsePath(path,parents,fname);
+    jmlParents = parsePath(path, parents, fname, parentIndex, dir);
     success = jmlParents == 0 && parentIndex == 0xFF; //case udah di root
 
     j = 0;
@@ -70,9 +70,9 @@ int getFileIndex(char *path, char parentIndex, char *dir) {
     return !success ? -1 : j-1;
 }
 
-int parsePath(char *path, char *parents, char *fname)
+int parsePath(char *path, char *parents, char *fname, char *parentIndex, char *dir)
 {
-    // TODO: handle kasus ../path
+    // TODO: Input path bisa salah, misal ada ...
     int i, j, n;
     char cur[14];
     bool isParentDone = false;
@@ -96,7 +96,7 @@ int parsePath(char *path, char *parents, char *fname)
                 isParentDone = false;
         }
 
-        if (isParentDone) // ngecek ada '.' atau '..' atau ngga
+        if (isParentDone && j > 14) // ngecek ada '.' atau '..' atau ngga
         {
             n = 14 * (strncmp(parents+j-14, ".", 14) == 0) +
                 28 * (strncmp(parents+j-14, "..", 14) == 0);
@@ -108,6 +108,22 @@ int parsePath(char *path, char *parents, char *fname)
 
     *(parents+j+i) = 0;
     strncpy(fname, parents+j, 14);
+
+    if (*parents == '.') {
+        if (*(parents+1) == '.')
+        {
+            *parentIndex = *(dir + *parentIndex*0x10);
+            if (*parentIndex != 0xFF)
+                strncpy(parents, dir+(*parentIndex)*0x10+2, 14);
+            else
+                strncpy(parents, "/", 14);
+        }
+        else
+        {
+            parents += 14;
+            j--;
+        }
+    }
 
     return div(j, 14);
 }
@@ -134,7 +150,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex)
     char map[SECTOR_SIZE],
          dir[2*SECTOR_SIZE],
          sec[SECTOR_SIZE];
-    char fileName[14], parentDirs[64][14]; // array of strings untuk parent dari path
+    char fileName[14]; // array of strings untuk parent dari path
     /*
     -1 file sudah ada
     -2 tidak cukup entri di sektor files
@@ -144,13 +160,13 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex)
 
     if (*sectors > 16) { *sectors = -3; return; }
 
-    parsePath(path, parentDirs, fileName);
-
     sectorNeeded = *sectors;
     readSector(map, 0x100);
     readSector(dir, 0x101);
     readSector(dir+SECTOR_SIZE, 0x102);
     readSector(sec, 0x103);
+
+    parsePath(path, 0, fileName, &parentIndex, dir);
 
     // ngecek file dengan yang sama di parent index yang sama udah ada atau belum
     i = 0;
@@ -237,6 +253,13 @@ void readFile(char *buffer, char *path, int *result, char parentIndex)
         return;
     }
     entry = dir + (i * 0x10);
+
+    // bukan file
+    if (*(entry+1) > 0x1F)
+    {
+        *result = -1;
+        return;
+    }
 
     i = 0;
     secIdx = *(entry+1);

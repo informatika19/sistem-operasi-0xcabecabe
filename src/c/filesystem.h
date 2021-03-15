@@ -48,9 +48,11 @@ void readFile(char *buffer, char *path, int *result, char parentIndex);
  * @param parents array of char pointer, setiap elemen punya 14 byte, berisi
  * nama direktori parent. Array ini menampung 64*14 bytes.
  * @param fname nama file/direktori terakhir pada path
+ * @param parentIndex current working directory index
+ * @param dir setkor files
  * @return banyak direktori parent
  */
-int parsePath(char *path, char *parents, char *fname);
+int parsePath(char *path, char *parents, char *fname, char *parentIndex, char *dir);
 
 /**
  * Fungsi untuk mendapatkan nomor index/nomor entri dari sektor files untuk
