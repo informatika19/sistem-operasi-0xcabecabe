@@ -67,7 +67,8 @@ int main()
         printString("\n");
     }
 
-    res = parsePath("/usr/share/../gcc-10.2.0//..//gcc-10.2.0/./././../gcc-10.2.0/python/libstdcxx/__init__.py", parents, filename);
+    // /usr/share/gcc-10.2.0/python/libstdcxx/__init__.py
+    res = parsePath("/usr/share/../share/gcc-10.2.0//..//gcc-10.2.0/./././../gcc-10.2.0/python/libstdcxx/__init__.py", parents, filename);
     printString(filename);
     printString("\n");
     while (res--)

@@ -11,19 +11,16 @@
 #include "io.h"
 #include "lib.h"
 
-int getFileIndex(char *path, char parentIndex)
+bool isPathValid(char *path, char parentIndex)
 {
     char dir[2*SECTOR_SIZE];
     char parent;
     int i, j, banyakParent;
-    char *nama, *fileName, parents[64][14];
+    char *fileName, parents[64][14];
     bool isfound = true;
 
     readSector(dir,0x101);
     readSector(dir+SECTOR_SIZE, 0x102);
-
-
-    banyakParent = parsePath(path, parents, fileName);
 
     // bandingin nama dgn yg ada di path
     // misalkan /usr/share/include/lib/asd
@@ -40,47 +37,37 @@ int getFileIndex(char *path, char parentIndex)
     // ngeceknya mundur berdasarkan indeks itu
     // path = "/test/tffff/test"
     // parents = ["/", "test", "tffff"]
-    // misalnya ./text.txt ini bener ga?
+    // misalnya ./text.txt
     // text.txt dicek sama yang di dir yang indeksnya 01
-    // cara ngakses dir nya gmn? (ngakses 74 65 73 ..)
+    // cara ngakses dir nya gmn? (ngakses 74 65 73 ..) -> dir+offset (kelipatan 0x10)
 
     // cek dlu index valid atau nggak:
     // test = strncmp((dir+(parentIndex*0x10))+2, parents[banyakParent-1], 14) == 0
     // test = test ? isPathValid(...) : false;
     // return test;
 
-    j = 1; // untuk mundur di string path
-    nama = parents[banyakParent-1];
-    parentIndex++;
-    do
-    {
-        // path paling ujung kanan
-        if (!isIndexValid(nama, parentIndex)) {
-            isfound = false;
-        }
+    banyakParent = parsePath(path, parents, fileName);
 
-        nama = parents[banyakParent-j];
-        j++;
-        parentIndex--;
-    } while (i < 2*SECTOR_SIZE && isfound && banyakParent-j==0);
+    // TODO: Optimasi?
+    while (banyakParent-- && isfound)
+    {
+        // path paling ujung kanan sebelum nama file
+        isfound = isIndexValid(parents[banyakParent], parentIndex, dir);
+        // perbarui parent index ke parent selanjutnya
+        parentIndex = *(dir+parentIndex*0x10);
+    }
 
     return isfound;
 }
 
-/**
- * Fungsi untuk mengecek apakah kombinasi filename dan parentindex terdapat di
- * directory
- * @param char *fileName nama dari file yang akan dicek
- * @param char parentIndex indeks dari parent  dicek
- * @return bool a
- */
-bool isIndexValid(char *fileName, char parentIndex) {
-    char dir[2*SECTOR_SIZE];
+int getFileIndex(char *fileName, char parentIndex) {
+
+}
+
+bool isIndexValid(char *fileName, char parentIndex, char *dir) {
     bool found = false;
     char *entry;
     int i = 0;
-    readSector(dir,0x101);
-    readSector(dir+SECTOR_SIZE,0x102);
 
     do
     {
@@ -88,6 +75,7 @@ bool isIndexValid(char *fileName, char parentIndex) {
         found = *entry == parentIndex && strncmp(entry+2, fileName, 14);
         i += 0x10;
     } while (i < 2*SECTOR_SIZE && !found);
+
     return found;
 }
 
@@ -246,7 +234,7 @@ void readFile(char *buffer, char *path, int *result, char parentIndex)
     int i;
     bool success;
     char dir[2*SECTOR_SIZE], sec[SECTOR_SIZE];
-    char fileName[14];//, parentDirs[64][14]; // array of strings untuk parent dari path
+    char fileName[14];
     char *entry, secIdx, *secNo;
     /*
     -1 file tidak ditemukan
@@ -258,17 +246,8 @@ void readFile(char *buffer, char *path, int *result, char parentIndex)
     readSector(dir+SECTOR_SIZE, 0x102);
     readSector(sec, 0x103);
 
-    i = 0;
-    do
-    {
-        entry = dir+i;
-        // *(entry+2) adalah posisi nama file pada entry
-        success = *entry == parentIndex && strncmp(entry+2, fileName, 13) == 0;
-        i += 0x10;
-    } while (i < 2*SECTOR_SIZE && !success);
-    // TODO: kelemahan /bin/sh ekivalen dengan /asdsad/fds/gg/sd/a/a/d/ea/bin/sh
-
-    if (!success) // file tidak ditemukan di parent atau parent tidak ada
+    // file tidak ditemukan di parent atau parent tidak ada
+    if (!isPathValid(path, parentIndex) && !isIndexValid(fileName, parentIndex, dir))
     {
         *result = -1;
         return;

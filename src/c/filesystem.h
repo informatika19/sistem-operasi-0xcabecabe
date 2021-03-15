@@ -10,6 +10,7 @@
 #ifndef _FILESYSTEM_CABECABE_H_
 #define _FILESYSTEM_CABECABE_H_
 
+#include "lib/boolean.h"
 #define KERNEL_SIZE 10
 
 /**
@@ -49,5 +50,21 @@ void readFile(char *buffer, char *path, int *result, char parentIndex);
  * @return banyak direktori parent
  */
 int parsePath(char *path, char *parents, char *fname);
+
+/**
+ */
+bool isPathValid(char *path, char parentIndex);
+
+int getFileIndex(char *fileName, char parentIndex);
+
+/**
+ * Fungsi untuk mengecek apakah kombinasi filename dan parentindex terdapat di
+ * directory
+ * @param char *fileName nama dari file yang akan dicek
+ * @param char parentIndex indeks dari parent  dicek
+ * @param char *dir sektor files di OS
+ * @return bool kalau filename dan parentindex sesuai, return true
+ */
+bool isIndexValid(char *fileName, char parentIndex, char *dir);
 
 #endif
