@@ -14,9 +14,9 @@
 int main()
 {
     char testo[8*1024];
-    char parents[0x3E][14]; // jadi flat array dengan jarak antarelemen 14
+    char parents[64][14]; // jadi flat array dengan jarak antarelemen 14
     char buffer[512];
-    char *filname;
+    char filename[14];
     int res, hadeh;
     // Set video mode
     // http://www.ctyme.com/intr/rb-0069.htm
@@ -25,19 +25,7 @@ int main()
     clear(buffer, 512);
     makeInterrupt21();
 
-    buffer[0] = 't';
-    buffer[1] = 'o';
-    buffer[2] = 'l';
-    buffer[3] = 'o';
-    buffer[4] = 'n';
-    buffer[5] = 'g';
-    buffer[6] = ' ';
-    buffer[7] = 's';
-    buffer[8] = 'a';
-    buffer[9] = 'y';
-    buffer[10] = 'a';
-    buffer[11] = '\n';
-
+    strncpy(buffer, "tolong saya\n", 12);
     res = 1;
     writeFile(buffer, "/test.txt", &res, 0xFF);
     if (res > 0)
@@ -45,19 +33,46 @@ int main()
         printString("Berhasil nulis :D\n");
         readFile(testo, "/test.txt", &hadeh, 0xFF);
         if (hadeh > 0)
-        {
             printString(testo);
-        }
         else
-        {
             printString("ga bisa baca :(\n");
-        }
     }
     else
     {
         printString("menghangdeh: -");
         hadeh = -1 * res;
         printNumber(hadeh);
+        printString("\n");
+    }
+
+    strncpy(buffer, "sini saya tolong\n", 17);
+    res = 1;
+    writeFile(buffer, "/test2.txt", &res, 0xFF);
+    printNumber(res);
+    printString("\n");
+    if (res > 0)
+    {
+        printString("Berhasil nulis :D\n");
+        readFile(testo, "/test2.txt", &hadeh, 0xFF);
+        if (hadeh > 0)
+            printString(testo);
+        else
+            printString("ga bisa baca :(\n");
+    }
+    else
+    {
+        printString("menghangdeh: -");
+        hadeh = -1 * res;
+        printNumber(hadeh);
+        printString("\n");
+    }
+
+    res = parsePath("/usr/share/../gcc-10.2.0//..//gcc-10.2.0/./././../gcc-10.2.0/python/libstdcxx/__init__.py", parents, filename);
+    printString(filename);
+    printString("\n");
+    while (res--)
+    {
+        printString(parents[res]);
         printString("\n");
     }
 
@@ -99,4 +114,3 @@ void clear(char *buffer, int length)
         buffer[i] = 0;
     }
 }
-

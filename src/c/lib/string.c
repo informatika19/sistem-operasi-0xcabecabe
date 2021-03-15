@@ -72,4 +72,3 @@ char* strncat(char *dest, char *src, int n) {
     dest[n_dest + i] = '\0';
     return dest;
 }
-

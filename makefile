@@ -13,6 +13,8 @@ BOCHS = bochs
 AS = nasm
 PY = python3
 
+KSIZE = 12
+
 CFLAG = -ansi -c
 
 ASM_DIR = src/asm
@@ -69,7 +71,7 @@ img: $(OUT_DIR) $(BOOTLOADER_OUT) $(KERNEL)
 	$(DD) if=/dev/zero of=$(MAP) bs=512 count=1
 	$(DD) if=/dev/zero of=$(FILES) bs=512 count=2
 	$(DD) if=/dev/zero of=$(SECTORS) bs=512 count=1
-	$(PY) -c "import sys; sys.stdout.buffer.write(b'\xFF'*10)" | $(DD) conv=notrunc bs=10 count=1 of=$(MAP)
+	$(PY) -c "import sys; sys.stdout.buffer.write(b'\xFF'*$(KSIZE))" | $(DD) conv=notrunc bs=$(KSIZE) count=1 of=$(MAP)
 	$(DD) if=$(BOOTLOADER_OUT) of=$(OS) bs=512 count=1 conv=notrunc
 	$(DD) if=$(KERNEL) of=$(OS) bs=512 conv=notrunc seek=1
 	$(DD) if=$(MAP) of=$(OS) bs=512 conv=notrunc seek=256

@@ -166,7 +166,7 @@ void printNumber(int number){
     char c;
     if (number < 10){
         c = number + '0';
-        interrupt(0x10, 0x0E00 + c, 0x0000 + WHITE, 0x0000, 0x0000); 
+        interrupt(0x10, 0x0E00 + c, 0x0000 + WHITE, 0x0000, 0x0000);
     }
     else {
         printNumber(number/10);
