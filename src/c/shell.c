@@ -59,8 +59,9 @@ int runShell() {
         */
 
         // parse dan hasil parse
-        res = commandParser(command, arguments);
-        if (res < 0) {
+        argc = commandParser(command, argv);
+        if (argc < 0) {
+            // TODO: bad UX because doesn't tell the error
             handleInterrupt21(0, "Terjadi kesalahan saat membaca perintah\n", 0,
                               0);
             handleInterrupt21(
@@ -72,26 +73,36 @@ int runShell() {
         }
 
         // eksekusi perintah
-        if (strncmp("cd", arguments[0], MAXIMUM_CMD_LEN) == 0) {
-            if (strlen(arguments[1]) == 0) {
+        if (strncmp("cd", argv[0], MAXIMUM_CMD_LEN) == 0) {
+            if (argc != 2) {
                 handleInterrupt21(
-                    0, "Perintah cd membutuhkan sebuah direktori.\n", 0, 0);
+                    0, "Penggunaan: cd <path/direktori>\n", 0, 0);
             } else {
-                cd(&cwdIdx, arguments[1], cwdName);
+                cd(&cwdIdx, argv[1], cwdName);
             }
-        } else if (strncmp("ls", arguments[0], MAXIMUM_CMD_LEN) == 0) {
+        } else if (strncmp("ls", argv[0], MAXIMUM_CMD_LEN) == 0) {
             listDir(cwdIdx);
-        } else if (strncmp("cat", arguments[0], MAXIMUM_CMD_LEN) == 0) {
-            if (strlen(arguments[1]) == 0) {
+        } else if (strncmp("cat", argv[0], MAXIMUM_CMD_LEN) == 0) {
+            if (argc != 2) {
                 handleInterrupt21(0,
-                                  "Perintah cat membutuhkan sebuah file "
-                                  "sebagai argumennya.\n",
+                                  "Penggunaan: cat <path/file>\n",
                                   0, 0);
             } else {
-                cat(cwdIdx, arguments[1]);
+                cat(cwdIdx, argv[1]);
             }
-        } else if (strncmp("ln", arguments[0], MAXIMUM_CMD_LEN) == 0) {
-        }
+        } else if (strncmp("ln", argv[0], MAXIMUM_CMD_LEN) == 0) {
+            // pseudo-ln KeK
+            if (argc != 3 && argc != 4) {
+                printNumber(argc);
+                printString("\n");
+                handleInterrupt21(0,
+                                  "Penggunaan: ln [-s] <path/sumber> <path/tujuan>\n",
+                                  0,0);
+            } else if (argc == 4 && strncmp(argv[1], "-s", MAXIMUM_CMD_LEN) == 0) {
+                softLink(cwdIdx, argv[2], argv[3]);
+            } else {
+                hardLink(cwdIdx, argv[1], argv[2]);
+            }
         /*
         else if (strncmp("history", arguments[0], MAXIMUM_CMD_LEN) == 0)
         {
@@ -104,7 +115,7 @@ int runShell() {
         */
         else {
             handleInterrupt21(0, "Perintah ", 0, 0);
-            handleInterrupt21(0, arguments[0], 0, 0);
+            handleInterrupt21(0, argv[0], 0, 0);
             handleInterrupt21(0, " tidak dikenali.\n", 0, 0);
         }
     }
@@ -197,4 +208,47 @@ void cat(char cwdIdx, char *path) {
         handleInterrupt21(0, path, 0, 0);
     }
     handleInterrupt21(0, "\n", 0, 0);
+}
+
+void hardLink(char cwdIdx, char *resourcePath, char *destinationPath) {
+    char buf[16* SECTOR_SIZE];
+    int res = 0;
+
+    handleInterrupt21((cwdIdx << 8) + 0x04, buf, resourcePath, &res);
+
+    if (res > 0) {
+        handleInterrupt21((cwdIdx << 8) + 0x05, buf, destinationPath, &res);
+    } else {
+        handleInterrupt21(0, "Terjadi kesalahan saat membaca berkas ", 0, 0);
+        handleInterrupt21(0, resourcePath, 0, 0);
+    }
+}
+
+void softLink(char cwdIdx, char *resourcePath, char *destinationPath) {
+    char dir[2*SECTOR_SIZE];
+
+    int destinationIndex = getFileIndex(destinationPath, cwdIdx, dir);
+    int resourceIndex = getFileIndex(resourcePath, cwdIdx, dir);
+    int i = 0;
+    int j = resourceIndex*0x10;
+    char fname[14];
+    char parents[64][14];
+    int testo;
+
+    testo = parsePath(destinationPath,parents, fname);
+    handleInterrupt21(0x0002, dir, 0x101, 0);  // readSector
+    handleInterrupt21(0x0002, dir + 512, 0x102, 0);
+    if (destinationIndex == -1){
+        while (*(dir+i) != 0){
+            i+=0x10;
+        }
+        *(dir+i) = cwdIdx;
+        *(dir+i+1) = *(dir+j+1);
+        printString(fname);
+        printString("\n");
+        strncpy(dir+i+2, fname, 14);
+    }
+
+    handleInterrupt21(0x0003, dir, 0x101, 0);  // writeSector
+    handleInterrupt21(0x0003, dir + 512, 0x102, 0);
 }
