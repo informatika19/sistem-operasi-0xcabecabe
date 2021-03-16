@@ -13,11 +13,6 @@
 #include "lib/lib.h"
 
 int getFileIndex(char *path, char parentIndex, char *dir) {
-    // misalkan /usr/share/share/include/lib/asd
-    // path: ../include/lib/asd
-    // path: /usr/share/share/include/lib/asd
-    // parse path dari /usr/share/include/lib/asd jadi
-    // ['usr','share','include','lib','asd']
     char *entry;
     char tmpP[64][14], fname[14];
     char parents[64][14];
@@ -69,7 +64,6 @@ int getFileIndex(char *path, char parentIndex, char *dir) {
             // sesuai kriteria atas
             if (found)
                 parentIndex = (i / 0x10) - 1;
-            // kalo misalnya ga ketemu filenya, success jadi false
         }
         j++;
     }
@@ -142,6 +136,8 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     readSector(sec, 0x103);
 
     // adjust parent index ke index tujuan
+    // include/lib/asd
+    // include/lib
     j = parsePath(path, parents, fileName);
     if (j != 0 && parentIndex != 0xFF) {
         strncpy(path, parents[0], strlen(parents[0]));
@@ -150,8 +146,8 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
             strncat(path, parents[i], strlen(parents[i]));
             strncat(path, "/", 2);
         }
+        parentIndex = getFileIndex(path, parentIndex, dir);
     }
-    parentIndex = getFileIndex(path, parentIndex, dir);
 
     // akibat dari path yang diberikan tidak valid
     if (parentIndex < 0) {

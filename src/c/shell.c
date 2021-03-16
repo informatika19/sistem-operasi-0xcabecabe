@@ -98,18 +98,12 @@ int runShell() {
             } else {
                 hardLink(cwdIdx, argv[1], argv[2]);
             }
-        }
-        /*
-        else if (strncmp("history", arguments[0], MAXIMUM_CMD_LEN) == 0)
-        {
-            for (i = 0; i < histTail; ++i)
-            {
-                printString(hist[i]);
-                printString("\n");
-            }
-        }
-        */
-        else {
+        } else if (strncmp("cwd", argv[0], MAXIMUM_CMD_LEN) == 0) {
+            printNumber(cwdIdx);
+            printString(" - ");
+            printString(cwdName);
+            printString("\n");
+        } else {
             handleInterrupt21(0, "Perintah ", 0, 0);
             handleInterrupt21(0, argv[0], 0, 0);
             handleInterrupt21(0, " tidak dikenali.\n", 0, 0);
@@ -139,6 +133,25 @@ int commandParser(char *cmd, char *argument) {
                 stop = cmd == 0; // \ di akhir string
                 i += 1 * !stop;
                 break;
+            // case '\'':
+            // case '"':
+            //     // treat ' and " as the same for now, meaning ' can be
+            //     // ended with " and vice versa
+            //     // TODO: masih ngebug aneh pisan hadeuh & harus handle: \' \"
+            //     cmd++;
+            //     while (!stop && *cmd != '\0' && (*cmd != '\'' || *cmd != '"')) {
+            //         printNumber(*cmd);
+            //         printString("\n");
+            //         *(argument + j + i) = *cmd;
+            //         cmd++;
+            //         i++;
+            //         // kasus ngewrite sampe ujung tapi ga diakhiri ' atau "
+            //         stop = *cmd == '\0' || i >= MAXIMUM_CMD_LEN;
+            //     }
+            //     stop = i >= MAXIMUM_CMD_LEN;
+            //     j += MAXIMUM_CMD_LEN * (i != 0);
+            //     i = 0;
+            //     break;
             default:
                 *(argument + j + i) = *cmd;
                 i++;
@@ -191,7 +204,7 @@ void listDir(char parentIndex) {
     handleInterrupt21(0x0002, dir + 512, 0x102, 0);
 
     while (i < 1024) {
-        if (*(dir + i) == parentIndex) {
+        if (*(dir + i) == parentIndex && *(dir+i+2) != 0) {
             handleInterrupt21(0, dir + i + 2, 0, 0);
             handleInterrupt21(0, "\n", 0, 0);
         }

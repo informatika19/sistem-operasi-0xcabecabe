@@ -27,12 +27,12 @@ int main() {
 
     strncpy(buffer, "Tolong, saya shinitai-desu:(", 70);
     res = 1;
-    writeFile(buffer, "/test.txt", &res, 0xFF);
+    writeFile(buffer, "test.txt", &res, 0x00);
     clear(buffer, 70);
 
     strncpy(buffer, "hadeh", 10);
     res = 1;
-    writeFile(buffer, "/testa2.txt", &res, 0xFF);
+    writeFile(buffer, "testa2.txt", &res, 0xFF);
 
     printLogoGrafik(140);
     runShell();
