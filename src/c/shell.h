@@ -10,7 +10,7 @@
 #define _SHELL_CABECABE_H_
 
 #define MAXIMUM_CMD_LEN 20
-#define HIST_SIZE 3
+#define HIST_SIZE 5
 
 int runShell();
 
@@ -24,6 +24,6 @@ void cat(char parentIndex, char *path);
 
 void hardLink(int cwdIdx, char *resourcePath, char *destinationPath);
 
-void softLink(char cwdIdx, char *resourcePath, char *destinationPath);
+void softLink(int cwdIdx, char *resourcePath, char *destinationPath);
 
 #endif

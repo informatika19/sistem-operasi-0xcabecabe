@@ -150,13 +150,13 @@ void printLogoGrafik(int sisi) {
               y + 9 * 0x100);  // buat nurunin kursor
 }
 
-void printNumber(int number) {
+void printNumber(unsigned int number) {
     char c;
-    if (number < 10) {
+    if (number < 16) {
         c = number + '0';
         interrupt(0x10, 0x0E00 + c, 0x0000 + WHITE, 0x0000, 0x0000);
     } else {
-        printNumber(number / 10);
+        printNumber(div(number, 10));
         printNumber(mod(number, 10));
     }
 }

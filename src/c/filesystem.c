@@ -12,7 +12,7 @@
 #include "kernel.h"
 #include "lib/lib.h"
 
-int getFileIndex(char *path, char parentIndex, char *dir) {
+int getFileIndex(char *path, int parentIndex, char *dir) {
     char *entry;
     char tmpP[64][14], fname[14];
     char parents[64][14];
@@ -110,7 +110,7 @@ void writeSector(char *buffer, int sector) {
               mod(div(sector, 18), 2) * 0x100);
 }
 
-void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
+void writeFile(char *buffer, char *path, int *sectors, int parentIndex) {
     int i, j, entry, sectorNeeded, sectorFree = 0, sectorsToUse[16],
                                    entrySectors;
     bool alreadyExists = false, parentExists = (parentIndex == 0xFF);
@@ -135,8 +135,6 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     readSector(sec, 0x103);
 
     // adjust parent index ke index tujuan
-    // include/lib/asd
-    // include/lib
     j = parsePath(path, parents, fileName);
     if (j != 0) {
         clear(path, strlen(path));
@@ -228,7 +226,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     writeSector(sec, 0x103);
 }
 
-void readFile(char *buffer, char *path, int *result, char parentIndex) {
+void readFile(char *buffer, char *path, int *result, int parentIndex) {
     int i;
     char dir[2 * SECTOR_SIZE], sec[SECTOR_SIZE];
     char *entry, secIdx, *secNo;

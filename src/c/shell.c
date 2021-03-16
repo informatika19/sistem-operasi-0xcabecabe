@@ -76,7 +76,6 @@ int runShell() {
         } else if (strncmp("ln", argv[0], MAXIMUM_CMD_LEN) == 0) {
             // pseudo-ln KeK
             if (argc != 3 && argc != 4) {
-                printString("\n");
                 interrupt(0x21, 0,
                                   "Penggunaan: ln [-s] <path/sumber> <path/tujuan>\n",
                                   0,0);
@@ -113,7 +112,6 @@ int runShell() {
     }
 }
 
-// TODO: tanganin spasi, ", dan '
 int commandParser(char *cmd, char *argument) {
     int i, j;
     bool stop = false;
@@ -198,6 +196,7 @@ void cd(char *parentIndex, char *path, char *newCwdName) {
     return;
 }
 
+// TODO: ls ke directory lain
 void listDir(char parentIndex) {
     int i = 0;
     char dir[2 * SECTOR_SIZE];
@@ -230,6 +229,7 @@ void cat(char cwdIdx, char *path) {
     interrupt(0x21, 0, "\n", 0, 0);
 }
 
+// TODO: cek yang mau di-link file apa dir
 void hardLink(int cwdIdx, char *resourcePath, char *destinationPath) {
     char buf[16* SECTOR_SIZE];
     char dir[2*SECTOR_SIZE];
@@ -264,32 +264,60 @@ void hardLink(int cwdIdx, char *resourcePath, char *destinationPath) {
         return;
 }
 
-void softLink(char cwdIdx, char *resourcePath, char *destinationPath) {
+// TODO: cek yang mau di-link file apa dir
+void softLink(int cwdIdx, char *resourcePath, char *destinationPath) {
     char dir[2*SECTOR_SIZE];
 
     int destinationIndex = getFileIndex(destinationPath, cwdIdx, dir);
     int resourceIndex = getFileIndex(resourcePath, cwdIdx, dir);
     int i = 0;
-    int j = resourceIndex*0x10;
+    int j = 0;
     char fname[14];
     char parents[64][14];
-    int testo;
+    int tmp = 2*SECTOR_SIZE;
+    int parentIndex;
 
-    interrupt(0x21, 0x0002, dir, 0x101, 0);  // readSector
-    interrupt(0x21, 0x0002, dir + 512, 0x102, 0);
+    if (destinationIndex == -1 || resourceIndex == -1) {
+        // read sector
+        interrupt(0x21, 0x0002, dir, 0x101, 0);
+        interrupt(0x21, 0x0002, dir + 512, 0x102, 0);
 
-    testo = parsePath(destinationPath,parents, fname);
-    if (destinationIndex == -1){
-        while (*(dir+i+2) != 0){
+        j = parsePath(destinationPath, parents, fname);
+        if (j != 0) {
+            clear(destinationPath, strlen(destinationPath));
+            strncpy(destinationPath, parents[0], strlen(parents[0]));
+            strncat(destinationPath, "/", 14);
+            for (i = 1; i < j; ++i) {
+                strncat(destinationPath, parents[i], strlen(parents[i]));
+                strncat(destinationPath, "/", 2);
+            }
+            cwdIdx = getFileIndex(destinationPath, cwdIdx, dir);
+        }
+
+        i = 0;
+        while (*(dir + i + 2) != 0 && i < tmp){
             i+=0x10;
         }
+        if (*(dir + i + 2) != 0) { // sektor files penuh
+            printString("sektor penuh\n");
+            goto softLink_error;
+            return;
+        }
+
         *(dir+i) = cwdIdx;
-        *(dir+i+1) = *(dir+j+1);
-        printString(fname);
-        printString("\n");
+        *(dir+i+1) = *(dir+resourceIndex*0x10+1);
         strncpy(dir+i+2, fname, 14);
+
+        interrupt(0x21, 0x0003, dir, 0x101, 0);  // writeSector
+        interrupt(0x21, 0x0003, dir + 512, 0x102, 0);
+
+        return;
+    } else {
+        goto softLink_error;
+        return;
     }
 
-    interrupt(0x21, 0x0003, dir, 0x101, 0);  // writeSector
-    interrupt(0x21, 0x0003, dir + 512, 0x102, 0);
+    softLink_error:
+        interrupt(0x21, 0, "Terjadi kesalahan saat membuat symbolic link\n", 0, 0);
+        return;
 }

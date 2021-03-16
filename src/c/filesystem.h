@@ -33,7 +33,7 @@ void writeSector(char *buffer, int sector);
  * @param sectors ukuran file
  * @param parentIndex index parent dari file
  */
-void writeFile(char *buffer, char *path, int *sectors, char parentIndex);
+void writeFile(char *buffer, char *path, int *sectors, int parentIndex);
 /**
  * Fungsi untuk membaca isi file di filesystem
  * @param buffer buffer untuk menampung isi file
@@ -41,7 +41,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex);
  * @param result hasil pembacaan file (banyak buffer yang dihasilkan)
  * @param parentIndex index parent dari file
  */
-void readFile(char *buffer, char *path, int *result, char parentIndex);
+void readFile(char *buffer, char *path, int *result, int parentIndex);
 /**
  * Fungsi untuk parsing path
  * @param path path yang ingin di-parse
@@ -62,6 +62,6 @@ int parsePath(char *path, char *parents, char *fname);
  * @param char *dir sektor files di OS
  * @return nomor index/nomor entri file yang dicari pada sektor files
  */
-int getFileIndex(char *path, char parentIndex, char *dir);
+int getFileIndex(char *path, int parentIndex, char *dir);
 
 #endif
