@@ -28,8 +28,7 @@ int main() {
     printString("Pedas OS by 0xCABECABE\n");
     printString("press enter to continue...");
     readString(0);
-
-    printLogoASCII();
+    interrupt(0x10, 0x0012, 0, 0, 0);
 
     strncpy(buffer, "Tolong, saya shinitai-desu:(", 70);
     res = 1;

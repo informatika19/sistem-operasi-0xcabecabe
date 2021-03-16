@@ -22,7 +22,7 @@ void listDir(char parentIndex);
 
 void cat(char parentIndex, char *path);
 
-void hardLink(char cwdIdx, char *resourcePath, char *destinationPath);
+void hardLink(int cwdIdx, char *resourcePath, char *destinationPath);
 
 void softLink(char cwdIdx, char *resourcePath, char *destinationPath);
 

@@ -23,7 +23,6 @@ int runShell() {
     char cwdIdx = 0xFF, username[11],
          cwdName[14],  // root
          promptHead[3], prompt[27], atSymb[2];
-    // hist[HIST_SIZE][10*MAXIMUM_CMD_LEN];
 
     int argc, histc = 0, i;
 
@@ -77,7 +76,6 @@ int runShell() {
         } else if (strncmp("ln", argv[0], MAXIMUM_CMD_LEN) == 0) {
             // pseudo-ln KeK
             if (argc != 3 && argc != 4) {
-                printNumber(argc);
                 printString("\n");
                 interrupt(0x21, 0,
                                   "Penggunaan: ln [-s] <path/sumber> <path/tujuan>\n",
@@ -109,9 +107,10 @@ int runShell() {
         histc = (histc>=HIST_SIZE) ? 0 : histc;
         for (i=1;i<HIST_SIZE;i++) {
             strcpy(hist[i-1],hist[i]);
-    }
+        }
         strcpy(hist[HIST_SIZE-1],command);
         histc++;
+    }
 }
 
 // TODO: tanganin spasi, ", dan '
@@ -231,18 +230,38 @@ void cat(char cwdIdx, char *path) {
     interrupt(0x21, 0, "\n", 0, 0);
 }
 
-void hardLink(char cwdIdx, char *resourcePath, char *destinationPath) {
+void hardLink(int cwdIdx, char *resourcePath, char *destinationPath) {
     char buf[16* SECTOR_SIZE];
+    char dir[2*SECTOR_SIZE];
+    char parents[64][14];
+    char fname[14];
     int res = 0;
+    int destinationIndex;
+    int pc;
+    int j, i;
 
-    handleInterrupt21((cwdIdx << 8) + 0x04, buf, resourcePath, &res);
+    interrupt(0x21, 0x0002, dir, 0x101, 0);  // readSector
+    interrupt(0x21, 0x0002, dir + 512, 0x102, 0);
 
-    if (res > 0) {
-        handleInterrupt21((cwdIdx << 8) + 0x05, buf, destinationPath, &res);
-    } else {
-        handleInterrupt21(0, "Terjadi kesalahan saat membaca berkas ", 0, 0);
-        handleInterrupt21(0, resourcePath, 0, 0);
+    // read file
+    interrupt(0x21, (cwdIdx << 8) + 0x04, buf, resourcePath, &res);
+    if (res <= 0) { // read error
+        goto hardLink_error;
+        return;
     }
+
+    // write file
+    interrupt(0x21, (cwdIdx << 8) + 0x05, buf, destinationPath, &res);
+    if (res <= 0) { // write errror
+        goto hardLink_error;
+        return;
+    }
+
+    return;
+
+    hardLink_error:
+        interrupt(0x21, 0, "Terjadi kesalahan saat membuat symbolic link\n", 0, 0);
+        return;
 }
 
 void softLink(char cwdIdx, char *resourcePath, char *destinationPath) {
@@ -261,7 +280,7 @@ void softLink(char cwdIdx, char *resourcePath, char *destinationPath) {
 
     testo = parsePath(destinationPath,parents, fname);
     if (destinationIndex == -1){
-        while (*(dir+i) != 0){
+        while (*(dir+i+2) != 0){
             i+=0x10;
         }
         *(dir+i) = cwdIdx;

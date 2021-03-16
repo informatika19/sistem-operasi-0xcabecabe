@@ -99,6 +99,7 @@ void bikinPersegi(int sisi, int warna, int x, int y) {
     }
 }
 
+/*
 void printLogoASCII() {
     int y = getCursorRow();
     printString("   ___                _                    _          ");
@@ -116,6 +117,7 @@ void printLogoASCII() {
     interrupt(0x10, 0x0200, 0x0000, 0x0000,
     y + 6 * 0x100);  // buat nurunin kursor
 }
+*/
 
 void printLogoGrafik(int sisi) {
     int i, j, y = getCursorRow(), setSisi = sisi / 2, radius1 = sisi / 20,
