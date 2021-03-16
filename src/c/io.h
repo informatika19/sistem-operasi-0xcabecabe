@@ -38,9 +38,9 @@ void printLogoASCII();
  */
 void printLogoGrafik(int sisi);
 /*
- * Fungsi untuk menuliskan integer menjadi char 
+ * Fungsi untuk menuliskan integer menjadi char
  * @param number angka yang ingin dituliskan
  */
-void printNumber (int number);
+void printNumber(int number);
 
 #endif

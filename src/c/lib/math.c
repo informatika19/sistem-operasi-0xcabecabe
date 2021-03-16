@@ -8,8 +8,7 @@
 
 #include "math.h"
 
-int div(int dividend, int divisor)
-{
+int div(int dividend, int divisor) {
     int quotient;
     int neg;
     unsigned int tempdividend;
@@ -18,7 +17,7 @@ int div(int dividend, int divisor)
     quotient = 1;
     neg = 1;
 
-    if ((dividend>0 &&divisor<0)||(dividend<0 && divisor>0))
+    if ((dividend > 0 && divisor < 0) || (dividend < 0 && divisor > 0))
         neg = -1;
 
     // Convert to positive
@@ -26,27 +25,25 @@ int div(int dividend, int divisor)
     tempdivisor = (divisor < 0) ? -divisor : divisor;
 
     if (tempdivisor == tempdividend) {
-        return 1*neg;
-    }
-    else if (tempdividend < tempdivisor) {
+        return 1 * neg;
+    } else if (tempdividend < tempdivisor) {
         return 0;
     }
-    while (tempdivisor<<1 <= tempdividend)
-    {
+    while (tempdivisor << 1 <= tempdividend) {
         tempdivisor = tempdivisor << 1;
         quotient = quotient << 1;
     }
 
     // Call division recursively
-    if(dividend < 0)
-        quotient = quotient*neg + div(-(tempdividend-tempdivisor), divisor);
+    if (dividend < 0)
+        quotient = quotient * neg + div(-(tempdividend - tempdivisor), divisor);
     else
-        quotient = quotient*neg + div(tempdividend-tempdivisor, divisor);
+        quotient = quotient * neg + div(tempdividend - tempdivisor, divisor);
     return quotient;
- }
+}
 
-int mod(int a, int b) // fix for negative numbers
-{
-    int hasil = div(a,b);
-    return a - b*hasil;
+int mod(int a, int b) {
+    // TODO: fix for negative numbers
+    int hasil = div(a, b);
+    return a - b * hasil;
 }

@@ -7,13 +7,13 @@
  * - istilah direktori (dir) dan folder interchangable
  */
 #include "kernel.h"
+
 #include "filesystem.h"
 #include "io.h"
 #include "lib/lib.h"
 #include "shell.h"
 
-int main()
-{
+int main() {
     char buffer[512];
     int res, hadeh;
     // Set video mode
@@ -34,16 +34,15 @@ int main()
     printLogoGrafik(140);
     runShell();
 
-    while (true);
+    while (true)
+        ;
 }
 
-void handleInterrupt21(int AX, int BX, int CX, int DX)
-{
+void handleInterrupt21(int AX, int BX, int CX, int DX) {
     char AL, AH;
-    AL = (char) AX;
-    AH = (unsigned char) (AX >> 8); // digeser 8 bit atau 1 byte
-    switch(AL)
-    {
+    AL = (char)AX;
+    AH = (unsigned char)(AX >> 8);  // digeser 8 bit atau 1 byte
+    switch (AL) {
         case 0x00:
             printString(BX);
             break;
@@ -67,11 +66,9 @@ void handleInterrupt21(int AX, int BX, int CX, int DX)
     }
 }
 
-void clear(char *buffer, int length)
-{
+void clear(char *buffer, int length) {
     int i = 0;
-    for (; i < length; ++i)
-    {
+    for (; i < length; ++i) {
         buffer[i] = 0;
     }
 }

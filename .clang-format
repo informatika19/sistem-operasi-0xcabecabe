@@ -1,4 +1,4 @@
-BasedOnStyle: Mozilla
+BasedOnStyle: Google # biar nanti kerja di Google. Amin.
 #AlignAfterOpenBracket: Align
 #AlignConsecutiveStyle: Consecutive
 #AlignConsecutiveStyle: Consecutive

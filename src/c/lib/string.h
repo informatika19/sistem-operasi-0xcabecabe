@@ -6,7 +6,6 @@
  * Header yang berisi fungsi-fungsi untuk operasi pada string
  */
 
-
 #ifndef _STRING_CABECABE_H_
 #define _STRING_CABECABE_H_
 
@@ -49,7 +48,7 @@ int strncmp(char *s1, char *s2, int n);
  * @param src string yang akan disalin
  * @return string di dest
  */
-char* strcpy(char *dest, char *src);
+char *strcpy(char *dest, char *src);
 
 /**
  * Fungsi untuk menyalin string sebanyak n
@@ -58,7 +57,7 @@ char* strcpy(char *dest, char *src);
  * @param n banyak string yang ingin disalin
  * @return string di dest
  */
-char* strncpy(char *dest, char *src, int n);
+char *strncpy(char *dest, char *src, int n);
 
 /**
  * Menggabungkan dua string, string hasil akan dikembalikan atau di-append
@@ -68,7 +67,7 @@ char* strncpy(char *dest, char *src, int n);
  * @param n banyak string yang ingin digabungkan
  * @return string di dest
  */
-char* strcat(char *dest, char *src);
+char *strcat(char *dest, char *src);
 
 /**
  * Menggabungkan dua string, string hasil akan dikembalikan atau di-append
@@ -79,6 +78,6 @@ char* strcat(char *dest, char *src);
  * @param n banyak string yang ingin digabungkan
  * @return string di dest
  */
-char* strncat(char *dest, char *src, int n);
+char *strncat(char *dest, char *src, int n);
 
 #endif
