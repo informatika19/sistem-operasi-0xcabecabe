@@ -9,8 +9,7 @@
 #include "filesystem.h"
 #include "kernel.h"
 #include "io.h"
-#include "lib.h"
-
+#include "lib/lib.h"
 
 int getFileIndex(char *path, char parentIndex, char *dir) {
     // misalkan /usr/share/share/include/lib/asd

@@ -6,7 +6,7 @@
  * implementasi io.h
  */
 
-#include "lib.h"
+#include "lib/lib.h"
 #include "filesystem.h"
 #include "kernel.h"
 #include "io.h"

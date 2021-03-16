@@ -9,9 +9,9 @@
 #ifndef _BOOL_CABECABE_H_
 #define _BOOL_CABECABE_H_
 
-#define bool unsigned char
-#define boolean bool
 #define true 1
 #define false 0
+typedef unsigned char bool;
+typedef bool boolean;
 
 #endif

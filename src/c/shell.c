@@ -1,8 +1,16 @@
-#include "filesystem.h"
+/**
+ * shell.c
+ * Alvin W., Josep M., Rehagana K.C.S.
+ * 15 Maret 2021
+ *
+ * Implementasi program shell untuk OS 0xCABECABE
+ */
+
 #include "shell.h"
+#include "filesystem.h"
 #include "kernel.h"
 #include "io.h"
-#include "lib.h"
+#include "lib/lib.h"
 
 int runShell()
 {
@@ -39,10 +47,10 @@ int runShell()
         strncat(prompt, atSymb, 1);
         strncat(prompt, cwdName, strlen(cwdName));
         strncat(prompt, promptHead, 2);
-        printString(prompt);
+        handleInterrupt21(0, prompt, 0, 0);
 
         // baca perintah dan simpan di history
-        readString(command);
+        handleInterrupt21(1, command, 0, 0);
         /* History
         histTail = histTail == 3 ? histTail : histTail+1;
         histCounter++;
@@ -60,10 +68,10 @@ int runShell()
         res = commandParser(command, arguments);
         if (res < 0)
         {
-            printString("Terjadi kesalahan saat membaca perintah\n");
-            printString("Panjang maksimal sebuah perintah/argumen perintah adalah ");
+            handleInterrupt21(0, "Terjadi kesalahan saat membaca perintah\n", 0, 0);
+            handleInterrupt21(0, "Panjang maksimal sebuah perintah/argumen perintah adalah ", 0, 0);
             printNumber(MAXIMUM_CMD_LEN);
-            printString(" karakter.\n");
+            handleInterrupt21(0, " karakter.\n", 0, 0);
             continue;
         }
 
@@ -72,7 +80,7 @@ int runShell()
         {
             if (strlen(arguments[1]) == 0)
             {
-                printString("Perintah cd membutuhkan sebuah direktori.\n");
+                handleInterrupt21(0, "Perintah cd membutuhkan sebuah direktori.\n", 0, 0);
             }
             else
             {
@@ -87,7 +95,7 @@ int runShell()
         {
             if (strlen(arguments[1]) == 0)
             {
-                printString("Perintah cat membutuhkan sebuah file sebagai argumennya.\n");
+                handleInterrupt21(0, "Perintah cat membutuhkan sebuah file sebagai argumennya.\n", 0, 0);
             }
             else
             {
@@ -109,9 +117,9 @@ int runShell()
         */
         else
         {
-            printString("Perintah ");
-            printString(arguments[0]);
-            printString(" tidak dikenali.\n");
+            handleInterrupt21(0, "Perintah ", 0, 0);
+            handleInterrupt21(0, arguments[0], 0, 0);
+            handleInterrupt21(0, " tidak dikenali.\n", 0, 0);
         }
     }
 }
@@ -172,15 +180,15 @@ void cd(char *parentIndex, char *path, char *newCwdName) {
         }
         else
         {
-            printString(path);
-            printString(" bukan direktori.\n");
+            handleInterrupt21(0, path, 0, 9);
+            handleInterrupt21(0, " bukan direktori.\n", 0, 0);
         }
     }
     else
     {
-        printString("Direktori ");
-        printString(path);
-        printString(" tidak ditemukan.\n");
+        handleInterrupt21(0, "Direktori ", 0, 9);
+        handleInterrupt21(0, path, 0, 0);
+        handleInterrupt21(0, " tidak ditemukan.\n", 0, 0);
     }
     return;
 }
@@ -193,8 +201,8 @@ void listDir(char parentIndex) {
     handleInterrupt21(0x0002, dir+512, 0x102, 0);
     while(i < 1024) {
         if (*(dir+i) == parentIndex){
-            printString(dir+i+2);
-            printString("\n");
+            handleInterrupt21(0, dir+i+2, 0, 0);
+            handleInterrupt21(0, "\n", 0, 0);
         }
         i += 16;
     }
@@ -205,14 +213,14 @@ void cat(char cwdIdx, char *path)
     char buf[16*SECTOR_SIZE];
     int res = 0;
 
-    readFile(buf, path, &res, cwdIdx);
+    handleInterrupt21((cwdIdx << 8) + 0x04, buf, path, &res);
 
     if (res > 0)
-        printString(buf);
+        handleInterrupt21(0, buf, 0, 0);
     else
     {
-        printString("Terjadi kesalahan saat membaca berkas ");
-        printString(path);
-        printString("\n");
+        handleInterrupt21(0, "Terjadi kesalahan saat membaca berkas ", 0, 0);
+        handleInterrupt21(0, path, 0, 0);
+        handleInterrupt21(0, "\n", 0, 0);
     }
 }

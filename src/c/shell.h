@@ -1,3 +1,11 @@
+/**
+ * shell.h
+ * Alvin W., Josep M., Rehagana K.C.S.
+ * 15 Maret 2021
+ *
+ * Header program shell untuk OS 0xCABECABE
+ */
+
 #ifndef _SHELL_CABECABE_H_
 #define _SHELL_CABECABE_H_
 

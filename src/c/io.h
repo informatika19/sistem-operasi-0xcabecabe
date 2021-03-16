@@ -33,12 +33,14 @@ void bikinPersegi(int sisi, int warna, int x, int y);
  */
 void printLogoASCII();
 /**
- * Fungsi untuk menuliskan logo grafik
+ * Fungsi untuk menuliskan logo grafik berbentuk persegi
+ * @param sisi banyak pixel/panjang sisi pada logo
  */
 void printLogoGrafik(int sisi);
 /*
-* Fungsi untuk menuliskan integer menjadi char 
-*/
+ * Fungsi untuk menuliskan integer menjadi char 
+ * @param number angka yang ingin dituliskan
+ */
 void printNumber (int number);
 
 #endif

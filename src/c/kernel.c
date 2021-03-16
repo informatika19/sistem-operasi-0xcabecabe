@@ -9,91 +9,29 @@
 #include "kernel.h"
 #include "filesystem.h"
 #include "io.h"
-#include "lib.h"
+#include "lib/lib.h"
 #include "shell.h"
 
 int main()
 {
-    char testo[8*1024];
-    char buffer[512], fname[14], parents[64][14], dir[1024];
+    char buffer[512];
     int res, hadeh;
     // Set video mode
     // http://www.ctyme.com/intr/rb-0069.htm
     // 640x200 with 16 colors, 80x30 text resolution
     interrupt(0x10, 0x0012, 0, 0, 0);
-    // printLogoGrafik(140);
     makeInterrupt21();
-
-    readSector(dir, 0x101);
-    readSector(dir+512, 0x102);
-    /*
-     * root
-     * |
-     * |
-     * `-test2.txt
-     * `- anjay (0x00)
-     *    |
-     *    `- mabar (0x01)
-     *       |
-     *        `- test.txt
-     */
-    hadeh = 0x01;
-    res = parsePath("../../anjay/mabar/test.txt", parents, fname, &hadeh, dir);
-    while (res--)
-    {
-        printString(parents[res]);
-        printString("\n");
-    }
 
     strncpy(buffer, "Tolong, saya shinitai-desu:(", 70);
     res = 1;
     writeFile(buffer, "/test.txt", &res, 0xFF);
-    // if (res > 0)
-    // {
-    //     readFile(testo, "/test.txt", &res, 0xFF);
-
-    //     if (res > 0)
-    //     {
-    //         printString(testo);
-    //         printString("\n");
-    //     }
-    //     else
-    //         printString("\nKesalahan dalam membaca file\n");
-    // }
-    // else
-    // {
-    //     res *= -1;
-    //     printString("Menghangdeh: -");
-    //     printNumber(res);
-    //     printString("Kesalahan dalam menulis file\n");
-    // }
-
     clear(buffer, 70);
-
 
     strncpy(buffer, "hadeh", 10);
     res = 1;
     writeFile(buffer, "/testa2.txt", &res, 0xFF);
-    // if (res > 0)
-    // {
-    //     readFile(testo, "/testa2.txt", &res, 0xFF);
 
-    //     if (res > 0)
-    //     {
-    //         printString(testo);
-    //         printString("\n");
-    //     }
-    //     else
-    //         printString("\nKesalahan dalam membaca file\n");
-    // }
-    // else
-    // {
-    //     res *= -1;
-    //     printString("Menghangdeh: -");
-    //     printNumber(res);
-    //     printString("Kesalahan dalam menulis file\n");
-    // }
-
+    printLogoGrafik(140);
     runShell();
 
     while (true);

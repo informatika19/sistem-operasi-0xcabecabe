@@ -3,10 +3,10 @@
  * Alvin W., Josep M., Rehagana K.C.S.
  * 20 Februari 2021
  *
- * Header yang berisi fungsi-fungsi tambahan yang diimplementasikan di assembly
+ * Header yang berisi fungsi-fungsi tambahan yang diimplementasikan di lib.asm
  */
-#ifndef _UTIL_CABECABE_H_
-#define _UTIL_CABECABE_H_
+#ifndef _ASM_CABECABE_H_
+#define _ASM_CABECABE_H_
 
 /**
  * Fungsi untuk mendapatkan posisi baris cursor di layar
