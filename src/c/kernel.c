@@ -18,23 +18,28 @@ int main() {
     int res, hadeh;
     char p[64][14], fname[14];
 
-    // interrupt(0x10, 0x0003, 0, 0, 0);
+    makeInterrupt21();
     // Set video mode
     // http://www.ctyme.com/intr/rb-0069.htm
     // 640x200 with 16 colors, 80x30 text resolution
     interrupt(0x10, 0x0012, 0, 0, 0);
-    makeInterrupt21();
+    printLogoGrafik(140);
+    printString("Pedas OS by 0xCABECABE\n");
+    printString("press enter to continue...");
+    readString(0);
+    interrupt(0x10, 0x0003, 0, 0, 0);
+
+    printLogoASCII();
 
     strncpy(buffer, "Tolong, saya shinitai-desu:(", 70);
     res = 1;
-    writeFile(buffer, "test.txt", &res, 0x00);
+    writeFile(buffer, "a/a.txt", &res, 0xFF);
     clear(buffer, 70);
 
     strncpy(buffer, "hadeh", 10);
     res = 1;
-    writeFile(buffer, "testa2.txt", &res, 0xFF);
+    writeFile(buffer, "b.txt", &res, 0xFF);
 
-    printLogoGrafik(140);
     runShell();
 
     while (true)
