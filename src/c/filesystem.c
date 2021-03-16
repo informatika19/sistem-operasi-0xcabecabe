@@ -19,65 +19,72 @@ int getFileIndex(char *path, char parentIndex, char *dir) {
     // parse path dari /usr/share/include/lib/asd jadi
     // ['usr','share','include','lib','asd']
     char *entry;
-    char parents[64][14], fname[14];
-    bool success, found;
-    int i, tmp = SECTOR_SIZE * 2;
-    int j;
-    int jmlParents;
+    char tmpP[64][14], fname[14];
+    char parents[64][14];
+    bool found;
+    int tmp = SECTOR_SIZE * 2;
+    int i, j, jmlParents;
 
-    jmlParents = parsePath(path, parents, fname);
-    // TODO: ilangin .. dan . dari parents
+    // append fname di array tmpP
+    jmlParents = parsePath(path, tmpP, fname);
+    strcpy(tmpP[jmlParents], fname);
+    jmlParents++;
 
+    // Untuk handle . (dihapus)
+    i=0, j=0;
+    for (i;i<jmlParents;i++) {
+        if (strncmp(tmpP[i],".", 2)==0) {
+            // do nothing
+        } else {
+            strcpy(parents[j],tmpP[i]);
+            j++;
+        }
+    }
+
+    jmlParents = j;
     j = 0;
-    success = true;
     found = true;
     while (j < jmlParents && found) {
         found = false;
         i = 0;
         // iterasi dalam file buat nyari yang parentIndexnya sesuai
         //      kalo ketemu, cari yang namanya sama strncmp(entry+2,...)
-        //          kalo namanya ga sama, found = false
-        while (!found && i < tmp) {
-            entry = dir + i;
-            found = *entry == parentIndex
-                        ? strncmp(entry + 2, parents[j], 14) == 0
-                        : found;
-            i += 0x10;
+        //          kalo namanya ga sama, found = true
+        if (strncmp(parents[j],"..",14) == 0) {
+            found = true; // kasus .. sebagai elemen terakhir di parents
+            if (parentIndex != 0xFF) {
+                parentIndex = *(dir+(parentIndex*0x10));
+            }
+            // kalo di root do nothing
+        } else {
+            while (!found && i < tmp) {
+                entry = dir + i;
+                found = *entry == parentIndex
+                            ? strncmp(entry + 2, parents[j], 14) == 0
+                            : found;
+                i += 0x10;
+            }
+            // kalo gaada file yang parentIndex dan namanya sesuai di path (bakal
+            // terminate loop) ganti parentIndex jadi indeks dari file/folder yang
+            // sesuai kriteria atas
+            if (found)
+                parentIndex = (i / 0x10) - 1;
+            // kalo misalnya ga ketemu filenya, success jadi false
         }
-        // kalo gaada file yang parentIndex dan namanya sesuai di path (bakal
-        // terminate loop) ganti parentIndex jadi indeks dari file/folder yang
-        // sesuai kriteria atas
-        if (found) parentIndex = (i / 0x10) - 1;
-        // kalo misalnya ga ketemu filenya, success jadi false
-        success = found;
         j++;
     }
 
-    // loop khusus buat nyari indeks dari file (soalnya array parents ga memuat
-    // nama filenya)
-    found = false;
-    i = 0;
-    j = 0;
-    if (success) {
-        while (!found && i < tmp) {
-            entry = dir + i;
-            found = *entry == parentIndex ? strncmp(entry + 2, fname, 14) == 0
-                                          : found;
-            i += 0x10;
-            j++;
-        }
-    }
-    success = found;
-
-    return !success ? -1 : j - 1;
+    return !found ? -1 : parentIndex;
 }
 
 int parsePath(char *path, char *parents, char *fname) {
     int i, j;
 
-    i = 0, j = 0;
     path = path + (1 * (*path == '/'));
+    j = strlen(path) - 1;
+    *(path + j) = *(path + j) * (*(path + j) != '/');
 
+    i = 0, j = 0;
     while (*path != '\0') {
         switch (*path) {
             case '/':
@@ -115,7 +122,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
                                    entrySectors;
     bool alreadyExists = false, parentExists = (parentIndex == 0xFF);
     char map[SECTOR_SIZE], dir[2 * SECTOR_SIZE], sec[SECTOR_SIZE];
-    char fileName[14];  // array of strings untuk parent dari path
+    char fileName[14], parents[64][14];
     /*
     -1 file sudah ada
     -2 tidak cukup entri di sektor files
@@ -134,7 +141,23 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     readSector(dir + SECTOR_SIZE, 0x102);
     readSector(sec, 0x103);
 
-    parsePath(path, 0, fileName);
+    // adjust parent index ke index tujuan
+    j = parsePath(path, parents, fileName);
+    if (j != 0 && parentIndex != 0xFF) {
+        strncpy(path, parents[0], strlen(parents[0]));
+        strncat(path, "/", 2);
+        for (i = 1; i < j; ++i) {
+            strncat(path, parents[i], strlen(parents[i]));
+            strncat(path, "/", 2);
+        }
+    }
+    parentIndex = getFileIndex(path, parentIndex, dir);
+
+    // akibat dari path yang diberikan tidak valid
+    if (parentIndex < 0) {
+        *sectors = -4;
+        return;
+    }
 
     // ngecek file dengan yang sama di parent index yang sama udah ada atau
     // belum

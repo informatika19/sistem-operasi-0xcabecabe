@@ -16,14 +16,14 @@
 
 int runShell() {
     char command[10 * MAXIMUM_CMD_LEN];  // kalo pointer aja takut error
-    char arguments[10][MAXIMUM_CMD_LEN];
+    char argv[10][MAXIMUM_CMD_LEN];
 
     char cwdIdx = 0xFF, username[11],
          cwdName[14],  // root
         promptHead[3], prompt[27], atSymb[2];
     // hist[HIST_SIZE][10*MAXIMUM_CMD_LEN];
 
-    int res, histCounter = 0, histTail = 0, i;
+    int argc, histCounter = 0, histTail = 0, i;
 
     strncpy(username, "0xCABECABE", 11);
     atSymb[0] = '@';
@@ -64,11 +64,6 @@ int runShell() {
             // TODO: bad UX because doesn't tell the error
             handleInterrupt21(0, "Terjadi kesalahan saat membaca perintah\n", 0,
                               0);
-            handleInterrupt21(
-                0, "Panjang maksimal sebuah perintah/argumen perintah adalah ",
-                0, 0);
-            printNumber(MAXIMUM_CMD_LEN);
-            handleInterrupt21(0, " karakter.\n", 0, 0);
             continue;
         }
 
@@ -103,6 +98,7 @@ int runShell() {
             } else {
                 hardLink(cwdIdx, argv[1], argv[2]);
             }
+        }
         /*
         else if (strncmp("history", arguments[0], MAXIMUM_CMD_LEN) == 0)
         {
@@ -137,6 +133,12 @@ int commandParser(char *cmd, char *argument) {
                 j += MAXIMUM_CMD_LEN * (i != 0);
                 i = 0;
                 break;
+            case '\\':
+                cmd++;
+                *(argument + j + i) = *(cmd);
+                stop = cmd == 0; // \ di akhir string
+                i += 1 * !stop;
+                break;
             default:
                 *(argument + j + i) = *cmd;
                 i++;
@@ -147,7 +149,7 @@ int commandParser(char *cmd, char *argument) {
 
     *(argument + j + i) = 0;
 
-    return stop ? -1 : div(j, MAXIMUM_CMD_LEN);
+    return stop ? -1 : (div(j, MAXIMUM_CMD_LEN) + 1);
 }
 
 void cd(char *parentIndex, char *path, char *newCwdName) {
@@ -163,7 +165,10 @@ void cd(char *parentIndex, char *path, char *newCwdName) {
 
     if (found) {
         isDir = *(dir + (tmpPI * 0x10) + 1) == '\xFF';
-        if (isDir) {
+        if (tmpPI == 0xFF) {
+            *parentIndex = 0xFF;
+            strncpy(newCwdName, "/",  14);
+        } else if (isDir) {
             *parentIndex = tmpPI;
             strncpy(newCwdName, dir + (tmpPI * 0x10) + 2, 14);
         } else {
@@ -235,9 +240,10 @@ void softLink(char cwdIdx, char *resourcePath, char *destinationPath) {
     char parents[64][14];
     int testo;
 
-    testo = parsePath(destinationPath,parents, fname);
     handleInterrupt21(0x0002, dir, 0x101, 0);  // readSector
     handleInterrupt21(0x0002, dir + 512, 0x102, 0);
+
+    testo = parsePath(destinationPath,parents, fname);
     if (destinationIndex == -1){
         while (*(dir+i) != 0){
             i+=0x10;
