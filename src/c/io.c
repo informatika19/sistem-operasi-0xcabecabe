@@ -99,23 +99,23 @@ void bikinPersegi(int sisi, int warna, int x, int y) {
     }
 }
 
-/*void printLogoASCII() {*/
-/*int y = getCursorRow();*/
-/*printString("   ___                _                    _          ");*/
-/*printString("\n");*/
-/*printString("  / _ \\__  _____ __ _| |__   ___  ___ __ _| |__   ___ ");*/
-/*printString("\n");*/
-/*printString(*/
-/*" | | | \\ \\/ / __/ _` | '_ \\ / _ \\/ __/ _` | '_ \\ / _ \\ ");*/
-/*printString("\n");*/
-/*printString(" | |_| |>  | (_| (_| | |_) |  __| (_| (_| | |_) |  __/ ");*/
-/*printString("\n");*/
-/*printString(*/
-/*"  \\___//_/\\_\\___\\__,_|_.__/ \\___|\\___\\__,_|_.__/ \\___| ");*/
-/*printString("\n");*/
-/*interrupt(0x10, 0x0200, 0x0000, 0x0000,*/
-/*y + 6 * 0x100);  // buat nurunin kursor*/
-/*}*/
+void printLogoASCII() {
+    int y = getCursorRow();
+    printString("   ___                _                    _          ");
+    printString("\n");
+    printString("  / _ \\__  _____ __ _| |__   ___  ___ __ _| |__   ___ ");
+    printString("\n");
+    printString(
+    " | | | \\ \\/ / __/ _` | '_ \\ / _ \\/ __/ _` | '_ \\ / _ \\ ");
+    printString("\n");
+    printString(" | |_| |>  | (_| (_| | |_) |  __| (_| (_| | |_) |  __/ ");
+    printString("\n");
+    printString(
+    "  \\___//_/\\_\\___\\__,_|_.__/ \\___|\\___\\__,_|_.__/ \\___| ");
+    printString("\n");
+    interrupt(0x10, 0x0200, 0x0000, 0x0000,
+    y + 6 * 0x100);  // buat nurunin kursor
+}
 
 void printLogoGrafik(int sisi) {
     int i, j, y = getCursorRow(), setSisi = sisi / 2, radius1 = sisi / 20,

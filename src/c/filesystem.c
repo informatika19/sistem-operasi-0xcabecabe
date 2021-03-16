@@ -26,12 +26,12 @@ int getFileIndex(char *path, char parentIndex, char *dir) {
     jmlParents++;
 
     // Untuk handle . (dihapus)
-    i=0, j=0;
-    for (i;i<jmlParents;i++) {
-        if (strncmp(tmpP[i],".", 2)==0) {
+    i = 0, j = 0;
+    for (; i < jmlParents; i++) {
+        if (strncmp(tmpP[i], ".", 2) == 0) {
             // do nothing
         } else {
-            strcpy(parents[j],tmpP[i]);
+            strcpy(parents[j], tmpP[i]);
             j++;
         }
     }
@@ -41,17 +41,17 @@ int getFileIndex(char *path, char parentIndex, char *dir) {
     found = true;
     while (j < jmlParents && found) {
         found = false;
-        i = 0;
         // iterasi dalam file buat nyari yang parentIndexnya sesuai
         //      kalo ketemu, cari yang namanya sama strncmp(entry+2,...)
         //          kalo namanya ga sama, found = true
-        if (strncmp(parents[j],"..",14) == 0) {
-            found = true; // kasus .. sebagai elemen terakhir di parents
+        if (strncmp(parents[j], "..", 14) == 0) {
+            found = true;  // kasus .. sebagai elemen terakhir di parents
             if (parentIndex != 0xFF) {
-                parentIndex = *(dir+(parentIndex*0x10));
+                parentIndex = *(dir + (parentIndex * 0x10));
             }
             // kalo di root do nothing
         } else {
+            i = 0;
             while (!found && i < tmp) {
                 entry = dir + i;
                 found = *entry == parentIndex
@@ -59,11 +59,10 @@ int getFileIndex(char *path, char parentIndex, char *dir) {
                             : found;
                 i += 0x10;
             }
-            // kalo gaada file yang parentIndex dan namanya sesuai di path (bakal
-            // terminate loop) ganti parentIndex jadi indeks dari file/folder yang
-            // sesuai kriteria atas
-            if (found)
-                parentIndex = (i / 0x10) - 1;
+            // kalo gaada file yang parentIndex dan namanya sesuai di path
+            // (bakal terminate loop) ganti parentIndex jadi indeks dari
+            // file/folder yang sesuai kriteria atas
+            if (found) parentIndex = (i / 0x10) - 1;
         }
         j++;
     }
@@ -139,16 +138,16 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     // include/lib/asd
     // include/lib
     j = parsePath(path, parents, fileName);
-    if (j != 0 && parentIndex != 0xFF) {
+    if (j != 0) {
+        clear(path, strlen(path));
         strncpy(path, parents[0], strlen(parents[0]));
-        strncat(path, "/", 2);
+        strncat(path, "/", 14);
         for (i = 1; i < j; ++i) {
             strncat(path, parents[i], strlen(parents[i]));
             strncat(path, "/", 2);
         }
         parentIndex = getFileIndex(path, parentIndex, dir);
     }
-
     // akibat dari path yang diberikan tidak valid
     if (parentIndex < 0) {
         *sectors = -4;
