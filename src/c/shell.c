@@ -14,8 +14,8 @@ int runShell()
          cwdName[14], //root
          promptHead[3],
          prompt[27],
-         atSymb[2],
-         hist[HIST_SIZE][10*MAXIMUM_CMD_LEN];
+         atSymb[2];
+         //hist[HIST_SIZE][10*MAXIMUM_CMD_LEN];
 
     int res,
         histCounter = 0,
@@ -43,6 +43,7 @@ int runShell()
 
         // baca perintah dan simpan di history
         readString(command);
+        /* History
         histTail = histTail == 3 ? histTail : histTail+1;
         histCounter++;
         if (histCounter >= 3)
@@ -53,6 +54,7 @@ int runShell()
         }
         else
             strncpy(hist[histCounter-1], command, 10*MAXIMUM_CMD_LEN);
+        */
 
         // parse dan hasil parse
         res = commandParser(command, arguments);
@@ -83,11 +85,19 @@ int runShell()
         }
         else if (strncmp("cat", arguments[0], MAXIMUM_CMD_LEN) == 0)
         {
-            cat(cwdIdx, arguments[1]);
+            if (strlen(arguments[1]) == 0)
+            {
+                printString("Perintah cat membutuhkan sebuah file sebagai argumennya.\n");
+            }
+            else
+            {
+                cat(cwdIdx, arguments[1]);
+            }
         }
         else if (strncmp("ln", arguments[0], MAXIMUM_CMD_LEN) == 0)
         {
         }
+        /*
         else if (strncmp("history", arguments[0], MAXIMUM_CMD_LEN) == 0)
         {
             for (i = 0; i < histTail; ++i)
@@ -96,6 +106,7 @@ int runShell()
                 printString("\n");
             }
         }
+        */
         else
         {
             printString("Perintah ");
@@ -138,8 +149,7 @@ int commandParser(char *cmd, char *argument)
 
 void cd(char *parentIndex, char *path, char *newCwdName) {
     char dir[2*SECTOR_SIZE];
-    char parents[64][14], fname[14];
-    int newIndex = 0xFF;
+    char *fname;
     int res, i, tmp = 2*SECTOR_SIZE, tmpPI = *parentIndex;
     bool found = false, isDir = true;
 
@@ -149,63 +159,29 @@ void cd(char *parentIndex, char *path, char *newCwdName) {
     if (*path == '/')
         tmpPI = 0xFF;
 
-    res = parsePath(path, parents, fname);
-    found = res == 0;
-
-    i = 0;
-    while (i < res)
-    {
-        newIndex = 0;
-        while (newIndex < tmp && !found)
-        {
-            found = *(dir+newIndex) == tmpPI &&
-                    strncmp(dir+newIndex+2, parents[i], 14) == 0;
-            newIndex += 0x10;
-        }
-
-        if (found)
-            tmpPI = newIndex - 0x10;
-        else
-            break;
-        ++i;
-    }
+    tmpPI = getFileIndex(path, *parentIndex, dir);
+    found = tmpPI > -1;
 
     if (found)
     {
-        found = false;
-        newIndex = 0;
-        while (newIndex < tmp && !found)
+        isDir = *(dir+tmpPI+1) > 0x1F;
+        if (isDir)
         {
-            found = *(dir+newIndex*0x10) == tmpPI &&
-                    strncmp(dir+newIndex+2, fname, 14) == 0;
-            isDir = *(dir+newIndex+1) > 0x1F;
-            newIndex += 0x10;
-        }
-        newIndex -= 0x10;
-
-        if (found && isDir)
-        {
-            tmpPI = newIndex/0x10;
             *parentIndex = tmpPI;
-            strncpy(newCwdName, dir+newIndex+2, 14);
+            strncpy(newCwdName, dir+(tmpPI*0x10)+2, 14);
         }
-        else if (found && !isDir)
+        else
         {
             printString(path);
             printString(" bukan direktori.\n");
         }
-        else if (!found)
-            goto CD_DIR_NOT_FOUND;
     }
     else
-        goto CD_DIR_NOT_FOUND;
-
-    return;
-
-CD_DIR_NOT_FOUND:
-    printString("Direktori ");
-    printString(path);
-    printString(" tidak ditemukan.\n");
+    {
+        printString("Direktori ");
+        printString(path);
+        printString(" tidak ditemukan.\n");
+    }
     return;
 }
 
