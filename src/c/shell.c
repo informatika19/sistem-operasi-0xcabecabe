@@ -8,10 +8,11 @@
 
 #include "shell.h"
 
-#include "filesystem.h"
-#include "io.h"
+#include "filesystem.h"  // parsePath, SECTOR_SIZE
+#include "io.h"          // printNumber
 #include "kernel.h"
-#include "lib/lib.h"
+#include "lib/boolean.h"
+#include "lib/string.h"
 
 int runShell() {
     char command[10 * MAXIMUM_CMD_LEN];  // kalo pointer aja takut error
@@ -109,6 +110,7 @@ int runShell() {
     }
 }
 
+// TODO: tanganin spasi, ", dan '
 int commandParser(char *cmd, char *argument) {
     int i, j;
     bool stop = false;
@@ -145,13 +147,11 @@ void cd(char *parentIndex, char *path, char *newCwdName) {
     handleInterrupt21(0x0002, dir, 0x101, 0);  // readSector
     handleInterrupt21(0x0002, dir + 512, 0x102, 0);
 
-    if (*path == '/') tmpPI = 0xFF;
-
     tmpPI = getFileIndex(path, *parentIndex, dir);
     found = tmpPI > -1;
 
     if (found) {
-        isDir = *(dir + tmpPI + 1) > 0x1F;
+        isDir = *(dir + (tmpPI * 0x10) + 1) == '\xFF';
         if (isDir) {
             *parentIndex = tmpPI;
             strncpy(newCwdName, dir + (tmpPI * 0x10) + 2, 14);
@@ -173,6 +173,7 @@ void listDir(char parentIndex) {
 
     handleInterrupt21(0x0002, dir, 0x101, 0);  // readSector
     handleInterrupt21(0x0002, dir + 512, 0x102, 0);
+
     while (i < 1024) {
         if (*(dir + i) == parentIndex) {
             handleInterrupt21(0, dir + i + 2, 0, 0);
@@ -182,6 +183,7 @@ void listDir(char parentIndex) {
     }
 }
 
+// TODO: cek dia direktori apa file?
 void cat(char cwdIdx, char *path) {
     char buf[16 * SECTOR_SIZE];
     int res = 0;
@@ -193,6 +195,6 @@ void cat(char cwdIdx, char *path) {
     else {
         handleInterrupt21(0, "Terjadi kesalahan saat membaca berkas ", 0, 0);
         handleInterrupt21(0, path, 0, 0);
-        handleInterrupt21(0, "\n", 0, 0);
     }
+    handleInterrupt21(0, "\n", 0, 0);
 }

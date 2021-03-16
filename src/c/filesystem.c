@@ -20,26 +20,26 @@ int getFileIndex(char *path, char parentIndex, char *dir) {
     // ['usr','share','include','lib','asd']
     char *entry;
     char parents[64][14], fname[14];
-    bool success = true;
-    bool found = false;
+    bool success, found;
     int i, tmp = SECTOR_SIZE * 2;
     int j;
     int jmlParents;
 
     jmlParents = parsePath(path, parents, fname);
     // TODO: ilangin .. dan . dari parents
-    success = jmlParents == 0 && parentIndex == 0xFF;  // case udah di root
 
     j = 0;
-    while (j < jmlParents && success && found) {
+    success = true;
+    found = true;
+    while (j < jmlParents && found) {
         found = false;
         i = 0;
         // iterasi dalam file buat nyari yang parentIndexnya sesuai
         //      kalo ketemu, cari yang namanya sama strncmp(entry+2,...)
         //          kalo namanya ga sama, found = false
-        while (!found && i <= tmp) {
+        while (!found && i < tmp) {
             entry = dir + i;
-            found = *(entry) == parentIndex
+            found = *entry == parentIndex
                         ? strncmp(entry + 2, parents[j], 14) == 0
                         : found;
             i += 0x10;
@@ -47,7 +47,7 @@ int getFileIndex(char *path, char parentIndex, char *dir) {
         // kalo gaada file yang parentIndex dan namanya sesuai di path (bakal
         // terminate loop) ganti parentIndex jadi indeks dari file/folder yang
         // sesuai kriteria atas
-        parentIndex = *entry;
+        if (found) parentIndex = (i / 0x10) - 1;
         // kalo misalnya ga ketemu filenya, success jadi false
         success = found;
         j++;
@@ -61,8 +61,8 @@ int getFileIndex(char *path, char parentIndex, char *dir) {
     if (success) {
         while (!found && i < tmp) {
             entry = dir + i;
-            found = *(entry) == parentIndex ? strncmp(entry + 2, fname, 14) == 0
-                                            : found;
+            found = *entry == parentIndex ? strncmp(entry + 2, fname, 14) == 0
+                                          : found;
             i += 0x10;
             j++;
         }

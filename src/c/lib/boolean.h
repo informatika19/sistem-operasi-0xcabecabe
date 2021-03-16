@@ -11,7 +11,7 @@
 
 #define true 1
 #define false 0
-#define bool unsigned char;
-#define boolean bool;
+#define bool unsigned char
+#define boolean bool
 
 #endif
