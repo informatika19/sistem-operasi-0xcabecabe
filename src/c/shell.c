@@ -1,77 +1,120 @@
+#include "filesystem.h"
 #include "shell.h"
 #include "kernel.h"
+#include "io.h"
 #include "lib.h"
 
 int runShell()
 {
-    char command[500]; // kalo pointer aja takut error
-    char arguments[25][MAXIMUM_CMD_LEN];
+    char command[10*MAXIMUM_CMD_LEN]; // kalo pointer aja takut error
+    char arguments[10][MAXIMUM_CMD_LEN];
 
-    char cwdIdx = 0xFF;
-    char username[11];
-    char cwdName[14]; //root
-    char promptHead[3];
-    char prompt[27];
-    char dir[2*SECTOR_SIZE];
-    char atSymb[2];
+    char cwdIdx = 0xFF,
+         username[11],
+         cwdName[14], //root
+         promptHead[3],
+         prompt[27],
+         atSymb[2],
+         hist[HIST_SIZE][10*MAXIMUM_CMD_LEN];
+
+    int res,
+        histCounter = 0,
+        histTail = 0,
+        i;
 
     strncpy(username, "0xCABECABE", 11);
     atSymb[0] = '@';
     atSymb[1] = 0;
     cwdName[0] = '/';
-    cwdName[1] = '\0';
+    cwdName[1] = 0;
     promptHead[0] = '>';
     promptHead[1] = ' ';
     promptHead[2] = 0; // default prompt: "0xCABECABE@/> "
 
-    handleInterrupt21(0x0002, dir, 0x101, 0);
-    handleInterrupt21(0x0002, dir+512, 0x102, 0);
-
     while (true)
     {
+        // set prompt
+        clear(prompt, 27);
         strncat(prompt, username, strlen(username));
         strncat(prompt, atSymb, 1);
         strncat(prompt, cwdName, strlen(cwdName));
         strncat(prompt, promptHead, 2);
-
         printString(prompt);
-        readString(command);
-        commandParser(command, arguments);
 
+        // baca perintah dan simpan di history
+        readString(command);
+        histTail = histTail == 3 ? histTail : histTail+1;
+        histCounter++;
+        if (histCounter >= 3)
+        {
+            for (i = HIST_SIZE-1; i >= 0; --i)
+                strncpy(hist[i+1], hist[i], 10*MAXIMUM_CMD_LEN);
+            strncpy(hist[HIST_SIZE-1], command, 10*MAXIMUM_CMD_LEN);
+        }
+        else
+            strncpy(hist[histCounter-1], command, 10*MAXIMUM_CMD_LEN);
+
+        // parse dan hasil parse
+        res = commandParser(command, arguments);
+        if (res < 0)
+        {
+            printString("Terjadi kesalahan saat membaca perintah\n");
+            printString("Panjang maksimal sebuah perintah/argumen perintah adalah ");
+            printNumber(MAXIMUM_CMD_LEN);
+            printString(" karakter.\n");
+            continue;
+        }
+
+        // eksekusi perintah
         if (strncmp("cd", arguments[0], MAXIMUM_CMD_LEN) == 0)
         {
             if (strlen(arguments[1]) == 0)
             {
-                printString("Cannot cd to nothing.\n");
+                printString("Perintah cd membutuhkan sebuah direktori.\n");
             }
             else
             {
-                cd(&cwdIdx, arguments[1], cwdName, dir);
+                cd(&cwdIdx, arguments[1], cwdName);
             }
         }
         else if (strncmp("ls", arguments[0], MAXIMUM_CMD_LEN) == 0)
         {
-            listDir(cwdIdx, dir);
+            listDir(cwdIdx);
+        }
+        else if (strncmp("cat", arguments[0], MAXIMUM_CMD_LEN) == 0)
+        {
+            cat(cwdIdx, arguments[1]);
+        }
+        else if (strncmp("ln", arguments[0], MAXIMUM_CMD_LEN) == 0)
+        {
+        }
+        else if (strncmp("history", arguments[0], MAXIMUM_CMD_LEN) == 0)
+        {
+            for (i = 0; i < histTail; ++i)
+            {
+                printString(hist[i]);
+                printString("\n");
+            }
         }
         else
         {
-            printString("Command ");
+            printString("Perintah ");
             printString(arguments[0]);
-            printString(" not recognized.\n");
+            printString(" tidak dikenali.\n");
         }
-
-        clear(prompt, 27);
     }
 }
 
 int commandParser(char *cmd, char *argument)
 {
     int i, j;
+    bool stop = false;
 
     i = 0, j = 0;
     for (; *cmd == ' '; cmd++);
-    while (*cmd != '\0')
+    while (*cmd != '\0' && !stop)
     {
+        stop = i >= MAXIMUM_CMD_LEN;
         switch (*cmd)
         {
             case ' ':
@@ -89,24 +132,27 @@ int commandParser(char *cmd, char *argument)
 
     *(argument+j+i) = 0;
 
-    return div(j, MAXIMUM_CMD_LEN);
+    return stop ? -1 : div(j, MAXIMUM_CMD_LEN);
 
 }
 
-void cd(char *parentIndex, char *path, char *newCwdName, char *dir) {
+void cd(char *parentIndex, char *path, char *newCwdName) {
+    char dir[2*SECTOR_SIZE];
     char parents[64][14], fname[14];
     int newIndex = 0xFF;
     int res, i, tmp = 2*SECTOR_SIZE, tmpPI = *parentIndex;
     bool found = false, isDir = true;
 
+    handleInterrupt21(0x0002, dir, 0x101, 0); // readSector
+    handleInterrupt21(0x0002, dir+512, 0x102, 0);
+
     if (*path == '/')
         tmpPI = 0xFF;
 
-    res = parsePath(path, parents, fname, parentIndex, dir);
+    res = parsePath(path, parents, fname);
     found = res == 0;
 
     i = 0;
-    // include/lib/asd
     while (i < res)
     {
         newIndex = 0;
@@ -141,37 +187,56 @@ void cd(char *parentIndex, char *path, char *newCwdName, char *dir) {
         {
             tmpPI = newIndex/0x10;
             *parentIndex = tmpPI;
-            strncmp(newCwdName, dir+newIndex, 14);
+            strncpy(newCwdName, dir+newIndex+2, 14);
         }
         else if (found && !isDir)
         {
             printString(path);
-            printString(" is not a directory.\n");
+            printString(" bukan direktori.\n");
         }
         else if (!found)
-            goto DIR_NOT_FOUND;
+            goto CD_DIR_NOT_FOUND;
     }
     else
-        goto DIR_NOT_FOUND;
+        goto CD_DIR_NOT_FOUND;
 
     return;
 
-DIR_NOT_FOUND:
-    printString("Directory ");
+CD_DIR_NOT_FOUND:
+    printString("Direktori ");
     printString(path);
-    printString(" not found.\n");
+    printString(" tidak ditemukan.\n");
     return;
 }
 
-void listDir(char parentIndex, char *dir) {
-    int i;
+void listDir(char parentIndex) {
+    int i = 0;
+    char dir[2*SECTOR_SIZE];
 
-    i = 0;
+    handleInterrupt21(0x0002, dir, 0x101, 0); // readSector
+    handleInterrupt21(0x0002, dir+512, 0x102, 0);
     while(i < 1024) {
         if (*(dir+i) == parentIndex){
             printString(dir+i+2);
             printString("\n");
         }
         i += 16;
+    }
+}
+
+void cat(char cwdIdx, char *path)
+{
+    char buf[16*SECTOR_SIZE];
+    int res = 0;
+
+    readFile(buf, path, &res, cwdIdx);
+
+    if (res > 0)
+        printString(buf);
+    else
+    {
+        printString("Terjadi kesalahan saat membaca berkas ");
+        printString(path);
+        printString("\n");
     }
 }

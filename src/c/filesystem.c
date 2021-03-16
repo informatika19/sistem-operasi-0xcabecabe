@@ -26,7 +26,8 @@ int getFileIndex(char *path, char parentIndex, char *dir) {
     int j;
     int jmlParents;
 
-    jmlParents = parsePath(path, parents, fname, parentIndex, dir);
+    jmlParents = parsePath(path, parents, fname);
+    // TODO: ilangin .. dan . dari parents
     success = jmlParents == 0 && parentIndex == 0xFF; //case udah di root
 
     j = 0;
@@ -70,9 +71,8 @@ int getFileIndex(char *path, char parentIndex, char *dir) {
     return !success ? -1 : j-1;
 }
 
-int parsePath(char *path, char *parents, char *fname, char *parentIndex, char *dir)
+int parsePath(char *path, char *parents, char *fname)
 {
-    // TODO: Input path bisa salah, misal ada ...
     int i, j, n;
     char cur[14];
     bool isParentDone = false;
@@ -95,35 +95,11 @@ int parsePath(char *path, char *parents, char *fname, char *parentIndex, char *d
                 i++;
                 isParentDone = false;
         }
-
-        if (isParentDone && j > 14) // ngecek ada '.' atau '..' atau ngga
-        {
-            n = 14 * (strncmp(parents+j-14, ".", 14) == 0) +
-                28 * (strncmp(parents+j-14, "..", 14) == 0);
-            j -= n;
-            clear(parents+j, n);
-        }
         path++;
     }
 
     *(parents+j+i) = 0;
     strncpy(fname, parents+j, 14);
-
-    if (*parents == '.') {
-        if (*(parents+1) == '.')
-        {
-            *parentIndex = *(dir + *parentIndex*0x10);
-            if (*parentIndex != 0xFF)
-                strncpy(parents, dir+(*parentIndex)*0x10+2, 14);
-            else
-                strncpy(parents, "/", 14);
-        }
-        else
-        {
-            parents += 14;
-            j--;
-        }
-    }
 
     return div(j, 14);
 }
@@ -166,7 +142,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex)
     readSector(dir+SECTOR_SIZE, 0x102);
     readSector(sec, 0x103);
 
-    parsePath(path, 0, fileName, &parentIndex, dir);
+    parsePath(path, 0, fileName);
 
     // ngecek file dengan yang sama di parent index yang sama udah ada atau belum
     i = 0;

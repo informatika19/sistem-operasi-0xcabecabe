@@ -52,7 +52,7 @@ void readFile(char *buffer, char *path, int *result, char parentIndex);
  * @param dir setkor files
  * @return banyak direktori parent
  */
-int parsePath(char *path, char *parents, char *fname, char *parentIndex, char *dir);
+int parsePath(char *path, char *parents, char *fname);
 
 /**
  * Fungsi untuk mendapatkan nomor index/nomor entri dari sektor files untuk
