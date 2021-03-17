@@ -174,10 +174,6 @@ void cd(char *parentIndex, char *path, char *newCwdName) {
             interrupt(0x21, 0x0002, dir + 512, 0x102, 0);
 
             test = getFileIndex(path, *parentIndex, dir);
-            /*
-            printNumber(test);
-            printString("\n");
-            */
             tmpPI = test & 0xFF;
             found = test > -1;
         } else {
@@ -187,18 +183,18 @@ void cd(char *parentIndex, char *path, char *newCwdName) {
 
         if (found) {
             isDir = *(dir + (tmpPI * 0x10) + 1) == '\xFF';
-            if (tmpPI == 0xFF) {
+            if (tmpPI == 0xFF) {  // cd ke root
                 *parentIndex = 0xFF;
                 strncpy(newCwdName, "/", 14);
             } else if (isDir) {
                 *parentIndex = tmpPI;
                 strncpy(newCwdName, dir + (tmpPI * 0x10) + 2, 14);
             } else {
-                interrupt(0x21, 0, path, 0, 9);
+                interrupt(0x21, 0, path, 0, 0);
                 interrupt(0x21, 0, " bukan direktori.\n", 0, 0);
             }
         } else {
-            interrupt(0x21, 0, "Direktori ", 0, 9);
+            interrupt(0x21, 0, "Direktori ", 0, 0);
             interrupt(0x21, 0, path, 0, 0);
             interrupt(0x21, 0, " tidak ditemukan.\n", 0, 0);
         }
@@ -273,34 +269,27 @@ hardLink_error:
 void softLink(char cwdIdx, char *resourcePath, char *destinationPath) {
     char dir[2 * SECTOR_SIZE];
 
-    int testDI = getFileIndex(destinationPath, cwdIdx, dir);
-    int testRI = getFileIndex(resourcePath, cwdIdx, dir);
-    char destinationIndex = testDI & 0xFF;
-    char resourceIndex = testRI & 0xFF;
-    int i = 0;
-    int j = 0;
+    int testDI, testRI, i = 0, jmlParents = 0;
+    char destinationIndex, resourceIndex;
     char fname[14];
     char parents[64][14];
     int tmp = 2 * SECTOR_SIZE;
 
-    /*
-    printNumber(testDI);
-    printString("    ");
-    printNumber(testRI);
-    printString("\n");
-    */
+    // read sector
+    interrupt(0x21, 0x0002, dir, 0x101, 0);
+    interrupt(0x21, 0x0002, dir + 512, 0x102, 0);
+    testDI = getFileIndex(destinationPath, cwdIdx, dir);
+    testRI = getFileIndex(resourcePath, cwdIdx, dir);
+    destinationIndex = testDI & 0xFF;
+    resourceIndex = testRI & 0xFF;
 
     if (testDI == -1 && testRI != -1) {
-        // read sector
-        interrupt(0x21, 0x0002, dir, 0x101, 0);
-        interrupt(0x21, 0x0002, dir + 512, 0x102, 0);
-
-        j = parsePath(destinationPath, parents, fname);
-        if (j != 0) {
+        jmlParents = parsePath(destinationPath, parents, fname);
+        if (jmlParents != 0) {
             clear(destinationPath, strlen(destinationPath));
             strncpy(destinationPath, parents[0], strlen(parents[0]));
             strncat(destinationPath, "/", 14);
-            for (i = 1; i < j; ++i) {
+            for (i = 1; i < jmlParents; ++i) {
                 strncat(destinationPath, parents[i], strlen(parents[i]));
                 strncat(destinationPath, "/", 2);
             }
@@ -320,18 +309,6 @@ void softLink(char cwdIdx, char *resourcePath, char *destinationPath) {
         *(dir + i) = cwdIdx;
         *(dir + i + 1) = *(dir + resourceIndex * 0x10 + 1);
         strncpy(dir + i + 2, fname, 14);
-
-        /*
-        printNumber(cwdIdx);
-        printString("    ");
-        printNumber(*(dir + resourceIndex * 0x10 + 1));
-        printString("(");
-        printNumber(resourceIndex);
-        printString(")");
-        printString("    ");
-        printString(fname);
-        printString("\n");
-        */
 
         interrupt(0x21, 0x0003, dir, 0x101, 0);  // writeSector
         interrupt(0x21, 0x0003, dir + 512, 0x102, 0);
