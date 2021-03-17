@@ -20,9 +20,8 @@ int runShell() {
 
     char hist[HIST_SIZE][10 * MAXIMUM_CMD_LEN];
 
-    char cwdIdx = 0xFF, username[11],
-         cwdName[14],  // root
-         promptHead[3], prompt[27], atSymb[2];
+    char cwdIdx = 0xFF, username[11], cwdName[14], promptHead[3], prompt[27],
+         atSymb[2];
 
     int argc, histc = 0, i;
 
@@ -51,15 +50,14 @@ int runShell() {
         if (argc < 0) {
             // TODO: bad UX because doesn't tell the error
             interrupt(0x21, 0, "Terjadi kesalahan saat membaca perintah\n", 0,
-                              0);
+                      0);
             continue;
         }
 
         // eksekusi perintah
         if (strncmp("cd", argv[0], MAXIMUM_CMD_LEN) == 0) {
             if (argc != 2) {
-                interrupt(0x21,
-                    0, "Penggunaan: cd <path/direktori>\n", 0, 0);
+                interrupt(0x21, 0, "Penggunaan: cd <path/direktori>\n", 0, 0);
             } else {
                 cd(&cwdIdx, argv[1], cwdName);
             }
@@ -67,9 +65,7 @@ int runShell() {
             listDir(cwdIdx);
         } else if (strncmp("cat", argv[0], MAXIMUM_CMD_LEN) == 0) {
             if (argc != 2) {
-                interrupt(0x21, 0,
-                                  "Penggunaan: cat <path/file>\n",
-                                  0, 0);
+                interrupt(0x21, 0, "Penggunaan: cat <path/file>\n", 0, 0);
             } else {
                 cat(cwdIdx, argv[1]);
             }
@@ -77,9 +73,10 @@ int runShell() {
             // pseudo-ln KeK
             if (argc != 3 && argc != 4) {
                 interrupt(0x21, 0,
-                                  "Penggunaan: ln [-s] <path/sumber> <path/tujuan>\n",
-                                  0,0);
-            } else if (argc == 4 && strncmp(argv[1], "-s", MAXIMUM_CMD_LEN) == 0) {
+                          "Penggunaan: ln [-s] <path/sumber> <path/tujuan>\n",
+                          0, 0);
+            } else if (argc == 4 &&
+                       strncmp(argv[1], "-s", MAXIMUM_CMD_LEN) == 0) {
                 softLink(cwdIdx, argv[2], argv[3]);
             } else {
                 hardLink(cwdIdx, argv[1], argv[2]);
@@ -90,8 +87,8 @@ int runShell() {
             printString(cwdName);
             printString("\n");
         } else if (strncmp("history", argv[0], MAXIMUM_CMD_LEN) == 0) {
-            for (i=0;i<HIST_SIZE;i++) {
-                if (strlen(hist[i])!=0) {
+            for (i = 0; i < HIST_SIZE; i++) {
+                if (strlen(hist[i]) != 0) {
                     printString(hist[i]);
                     printString("\n");
                 }
@@ -103,11 +100,11 @@ int runShell() {
         }
 
         // HISTORY
-        histc = (histc>=HIST_SIZE) ? 0 : histc;
-        for (i=1;i<HIST_SIZE;i++) {
-            strcpy(hist[i-1],hist[i]);
+        histc = (histc >= HIST_SIZE) ? 0 : histc;
+        for (i = 1; i < HIST_SIZE; i++) {
+            strcpy(hist[i - 1], hist[i]);
         }
-        strcpy(hist[HIST_SIZE-1],command);
+        strcpy(hist[HIST_SIZE - 1], command);
         histc++;
     }
 }
@@ -130,7 +127,7 @@ int commandParser(char *cmd, char *argument) {
             case '\\':
                 cmd++;
                 *(argument + j + i) = *(cmd);
-                stop = cmd == 0; // \ di akhir string
+                stop = cmd == 0;  // \ di akhir string
                 i += 1 * !stop;
                 break;
             // case '\'':
@@ -139,7 +136,8 @@ int commandParser(char *cmd, char *argument) {
             //     // ended with " and vice versa
             //     // TODO: masih ngebug aneh pisan hadeuh & harus handle: \' \"
             //     cmd++;
-            //     while (!stop && *cmd != '\0' && (*cmd != '\'' || *cmd != '"')) {
+            //     while (!stop && *cmd != '\0' && (*cmd != '\'' || *cmd !=
+            //     '"')) {
             //         printNumber(*cmd);
             //         printString("\n");
             //         *(argument + j + i) = *cmd;
@@ -165,7 +163,7 @@ int commandParser(char *cmd, char *argument) {
     return stop ? -1 : (div(j, MAXIMUM_CMD_LEN) + 1);
 }
 
-void cd(char *parentIndex, char *path, char *newCwdName) {
+void cd(int *parentIndex, char *path, char *newCwdName) {
     char dir[2 * SECTOR_SIZE];
     int tmpPI = *parentIndex;
     bool found = false, isDir = true;
@@ -180,7 +178,7 @@ void cd(char *parentIndex, char *path, char *newCwdName) {
         isDir = *(dir + (tmpPI * 0x10) + 1) == '\xFF';
         if (tmpPI == 0xFF) {
             *parentIndex = 0xFF;
-            strncpy(newCwdName, "/",  14);
+            strncpy(newCwdName, "/", 14);
         } else if (isDir) {
             *parentIndex = tmpPI;
             strncpy(newCwdName, dir + (tmpPI * 0x10) + 2, 14);
@@ -197,7 +195,7 @@ void cd(char *parentIndex, char *path, char *newCwdName) {
 }
 
 // TODO: ls ke directory lain
-void listDir(char parentIndex) {
+void listDir(int parentIndex) {
     int i = 0;
     char dir[2 * SECTOR_SIZE];
 
@@ -205,7 +203,7 @@ void listDir(char parentIndex) {
     interrupt(0x21, 0x0002, dir + 512, 0x102, 0);
 
     while (i < 1024) {
-        if (*(dir + i) == parentIndex && *(dir+i+2) != 0) {
+        if (*(dir + i) == parentIndex && *(dir + i + 2) != 0) {
             interrupt(0x21, 0, dir + i + 2, 0, 0);
             interrupt(0x21, 0, "\n", 0, 0);
         }
@@ -214,7 +212,7 @@ void listDir(char parentIndex) {
 }
 
 // TODO: cek dia direktori apa file?
-void cat(char cwdIdx, char *path) {
+void cat(int cwdIdx, char *path) {
     char buf[16 * SECTOR_SIZE];
     int res = 0;
 
@@ -231,42 +229,37 @@ void cat(char cwdIdx, char *path) {
 
 // TODO: cek yang mau di-link file apa dir
 void hardLink(int cwdIdx, char *resourcePath, char *destinationPath) {
-    char buf[16* SECTOR_SIZE];
-    char dir[2*SECTOR_SIZE];
-    char parents[64][14];
-    char fname[14];
+    char buf[16 * SECTOR_SIZE];
+    char dir[2 * SECTOR_SIZE];
     int res = 0;
-    int destinationIndex;
-    int pc;
-    int j, i;
 
     interrupt(0x21, 0x0002, dir, 0x101, 0);  // readSector
     interrupt(0x21, 0x0002, dir + 512, 0x102, 0);
 
     // read file
     interrupt(0x21, (cwdIdx << 8) + 0x04, buf, resourcePath, &res);
-    if (res <= 0) { // read error
+    if (res <= 0) {  // read error
         goto hardLink_error;
         return;
     }
 
     // write file
     interrupt(0x21, (cwdIdx << 8) + 0x05, buf, destinationPath, &res);
-    if (res <= 0) { // write errror
+    if (res <= 0) {  // write errror
         goto hardLink_error;
         return;
     }
 
     return;
 
-    hardLink_error:
-        interrupt(0x21, 0, "Terjadi kesalahan saat membuat symbolic link\n", 0, 0);
-        return;
+hardLink_error:
+    interrupt(0x21, 0, "Terjadi kesalahan saat membuat symbolic link\n", 0, 0);
+    return;
 }
 
 // TODO: cek yang mau di-link file apa dir
 void softLink(int cwdIdx, char *resourcePath, char *destinationPath) {
-    char dir[2*SECTOR_SIZE];
+    char dir[2 * SECTOR_SIZE];
 
     int destinationIndex = getFileIndex(destinationPath, cwdIdx, dir);
     int resourceIndex = getFileIndex(resourcePath, cwdIdx, dir);
@@ -274,8 +267,7 @@ void softLink(int cwdIdx, char *resourcePath, char *destinationPath) {
     int j = 0;
     char fname[14];
     char parents[64][14];
-    int tmp = 2*SECTOR_SIZE;
-    int parentIndex;
+    int tmp = 2 * SECTOR_SIZE;
 
     if (destinationIndex == -1 || resourceIndex == -1) {
         // read sector
@@ -295,18 +287,18 @@ void softLink(int cwdIdx, char *resourcePath, char *destinationPath) {
         }
 
         i = 0;
-        while (*(dir + i + 2) != 0 && i < tmp){
-            i+=0x10;
+        while (*(dir + i + 2) != 0 && i < tmp) {
+            i += 0x10;
         }
-        if (*(dir + i + 2) != 0) { // sektor files penuh
+        if (*(dir + i + 2) != 0) {  // sektor files penuh
             printString("sektor penuh\n");
             goto softLink_error;
             return;
         }
 
-        *(dir+i) = cwdIdx;
-        *(dir+i+1) = *(dir+resourceIndex*0x10+1);
-        strncpy(dir+i+2, fname, 14);
+        *(dir + i) = cwdIdx;
+        *(dir + i + 1) = *(dir + resourceIndex * 0x10 + 1);
+        strncpy(dir + i + 2, fname, 14);
 
         interrupt(0x21, 0x0003, dir, 0x101, 0);  // writeSector
         interrupt(0x21, 0x0003, dir + 512, 0x102, 0);
@@ -317,7 +309,7 @@ void softLink(int cwdIdx, char *resourcePath, char *destinationPath) {
         return;
     }
 
-    softLink_error:
-        interrupt(0x21, 0, "Terjadi kesalahan saat membuat symbolic link\n", 0, 0);
-        return;
+softLink_error:
+    interrupt(0x21, 0, "Terjadi kesalahan saat membuat symbolic link\n", 0, 0);
+    return;
 }

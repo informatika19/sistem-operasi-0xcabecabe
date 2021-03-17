@@ -16,11 +16,11 @@ int runShell();
 
 int commandParser(char *cmd, char *argument);
 
-void cd(char *parentIndex, char *path, char *newCwdName);
+void cd(int *parentIndex, char *path, char *newCwdName);
 
-void listDir(char parentIndex);
+void listDir(int parentIndex);
 
-void cat(char parentIndex, char *path);
+void cat(int parentIndex, char *path);
 
 void hardLink(int cwdIdx, char *resourcePath, char *destinationPath);
 

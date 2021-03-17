@@ -17,7 +17,7 @@ void printString(char *string) {
     // Pake teletype output (basiclly yang AH=09h atau AH = 10h (?)
     // tapi bisa otomatis geser kursor dan insert new line
     // http://www.ctyme.com/intr/rb-0106.htm
-    int i, baris;
+    int i /*, baris*/;
     for (i = 0; string[i] != '\0'; ++i) {
         switch (string[i]) {
             // bikin new line pas ketemu \n
@@ -25,10 +25,8 @@ void printString(char *string) {
                 // baris = (getCursorRow() + 1) * 0x100;
                 // interrupt(0x10, 0x0200, 0x0000, 0x0000, baris);
                 // https://stackoverflow.com/questions/28839568/using-bios-interrupts-in-x86
-                interrupt(0x10, 0x0E00 + '\r', 0x0000 + WHITE, 0x0000,
-                          0x0000);
-                interrupt(0x10, 0x0E00 + '\n', 0x0000 + WHITE, 0x0000,
-                          0x0000);
+                interrupt(0x10, 0x0E00 + '\r', 0x0000 + WHITE, 0x0000, 0x0000);
+                interrupt(0x10, 0x0E00 + '\n', 0x0000 + WHITE, 0x0000, 0x0000);
                 break;
             default:
                 interrupt(0x10, 0x0E00 + string[i], 0x0000 + WHITE, 0x0000,

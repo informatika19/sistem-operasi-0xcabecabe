@@ -15,8 +15,7 @@
 
 int main() {
     char buffer[512];
-    int res, hadeh;
-    char p[64][14], fname[14];
+    int res;
 
     // interrupt(0x10, 0x0003, 0, 0, 0);
     makeInterrupt21();
