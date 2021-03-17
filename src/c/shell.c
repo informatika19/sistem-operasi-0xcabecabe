@@ -70,14 +70,10 @@ int runShell() {
                 cat(cwdIdx, argv[1]);
             }
         } else if (strncmp("ln", argv[0], MAXIMUM_CMD_LEN) == 0) {
-            // pseudo-ln KeK
-            if (argc != 3 && argc != 4) {
+            if (argc != 3) {
                 interrupt(0x21, 0,
-                          "Penggunaan: ln [-s] <path/sumber> <path/tujuan>\n",
+                          "Penggunaan: ln <path/sumber> <path/tujuan>\n",
                           0, 0);
-            } else if (argc == 4 &&
-                       strncmp(argv[1], "-s", MAXIMUM_CMD_LEN) == 0) {
-                softLink(cwdIdx, argv[2], argv[3]);
             } else {
                 hardLink(cwdIdx, argv[1], argv[2]);
             }
@@ -92,6 +88,14 @@ int runShell() {
                     printString(hist[i]);
                     printString("\n");
                 }
+            }
+        } else if (strncmp("cp", argv[0], MAXIMUM_CMD_LEN) == 0) {
+            if (argc != 3) {
+                interrupt(0x21, 0,
+                          "Penggunaan: cp <path/sumber> <path/tujuan>\n",
+                          0, 0);
+            } else {
+                cp(cwdIdx, argv[1], argv[2]);
             }
         } else {
             interrupt(0x21, 0, "Perintah ", 0, 0);
@@ -236,7 +240,7 @@ void cat(char cwdIdx, char *path) {
 }
 
 // TODO: cek yang mau di-link file apa dir
-void hardLink(char cwdIdx, char *resourcePath, char *destinationPath) {
+void cp(char cwdIdx, char *resourcePath, char *destinationPath) {
     char buf[16 * SECTOR_SIZE];
     char dir[2 * SECTOR_SIZE];
     int res = 0;
@@ -247,26 +251,26 @@ void hardLink(char cwdIdx, char *resourcePath, char *destinationPath) {
     // read file
     interrupt(0x21, (cwdIdx << 8) + 0x04, buf, resourcePath, &res);
     if (res <= 0) {  // read error
-        goto hardLink_error;
+        goto cp_error;
         return;
     }
 
     // write file
     interrupt(0x21, (cwdIdx << 8) + 0x05, buf, destinationPath, &res);
     if (res <= 0) {  // write errror
-        goto hardLink_error;
+        goto cp_error;
         return;
     }
 
     return;
 
-hardLink_error:
+cp_error:
     interrupt(0x21, 0, "Terjadi kesalahan saat membuat symbolic link\n", 0, 0);
     return;
 }
 
 // TODO: cek yang mau di-link file apa dir
-void softLink(char cwdIdx, char *resourcePath, char *destinationPath) {
+void hardLink(char cwdIdx, char *resourcePath, char *destinationPath) {
     char dir[2 * SECTOR_SIZE];
 
     int testDI, testRI, i = 0, jmlParents = 0;
@@ -302,7 +306,7 @@ void softLink(char cwdIdx, char *resourcePath, char *destinationPath) {
         }
         if (*(dir + i + 2) != 0) {  // sektor files penuh
             printString("sektor penuh\n");
-            goto softLink_error;
+            goto hardLink_error;
             return;
         }
 
@@ -315,11 +319,11 @@ void softLink(char cwdIdx, char *resourcePath, char *destinationPath) {
 
         return;
     } else {
-        goto softLink_error;
+        goto hardLink_error;
         return;
     }
 
-softLink_error:
+hardLink_error:
     interrupt(0x21, 0, "Terjadi kesalahan saat membuat symbolic link\n", 0, 0);
     return;
 }
