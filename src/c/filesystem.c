@@ -12,7 +12,7 @@
 #include "kernel.h"
 #include "lib/lib.h"
 
-int getFileIndex(char *path, int parentIndex, char *dir) {
+int getFileIndex(char *path, char parentIndex, char *dir) {
     char *entry;
     char tmpP[64][14], fname[14];
     char parents[64][14];
@@ -46,8 +46,8 @@ int getFileIndex(char *path, int parentIndex, char *dir) {
         //          kalo namanya ga sama, found = true
         if (strncmp(parents[j], "..", 14) == 0) {
             found = true;  // kasus .. sebagai elemen terakhir di parents
-            if (parentIndex != 0xFF) {
-                parentIndex = *(dir + (parentIndex * 0x10));
+            if (parentIndex != '\xFF') {
+                parentIndex = *(dir + (parentIndex * 0x10)) & 0xFF;
             }
             // kalo di root do nothing
         } else {
@@ -110,10 +110,10 @@ void writeSector(char *buffer, int sector) {
               mod(div(sector, 18), 2) * 0x100);
 }
 
-void writeFile(char *buffer, char *path, int *sectors, int parentIndex) {
+void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     int i, j, entry, sectorNeeded, sectorFree = 0, sectorsToUse[16],
                                    entrySectors;
-    bool alreadyExists = false, parentExists = (parentIndex == 0xFF);
+    bool alreadyExists = false, parentExists = (parentIndex == '\xFF');
     char map[SECTOR_SIZE], dir[2 * SECTOR_SIZE], sec[SECTOR_SIZE];
     char fileName[14], parents[64][14];
     /*
@@ -144,7 +144,7 @@ void writeFile(char *buffer, char *path, int *sectors, int parentIndex) {
             strncat(path, parents[i], strlen(parents[i]));
             strncat(path, "/", 2);
         }
-        parentIndex = getFileIndex(path, parentIndex, dir);
+        parentIndex = getFileIndex(path, parentIndex, dir) & 0xFF;
     }
     // akibat dari path yang diberikan tidak valid
     if (parentIndex < 0) {
@@ -226,8 +226,8 @@ void writeFile(char *buffer, char *path, int *sectors, int parentIndex) {
     writeSector(sec, 0x103);
 }
 
-void readFile(char *buffer, char *path, int *result, int parentIndex) {
-    int i;
+void readFile(char *buffer, char *path, int *result, char parentIndex) {
+    int i, test;
     char dir[2 * SECTOR_SIZE], sec[SECTOR_SIZE];
     char *entry, secIdx, *secNo;
     /*
@@ -239,11 +239,12 @@ void readFile(char *buffer, char *path, int *result, int parentIndex) {
     readSector(sec, 0x103);
 
     // file tidak ditemukan di parent atau parent tidak ada
-    i = getFileIndex(path, parentIndex, dir);
-    if (i == -1) {
+    test = getFileIndex(path, parentIndex, dir);
+    if (test == -1) {
         *result = -1;
         return;
     }
+    i = test & 0xFF;
     entry = dir + (i * 0x10);
 
     // bukan file

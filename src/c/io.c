@@ -148,9 +148,15 @@ void printLogoGrafik(int sisi) {
               y + 9 * 0x100);  // buat nurunin kursor
 }
 
-void printNumber(unsigned int number) {
+void printNumber(int number) {
     char c;
-    if (number < 16) {
+
+    if (number < 0) {
+        printString("-");
+        number *= -1;
+    }
+
+    if (number < 10) {
         c = number + '0';
         interrupt(0x10, 0x0E00 + c, 0x0000 + WHITE, 0x0000, 0x0000);
     } else {

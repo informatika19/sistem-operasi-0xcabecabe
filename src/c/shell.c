@@ -20,8 +20,8 @@ int runShell() {
 
     char hist[HIST_SIZE][10 * MAXIMUM_CMD_LEN];
 
-    char cwdIdx = 0xFF, username[11], cwdName[14], promptHead[3], prompt[27],
-         atSymb[2];
+    char username[11], cwdName[14], promptHead[3], prompt[27], atSymb[2];
+    char cwdIdx = 0xFF;
 
     int argc, histc = 0, i;
 
@@ -163,39 +163,51 @@ int commandParser(char *cmd, char *argument) {
     return stop ? -1 : (div(j, MAXIMUM_CMD_LEN) + 1);
 }
 
-void cd(int *parentIndex, char *path, char *newCwdName) {
+void cd(char *parentIndex, char *path, char *newCwdName) {
     char dir[2 * SECTOR_SIZE];
-    int tmpPI = *parentIndex;
+    int tmpPI = *parentIndex, test;
     bool found = false, isDir = true;
 
-    interrupt(0x21, 0x0002, dir, 0x101, 0);  // readSector
-    interrupt(0x21, 0x0002, dir + 512, 0x102, 0);
+    if (strncmp(path, ".", MAXIMUM_CMD_LEN)) {
+        if (strncmp(path, "/", MAXIMUM_CMD_LEN) != 0) {
+            interrupt(0x21, 0x0002, dir, 0x101, 0);  // readSector
+            interrupt(0x21, 0x0002, dir + 512, 0x102, 0);
 
-    tmpPI = getFileIndex(path, *parentIndex, dir);
-    found = tmpPI > -1;
-
-    if (found) {
-        isDir = *(dir + (tmpPI * 0x10) + 1) == '\xFF';
-        if (tmpPI == 0xFF) {
-            *parentIndex = 0xFF;
-            strncpy(newCwdName, "/", 14);
-        } else if (isDir) {
-            *parentIndex = tmpPI;
-            strncpy(newCwdName, dir + (tmpPI * 0x10) + 2, 14);
+            test = getFileIndex(path, *parentIndex, dir);
+            /*
+            printNumber(test);
+            printString("\n");
+            */
+            tmpPI = test & 0xFF;
+            found = test > -1;
         } else {
-            interrupt(0x21, 0, path, 0, 9);
-            interrupt(0x21, 0, " bukan direktori.\n", 0, 0);
+            found = true;
+            tmpPI = 0xFF;
         }
-    } else {
-        interrupt(0x21, 0, "Direktori ", 0, 9);
-        interrupt(0x21, 0, path, 0, 0);
-        interrupt(0x21, 0, " tidak ditemukan.\n", 0, 0);
+
+        if (found) {
+            isDir = *(dir + (tmpPI * 0x10) + 1) == '\xFF';
+            if (tmpPI == 0xFF) {
+                *parentIndex = 0xFF;
+                strncpy(newCwdName, "/", 14);
+            } else if (isDir) {
+                *parentIndex = tmpPI;
+                strncpy(newCwdName, dir + (tmpPI * 0x10) + 2, 14);
+            } else {
+                interrupt(0x21, 0, path, 0, 9);
+                interrupt(0x21, 0, " bukan direktori.\n", 0, 0);
+            }
+        } else {
+            interrupt(0x21, 0, "Direktori ", 0, 9);
+            interrupt(0x21, 0, path, 0, 0);
+            interrupt(0x21, 0, " tidak ditemukan.\n", 0, 0);
+        }
     }
     return;
 }
 
 // TODO: ls ke directory lain
-void listDir(int parentIndex) {
+void listDir(char parentIndex) {
     int i = 0;
     char dir[2 * SECTOR_SIZE];
 
@@ -212,7 +224,7 @@ void listDir(int parentIndex) {
 }
 
 // TODO: cek dia direktori apa file?
-void cat(int cwdIdx, char *path) {
+void cat(char cwdIdx, char *path) {
     char buf[16 * SECTOR_SIZE];
     int res = 0;
 
@@ -228,7 +240,7 @@ void cat(int cwdIdx, char *path) {
 }
 
 // TODO: cek yang mau di-link file apa dir
-void hardLink(int cwdIdx, char *resourcePath, char *destinationPath) {
+void hardLink(char cwdIdx, char *resourcePath, char *destinationPath) {
     char buf[16 * SECTOR_SIZE];
     char dir[2 * SECTOR_SIZE];
     int res = 0;
@@ -258,18 +270,27 @@ hardLink_error:
 }
 
 // TODO: cek yang mau di-link file apa dir
-void softLink(int cwdIdx, char *resourcePath, char *destinationPath) {
+void softLink(char cwdIdx, char *resourcePath, char *destinationPath) {
     char dir[2 * SECTOR_SIZE];
 
-    int destinationIndex = getFileIndex(destinationPath, cwdIdx, dir);
-    int resourceIndex = getFileIndex(resourcePath, cwdIdx, dir);
+    int testDI = getFileIndex(destinationPath, cwdIdx, dir);
+    int testRI = getFileIndex(resourcePath, cwdIdx, dir);
+    char destinationIndex = testDI & 0xFF;
+    char resourceIndex = testRI & 0xFF;
     int i = 0;
     int j = 0;
     char fname[14];
     char parents[64][14];
     int tmp = 2 * SECTOR_SIZE;
 
-    if (destinationIndex == -1 || resourceIndex == -1) {
+    /*
+    printNumber(testDI);
+    printString("    ");
+    printNumber(testRI);
+    printString("\n");
+    */
+
+    if (testDI == -1 && testRI != -1) {
         // read sector
         interrupt(0x21, 0x0002, dir, 0x101, 0);
         interrupt(0x21, 0x0002, dir + 512, 0x102, 0);
@@ -283,7 +304,7 @@ void softLink(int cwdIdx, char *resourcePath, char *destinationPath) {
                 strncat(destinationPath, parents[i], strlen(parents[i]));
                 strncat(destinationPath, "/", 2);
             }
-            cwdIdx = getFileIndex(destinationPath, cwdIdx, dir);
+            cwdIdx = getFileIndex(destinationPath, cwdIdx, dir) & 0xFF;
         }
 
         i = 0;
@@ -299,6 +320,18 @@ void softLink(int cwdIdx, char *resourcePath, char *destinationPath) {
         *(dir + i) = cwdIdx;
         *(dir + i + 1) = *(dir + resourceIndex * 0x10 + 1);
         strncpy(dir + i + 2, fname, 14);
+
+        /*
+        printNumber(cwdIdx);
+        printString("    ");
+        printNumber(*(dir + resourceIndex * 0x10 + 1));
+        printString("(");
+        printNumber(resourceIndex);
+        printString(")");
+        printString("    ");
+        printString(fname);
+        printString("\n");
+        */
 
         interrupt(0x21, 0x0003, dir, 0x101, 0);  // writeSector
         interrupt(0x21, 0x0003, dir + 512, 0x102, 0);
