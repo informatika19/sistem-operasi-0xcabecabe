@@ -72,8 +72,7 @@ int runShell() {
         } else if (strncmp("ln", argv[0], MAXIMUM_CMD_LEN) == 0) {
             if (argc != 3) {
                 interrupt(0x21, 0,
-                          "Penggunaan: ln <path/sumber> <path/tujuan>\n",
-                          0, 0);
+                          "Penggunaan: ln <path/sumber> <path/tujuan>\n", 0, 0);
             } else {
                 hardLink(cwdIdx, argv[1], argv[2]);
             }
@@ -92,8 +91,7 @@ int runShell() {
         } else if (strncmp("cp", argv[0], MAXIMUM_CMD_LEN) == 0) {
             if (argc != 3) {
                 interrupt(0x21, 0,
-                          "Penggunaan: cp <path/sumber> <path/tujuan>\n",
-                          0, 0);
+                          "Penggunaan: cp <path/sumber> <path/tujuan>\n", 0, 0);
             } else {
                 cp(cwdIdx, argv[1], argv[2]);
             }
@@ -217,6 +215,7 @@ void listDir(char parentIndex) {
     while (i < 1024) {
         if (*(dir + i) == parentIndex && *(dir + i + 2) != 0) {
             interrupt(0x21, 0, dir + i + 2, 0, 0);
+            if (*(dir + i + 1) == '\xFF') interrupt(0x21, 0, "/", 0, 0);
             interrupt(0x21, 0, "\n", 0, 0);
         }
         i += 16;
