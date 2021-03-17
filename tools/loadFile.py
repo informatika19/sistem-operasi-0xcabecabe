@@ -24,18 +24,18 @@ if __name__ == '__main__':
 
     if len(sys.argv) < 3:
         print(
-            f'Penggunaan: python3 {sys.argv[0]} <path ke disk image> <path ke file>',
+            f'Penggunaan: python3 {sys.argv[0]} <path ke disk image> <path ke file> [index folder u/ taruh file (base 16), default to root]',
             file=stderr
         )
         sys.exit(1)
 
     diskImagePath: str = sys.argv[1]
     filePath: str = sys.argv[2]
-    parents: list[str] = ['/']
+    parentIdx: int = 0
     try:
-        parents += sys.argv[3].split('/')[1:]
+        parentIdx = int(sys.argv[3], base=16)
     except:
-        None
+        parentIdx = 0xFF
 
     fileName: str = sys.argv[2].split('/')[-1]
 
@@ -89,11 +89,9 @@ Sektor tersedia: {sectorsFree},\n\
 sektor dibutuhkan: {sectorsNeeded}", file=stderr)
         sys.exit(-2)
 
-    # Nyari entry pertama di sektor-sektor files yang belom dipake (dipilih
-    # yang awalnya 0 soalnya kalo dia direktori di 0 ga mugkin punya parent
-    # dirinya sendiri)
+    # Nyari entry pertama di sektor-sektor files yang belom dipake
     i: int = 0
-    while (filesSec[i][0]):
+    while (filesSec[i][2] != 0 and i <= 0x3F):
         i += 1
     filesEntry: int = i
 
@@ -118,20 +116,8 @@ sektor dibutuhkan: {sectorsNeeded}", file=stderr)
 
     mapSec = bytes(tmp)
 
-    parentIdx: int = 0
-    if parents[-1] == '/':
-        parentIdx = 0xFF
-    else:
-        # TODO: harus nyari parent idx nya kalo pake path selain root
-        # let the future us do this
-        None
-
-    entryDir: int = 0
-    while (entryDir < 64 and filesSec[entryDir][0] == b"\x00"):
-        entryDir += 1
-
     lenFileName: int = len(fileName)
-    filesSec[entryDir] = bytes([parentIdx if (i == 0) else entrySectors if i == 1 else ord(
+    filesSec[filesEntry] = bytes([parentIdx if (i == 0) else entrySectors if i == 1 else ord(
         fileName[i-2]) if (i < 2+lenFileName) else 0 for i in range(16)])
 
     imgSectors[0x100] = mapSec
