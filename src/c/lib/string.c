@@ -7,6 +7,8 @@
  */
 
 #include "string.h"
+#include "io.h"
+#include "math.h"
 
 #include "boolean.h"
 
@@ -69,4 +71,29 @@ char *strncat(char *dest, char *src, int n) {
     }
     dest[n_dest + i] = '\0';
     return dest;
+}
+
+int tokenize(char *src, char *dest, char delim) {
+    int i, j;
+
+    src = src + (1 * (*src == delim)); // remove delim at beginning
+    j = strlen(src) - 1;
+    *(src + j) = *(src + j) * (*(src + j) != delim); // remove delim at end
+
+    i = 0, j = 0;
+    while (*src != '\0') {
+        if (*src == delim) {
+            *(dest + j + i) = 0;
+            j += 14 * (i != 0);
+            i = 0;
+        } else {
+            *(dest + j + i) = *src;
+            i++;
+        }
+        src++;
+    }
+
+    *(src + j + i) = 0;
+
+    return div(j, 14) + 1;
 }

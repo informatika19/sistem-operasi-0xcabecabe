@@ -224,7 +224,9 @@ void cp(char cwdIdx, char *resourcePath, char *destinationPath) {
 
     readFile(buf, resourcePath, &res, cwdIdx);
     if (res <= 0) {  // read error
-        goto cp_error;
+        printString("File ");
+        printString(resourcePath);
+        printString(" tidak ditemukan\n");
         return;
     }
 
@@ -237,7 +239,7 @@ void cp(char cwdIdx, char *resourcePath, char *destinationPath) {
     return;
 
 cp_error:
-    printString("Terjadi kesalahan saat membuat symbolic link\n");
+    printString("Terjadi kesalahan saat menyalin file.\n");
     return;
 }
 
@@ -261,7 +263,8 @@ void hardLink(char cwdIdx, char *resourcePath, char *destinationPath) {
     resourceIndex = testRI & 0xFF;
 
     if (testDI == -1 && testRI != -1) {
-        jmlParents = parsePath(destinationPath, parents, fname);
+        jmlParents = tokenize(destinationPath, parents, '/');
+        strncpy(fname, parents[jmlParents - 1], 14);
         if (jmlParents != 0) {
             clear(destinationPath, strlen(destinationPath));
             strncpy(destinationPath, parents[0], strlen(parents[0]));

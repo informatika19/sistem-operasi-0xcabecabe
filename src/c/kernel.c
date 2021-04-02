@@ -10,9 +10,6 @@
 #include "programs/shell.h"
 
 int main() {
-    char buffer[512];
-    int res;
-
     // interrupt(0x10, 0x0003, 0, 0, 0);
     makeInterrupt21();
     // Set video mode

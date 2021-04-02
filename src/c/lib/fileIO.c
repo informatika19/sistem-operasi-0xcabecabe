@@ -9,22 +9,18 @@
 #include "fileIO.h"
 
 #include "../kernel.h"
-#include "io.h"
 #include "math.h"
 #include "teks.h"
 
 int getFileIndex(char *path, char parentIndex, char *dir) {
     char *entry;
-    char tmpP[64][14], fname[14];
+    char tmpP[64][14];
     char parents[64][14];
     bool found;
     int tmp = SECTOR_SIZE * 2;
     int i, j, jmlParents;
 
-    // append fname di array tmpP
-    jmlParents = parsePath(path, tmpP, fname);
-    strcpy(tmpP[jmlParents], fname);
-    jmlParents++;
+    jmlParents = tokenize(path, tmpP, '/');
 
     // Untuk handle . (dihapus)
     i = 0, j = 0;
@@ -71,34 +67,6 @@ int getFileIndex(char *path, char parentIndex, char *dir) {
     return !found ? -1 : parentIndex;
 }
 
-int parsePath(char *path, char *parents, char *fname) {
-    int i, j;
-
-    path = path + (1 * (*path == '/'));
-    j = strlen(path) - 1;
-    *(path + j) = *(path + j) * (*(path + j) != '/');
-
-    i = 0, j = 0;
-    while (*path != '\0') {
-        switch (*path) {
-            case '/':
-                *(parents + j + i) = 0;
-                j += 14 * (i != 0);
-                i = 0;
-                break;
-            default:
-                *(parents + j + i) = *path;
-                i++;
-        }
-        path++;
-    }
-
-    *(parents + j + i) = 0;
-    strncpy(fname, parents + j, 14);
-
-    return div(j, 14);
-}
-
 void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     int i, j, entry, sectorNeeded, sectorFree = 0, sectorsToUse[16],
                                    entrySectors;
@@ -124,7 +92,8 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     readSector(sec, 0x103);
 
     // adjust parent index ke index tujuan
-    j = parsePath(path, parents, fileName);
+    j = tokenize(path, parents, '/');
+    strncpy(fileName, parents[j - 1], 14);
     if (j != 0) {
         clear(path, strlen(path));
         strncpy(path, parents[0], strlen(parents[0]));
