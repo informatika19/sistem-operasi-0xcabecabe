@@ -3,7 +3,7 @@
  * Alvin W., Josep M., Rehagana K.C.S.
  * 6 Maret 2021
  *
- * Header yang berisi fungsi-fungsi untuk operasi pada string
+ * Library yang berisi fungsi-fungsi utilitas pada string
  */
 
 #ifndef _STRING_CABECABE_H_
@@ -79,5 +79,17 @@ char *strcat(char *dest, char *src);
  * @return string di dest
  */
 char *strncat(char *dest, char *src, int n);
+
+/**
+ * In essence, mirip dengan strtok atau split string di JS atau Python.
+ * Tokenize/memisahkan string berdasarkan sebuah delim. Hasilnya adalah sebuah
+ * array of strings pada dest. Akan mengembalikan banyak token pada dest. Jika
+ * karakter pertama atau terakhir adalah hasil delim, akan di-remove
+ * @param src string yang ingin di-tokenize
+ * @param dest array of strings berisihasil tokenizing string
+ * @param delim delimiter/pemisah antar token
+ * @return banyak token pada array of strings
+ */
+int tokenize(char *src, char *dest, char delim);
 
 #endif

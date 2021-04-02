@@ -4,4 +4,4 @@
 #include "string.h"
 #include "io.h"
 
-#endif // _TEKS_CABECABE_H_
+#endif

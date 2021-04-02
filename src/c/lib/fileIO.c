@@ -3,13 +3,14 @@
  * Alvin W., Josep M., Rehagana K.C.S.
  * 13 Maret 2021
  *
- * implementasi filesystem.h
+ * implementasi fileIO.h
  */
 
 #include "fileIO.h"
 
-#include "io.h"
 #include "../kernel.h"
+#include "io.h"
+#include "math.h"
 #include "teks.h"
 
 int getFileIndex(char *path, char parentIndex, char *dir) {

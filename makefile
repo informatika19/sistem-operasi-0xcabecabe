@@ -74,7 +74,7 @@ $(LIB_ASM_OUT): $(LIB_ASM)
 $(KERNEL_ASM_OUT): $(KERNEL_ASM)
 	$(AS) -f as86 -o $@ $<
 
-$(KERNEL): $(KERNEL_C_OUT) $(KERNEL_ASM_OUT) $(LIB_ASM_OUT) $(LIB_C_OUT)
+$(KERNEL): $(KERNEL_C_OUT) $(KERNEL_ASM_OUT) $(LIB_ASM_OUT) $(LIB_C_OUT) $(PROG_C_OUT)
 	$(LD) -o $@ -d $(OUT_DIR)/kernel.o $^
 
 img: $(OUT_DIR) $(BOOTLOADER_OUT) $(KERNEL)

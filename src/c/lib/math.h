@@ -3,7 +3,7 @@
  * Alvin W., Josep M., Rehagana K.C.S.
  * 6 Maret 2021
  *
- * Header yang berisi fungsi-fungsi matematika
+ * Library yang berisi fungsi-fungsi matematika
  */
 
 #ifndef _MATH_CABECABE_H_

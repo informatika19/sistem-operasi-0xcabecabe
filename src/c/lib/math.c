@@ -1,9 +1,9 @@
 /**
- * math.h
+ * math.c
  * Alvin W., Josep M., Rehagana K.C.S.
  * 20 Februari 2020
  *
- * Header yang berisi fungsi-fungsi matematika
+ * Implementasi math.h
  */
 
 #include "math.h"

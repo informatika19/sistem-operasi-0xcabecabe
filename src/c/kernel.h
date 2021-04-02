@@ -35,7 +35,7 @@ typedef char byte;
 #define YELLOW 0xE
 #define WHITE 0xF
 
-/** *** Diimplementasikan di Assembly *** **/
+/* *** Diimplementasikan di Assembly *** */
 /**
  * Fungsi untuk menulis sebuah karakter pada segment memori dengan offset
  * tertentu
@@ -60,7 +60,7 @@ int interrupt(int number, int AX, int BX, int CX, int DX);
  */
 void makeInterrupt21();
 
-/** *** Diimplementasikan di C *** **/
+/* *** Diimplementasikan di C *** */
 /**
  * Fungsi yang dipanggil ketika terjadi interrupt 0x21
  * @param AX
@@ -69,16 +69,6 @@ void makeInterrupt21();
  * @param DX
  */
 void handleInterrupt21(int AX, int BX, int CX, int DX);
-/**
- * Fungsi untuk mengosongkan buffer
- * @param buffer address ke buffer yang ingin dikosongkan
- * @param length panjang/banyak 0 yang mau diisi
- */
-void clear(char *buffer, int length);
-/**
- * Fungsi untuk menuliskan logo ASCII
- */
-// void printLogoASCII();
 /**
  * Fungsi untuk menuliskan logo grafik berbentuk persegi
  * @param sisi banyak pixel/panjang sisi pada logo

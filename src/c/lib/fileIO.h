@@ -3,8 +3,7 @@
  * Alvin W., Josep M., Rehagana K.C.S.
  * 13 Maret 2021
  *
- * Header yang berisi fungsi-fungsi untuk penunjang filesystem dan file
- * operation pada kernel
+ * Library untuk operasi pada file
  */
 
 #ifndef _FILEIO_CABECABE_H_
@@ -30,18 +29,6 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex);
  * @param parentIndex index parent dari file
  */
 void readFile(char *buffer, char *path, int *result, char parentIndex);
-/**
- * Fungsi untuk parsing path
- * @param path path yang ingin di-parse
- * @param parents array of char pointer, setiap elemen punya 14 byte, berisi
- * nama direktori parent. Array ini menampung 64*14 bytes.
- * @param fname nama file/direktori terakhir pada path
- * @param parentIndex current working directory index
- * @param dir setkor files
- * @return banyak direktori parent
- */
-int parsePath(char *path, char *parents, char *fname);
-
 /**
  * Fungsi untuk mendapatkan nomor index/nomor entri dari sektor files untuk
  * suatu file dengan fileName dan parentIndex tertentu

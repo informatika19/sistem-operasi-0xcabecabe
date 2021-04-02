@@ -9,7 +9,8 @@
 #include "io.h"
 
 #include "../kernel.h"
-#include "lib.h"
+#include "boolean.h"
+#include "math.h"
 
 void printString(char *string) {
     // Pake teletype output (basiclly yang AH=09h atau AH = 10h (?)
@@ -109,5 +110,12 @@ void printNumber(int number) {
     } else {
         printNumber(div(number, 10));
         printNumber(mod(number, 10));
+    }
+}
+
+void clear(char *buffer, int length) {
+    int i = 0;
+    for (; i < length; ++i) {
+        buffer[i] = 0;
     }
 }

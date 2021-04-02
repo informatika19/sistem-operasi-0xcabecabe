@@ -3,8 +3,7 @@
  * Alvin W., Josep M., Rehagana K.C.S.
  * 13 Maret 2021
  *
- * Header yang berisi fungsi-fungsi pada kernel yang berhubungan dengan input
- * dan output
+ * Library untuk input/output string, grafik, angka
  */
 
 #ifndef _IO_CABECABE_H_
@@ -33,5 +32,11 @@ void bikinPersegi(int sisi, int warna, int x, int y);
  * @param number angka yang ingin dituliskan
  */
 void printNumber(int number);
+/**
+ * Fungsi untuk mengosongkan buffer
+ * @param buffer address ke buffer yang ingin dikosongkan
+ * @param length panjang/banyak 0 yang mau diisi
+ */
+void clear(char *buffer, int length);
 
 #endif

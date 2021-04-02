@@ -2,6 +2,8 @@
  * string.c
  * Alvin W., Josep M., Rehagana K.C.S.
  * 6 Maret 2021
+ *
+ * Implementasi string.h
  */
 
 #include "string.h"
