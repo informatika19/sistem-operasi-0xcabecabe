@@ -12,10 +12,11 @@
 #include "math.h"
 #include "teks.h"
 
-int getFileIndex(char *path, char parentIndex, char *dir) {
+int getFileIndex(char *path, char parentIndex) {
     char *entry;
     char tmpP[64][14];
     char parents[64][14];
+    char dir[2 * SECTOR_SIZE];
     bool found;
     int tmp = SECTOR_SIZE * 2;
     int i, j, jmlParents;
@@ -23,6 +24,9 @@ int getFileIndex(char *path, char parentIndex, char *dir) {
     if (*path == 0) {
         return parentIndex;
     }
+
+    readSector(dir, 0x101);
+    readSector(dir + SECTOR_SIZE, 0x102);
 
     jmlParents = tokenize(path, tmpP, '/');
 
@@ -32,7 +36,7 @@ int getFileIndex(char *path, char parentIndex, char *dir) {
         if (strncmp(tmpP[i], ".", 2) == 0) {
             // do nothing
         } else {
-            strcpy(parents[j], tmpP[i]);
+            strncpy(parents[j], tmpP[i], 14);
             j++;
         }
     }
@@ -95,9 +99,11 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     readSector(dir + SECTOR_SIZE, 0x102);
     readSector(sec, 0x103);
 
-    // adjust parent index ke index tujuan
     j = tokenize(path, parents, '/');
-    strncpy(fileName, parents[j - 1], 14);
+    strncpy(fileName, parents[--j], 14);
+
+    // adjust parent index ke index tujuan
+    // hapus element terakhir dari parents
     if (j != 0) {
         clear(path, strlen(path));
         strncpy(path, parents[0], strlen(parents[0]));
@@ -106,8 +112,9 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
             strncat(path, parents[i], strlen(parents[i]));
             strncat(path, "/", 2);
         }
-        parentIndex = getFileIndex(path, parentIndex, dir) & 0xFF;
+        parentIndex = getFileIndex(path, parentIndex) & 0xFF;
     }
+
     // akibat dari path yang diberikan tidak valid
     if (parentIndex < 0) {
         *sectors = -4;
@@ -184,7 +191,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     // tulis perubahan
     writeSector(map, 0x100);
     writeSector(dir, 0x101);
-    writeSector(dir + 512, 0x102);
+    writeSector(dir + SECTOR_SIZE, 0x102);
     writeSector(sec, 0x103);
 }
 
@@ -201,7 +208,7 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
     readSector(sec, 0x103);
 
     // file tidak ditemukan di parent atau parent tidak ada
-    test = getFileIndex(path, parentIndex, dir);
+    test = getFileIndex(path, parentIndex);
     if (test == -1) {
         *result = -1;
         return;

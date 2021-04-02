@@ -93,7 +93,7 @@ int tokenize(char *src, char *dest, char delim) {
         src++;
     }
 
-    *(src + j + i) = 0;
+    *(dest + j + i) = 0;
 
     return div(j, 14) + 1;
 }

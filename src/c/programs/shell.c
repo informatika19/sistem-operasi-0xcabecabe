@@ -6,6 +6,15 @@
  * Implementasi program shell untuk OS 0xCABECABE
  */
 
+/**
+ * TODO:
+ * 1. urutan perintah:
+ *    ls hadeh // **error**
+ *    cd hadeh // fine
+ *    cd .. // **error**
+ *    ls hadeh // fine
+ */
+
 #include "shell.h"
 
 #include "../lib.h"
@@ -149,13 +158,13 @@ void cd(char *parentIndex, char *path, char *newCwdName) {
     int tmpPI = *parentIndex, test;
     bool found = false, isDir = true;
 
-    if (strncmp(path, ".", MAXIMUM_CMD_LEN)) {
-        if (strncmp(path, "/", MAXIMUM_CMD_LEN) != 0) {
-            // TODO: ga boleh pake interrupt langsung
-            interrupt(0x21, 0x0002, dir, 0x101, 0);  // readSector
-            interrupt(0x21, 0x0002, dir + 512, 0x102, 0);
+    // TODO: ga boleh langsung pake interrupt
+    readSector(dir, 0x101);
+    readSector(dir + SECTOR_SIZE, 0x102);
 
-            test = getFileIndex(path, *parentIndex, dir);
+    if (strncmp(path, ".", MAXIMUM_CMD_LEN)) {
+        if (strncmp(path, "/", MAXIMUM_CMD_LEN)) {
+            test = getFileIndex(path, *parentIndex);
             tmpPI = test & 0xFF;
             found = test > -1;
         } else {
@@ -214,9 +223,9 @@ void cat(char cwdIdx, char *path) {
 
     readFile(buf, path, &res, cwdIdx);
 
-    if (res > 0)
+    if (res > 0) {
         printString(buf);
-    else {
+    } else {
         printString("Terjadi kesalahan saat membaca berkas ");
         printString(path);
     }
@@ -226,12 +235,7 @@ void cat(char cwdIdx, char *path) {
 // TODO: cek yang mau di-link file apa dir
 void cp(char cwdIdx, char *resourcePath, char *destinationPath) {
     char buf[16 * SECTOR_SIZE];
-    char dir[2 * SECTOR_SIZE];
     int res = 0;
-
-    // TODO: ga boleh pake interrupt langsung
-    interrupt(0x21, 0x0002, dir, 0x101, 0);  // readSector
-    interrupt(0x21, 0x0002, dir + 512, 0x102, 0);
 
     readFile(buf, resourcePath, &res, cwdIdx);
     if (res <= 0) {  // read error
@@ -264,12 +268,8 @@ void hardLink(char cwdIdx, char *resourcePath, char *destinationPath) {
     char parents[64][14];
     int tmp = 2 * SECTOR_SIZE;
 
-    // TODO: g boleh pake interrupt langsung
-    // read sector
-    interrupt(0x21, 0x0002, dir, 0x101, 0);
-    interrupt(0x21, 0x0002, dir + 512, 0x102, 0);
-    testDI = getFileIndex(destinationPath, cwdIdx, dir);
-    testRI = getFileIndex(resourcePath, cwdIdx, dir);
+    testDI = getFileIndex(destinationPath, cwdIdx);
+    testRI = getFileIndex(resourcePath, cwdIdx);
     destinationIndex = testDI & 0xFF;
     resourceIndex = testRI & 0xFF;
 
@@ -284,7 +284,7 @@ void hardLink(char cwdIdx, char *resourcePath, char *destinationPath) {
                 strncat(destinationPath, parents[i], strlen(parents[i]));
                 strncat(destinationPath, "/", 2);
             }
-            cwdIdx = getFileIndex(destinationPath, cwdIdx, dir) & 0xFF;
+            cwdIdx = getFileIndex(destinationPath, cwdIdx) & 0xFF;
         }
 
         i = 0;
