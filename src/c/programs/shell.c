@@ -145,13 +145,8 @@ int commandParser(char *cmd, char *argument) {
 }
 
 void cd(char *parentIndex, char *path, char *newCwdName) {
-    char dir[2 * SECTOR_SIZE];
     int tmpPI = *parentIndex, test;
-    bool found = false, isDir = true;
-
-    // TODO: ga boleh langsung pake interrupt
-    readSector(dir, 0x101);
-    readSector(dir + SECTOR_SIZE, 0x102);
+    bool found = false;
 
     if (strncmp(path, ".", MAXIMUM_CMD_LEN)) {
         if (strncmp(path, "/", MAXIMUM_CMD_LEN)) {
@@ -164,13 +159,12 @@ void cd(char *parentIndex, char *path, char *newCwdName) {
         }
 
         if (found) {
-            isDir = *(dir + (tmpPI * 0x10) + 1) == '\xFF';
             if (tmpPI == 0xFF) {  // cd ke root
                 *parentIndex = 0xFF;
                 strncpy(newCwdName, "/", 14);
-            } else if (isDir) {
+            } else if (isDir(path, *parentIndex)) {
                 *parentIndex = tmpPI;
-                strncpy(newCwdName, dir + (tmpPI * 0x10) + 2, 14);
+                getFileName(newCwdName, tmpPI);
             } else {
                 printString(path);
                 printString(" bukan direktori.\n");

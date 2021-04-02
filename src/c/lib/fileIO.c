@@ -234,3 +234,14 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
     *(buffer + (i * SECTOR_SIZE)) = 0;
     *result = i;
 }
+
+char *getFileName(char *dest, char fileIndex) {
+    char dir[2 * SECTOR_SIZE];
+
+    readSector(dir, 0x101);
+    readSector(dir + SECTOR_SIZE, 0x102);
+
+    strncpy(dest, dir + (fileIndex * 0x10) + 2, 14);
+
+    return dest;
+}

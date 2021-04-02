@@ -38,4 +38,12 @@ void readFile(char *buffer, char *path, int *result, char parentIndex);
  */
 int getFileIndex(char *path, char parentIndex);
 
+/**
+ * Fungsi untuk mendapatkan nama file jika diberikan index-nya
+ * @param dest tempat menyimpan nama file
+ * @param parentIndex index file
+ * @return dest
+ */
+char *getFileName(char *dest, char fileIndex);
+
 #endif
