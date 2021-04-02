@@ -19,7 +19,7 @@ int getChildrenFiles(char *path, int parentIndex, char *res) {
     char dir[2 * SECTOR_SIZE];
     char tmpName[15]; // 15 soalnya buat '/' di akhir
 
-    test = getFileIndex(path, parentIndex, dir);
+    test = getFileIndex(path, parentIndex);
 
     if (test == -1) {
         return -2;
@@ -27,12 +27,12 @@ int getChildrenFiles(char *path, int parentIndex, char *res) {
 
     parentIndex = test & 0xFF;
 
+    readSector(dir, 0x101);
+    readSector(dir + SECTOR_SIZE, 0x102);
+
     if (parentIndex != '\xFF' && *(dir + (parentIndex * 0x10) + 1) != '\xFF') {
         return -1;
     }
-
-    readSector(dir, 0x101);
-    readSector(dir + 512, 0x102);
 
     while (i < 1024) {
         if (*(dir + i) == parentIndex && *(dir + i + 2) != 0) {

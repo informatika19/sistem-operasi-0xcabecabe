@@ -6,15 +6,6 @@
  * Implementasi program shell untuk OS 0xCABECABE
  */
 
-/**
- * TODO:
- * 1. urutan perintah:
- *    ls hadeh // **error**
- *    cd hadeh // fine
- *    cd .. // **error**
- *    ls hadeh // fine
- */
-
 #include "shell.h"
 
 #include "../lib.h"
