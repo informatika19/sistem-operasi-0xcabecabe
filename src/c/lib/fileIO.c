@@ -20,6 +20,10 @@ int getFileIndex(char *path, char parentIndex, char *dir) {
     int tmp = SECTOR_SIZE * 2;
     int i, j, jmlParents;
 
+    if (*path == 0) {
+        return parentIndex;
+    }
+
     jmlParents = tokenize(path, tmpP, '/');
 
     // Untuk handle . (dihapus)

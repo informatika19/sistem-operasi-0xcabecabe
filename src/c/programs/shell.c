@@ -52,12 +52,18 @@ int runShell() {
         // eksekusi perintah
         if (strncmp("cd", argv[0], MAXIMUM_CMD_LEN) == 0) {
             if (argc != 2) {
-                printString("Penggunaan: cd <path/direktori>\n");
+                printString("Penggunaan: cd <path/ke/direktori>\n");
             } else {
                 cd(&cwdIdx, argv[1], cwdName);
             }
         } else if (strncmp("ls", argv[0], MAXIMUM_CMD_LEN) == 0) {
-            listDir(cwdIdx);
+            if (argc == 1) {
+                listDir("", cwdIdx);
+            } else if (argc == 2) {
+                listDir(argv[1], cwdIdx);
+            } else {
+                printString("Penggunaan: ls [path/ke/direktori]");
+            }
         } else if (strncmp("cat", argv[0], MAXIMUM_CMD_LEN) == 0) {
             if (argc != 2) {
                 printString("Penggunaan: cat <path/file>\n");
@@ -66,7 +72,7 @@ int runShell() {
             }
         } else if (strncmp("ln", argv[0], MAXIMUM_CMD_LEN) == 0) {
             if (argc != 3) {
-                printString("Penggunaan: ln <path/sumber> <path/tujuan>\n");
+                printString("Penggunaan: ln <path/ke/sumber> <path/ke/tujuan>\n");
             } else {
                 hardLink(cwdIdx, argv[1], argv[2]);
             }
@@ -84,7 +90,7 @@ int runShell() {
             }
         } else if (strncmp("cp", argv[0], MAXIMUM_CMD_LEN) == 0) {
             if (argc != 3) {
-                printString("Penggunaan: cp <path/sumber> <path/tujuan>\n");
+                printString("Penggunaan: cp <path/ke/sumber> <path/ke/tujuan>\n");
             } else {
                 cp(cwdIdx, argv[1], argv[2]);
             }
@@ -178,21 +184,26 @@ void cd(char *parentIndex, char *path, char *newCwdName) {
     return;
 }
 
-void listDir(char parentIndex) {
-    int i = 0;
-    char dir[2 * SECTOR_SIZE];
+void listDir(char *path, char parentIndex) {
+    char children[64][15];
+    int res = 0;
 
-    // TODO: ga boleh pake interrupt langsugn
-    interrupt(0x21, 0x0002, dir, 0x101, 0);  // readSector
-    interrupt(0x21, 0x0002, dir + 512, 0x102, 0);
+    res = getChildrenFiles(path, parentIndex, children);
+    if (res == -1) {
+        printString(path);
+        printString(" bukan direktori.\n");
+        return;
+    } else if (res == -2) {
+        printString(path);
+        printString(" tidak ada.\n");
+        return;
+    } else if (res < 0) {
+        printString("Terjadi kesalahan.\n");
+    }
 
-    while (i < 1024) {
-        if (*(dir + i) == parentIndex && *(dir + i + 2) != 0) {
-            printString(dir + i + 2);
-            if (*(dir + i + 1) == '\xFF') printString("/");
-            printString("\n");
-        }
-        i += 16;
+    while(res--) {
+        printString(children[res]);
+        printString("\n");
     }
 }
 

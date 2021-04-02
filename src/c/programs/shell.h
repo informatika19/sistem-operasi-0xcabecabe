@@ -18,7 +18,7 @@ int commandParser(char *cmd, char *argument);
 
 void cd(char *parentIndex, char *path, char *newCwdName);
 
-void listDir(char parentIndex);
+void listDir(char *path, char parentIndex);
 
 void cat(char parentIndex, char *path);
 
