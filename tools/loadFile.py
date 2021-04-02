@@ -62,15 +62,6 @@ if __name__ == '__main__':
 
     sectorsNeeded: int = len(fileBuffers)
 
-    # TODO kalo pake path selain root
-    # cek apakah kevalidan parent directories ada DAN apakah file sudah ada
-    # fileExists: bool = False
-    # parentsExist: bool = False
-    # for entry in filesSec:
-    #     fname = entry[2:]
-    #     anjay = b"test.txt"
-    #     print(fname, strncmp(fname, anjay, len(anjay)))
-
     # Ngitungin banyak sector yang kosong dan milih mana sector yang bakal
     # dipake buat nyimpen data file
     sectorsFree = 0

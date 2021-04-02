@@ -1,5 +1,5 @@
 /**
- * filesystem.h
+ * fileIO.h
  * Alvin W., Josep M., Rehagana K.C.S.
  * 13 Maret 2021
  *
@@ -7,25 +7,13 @@
  * operation pada kernel
  */
 
-#ifndef _FILESYSTEM_CABECABE_H_
-#define _FILESYSTEM_CABECABE_H_
+#ifndef _FILEIO_CABECABE_H_
+#define _FILEIO_CABECABE_H_
 
-#include "lib/boolean.h"
+#include "boolean.h"
 #define KERNEL_SIZE 10
 #define SECTOR_SIZE 512
 
-/**
- * Fungsi untuk membaca sector
- * @param buffer
- * @param sector
- */
-void readSector(char *buffer, int sector);
-/**
- * Fungsi untuk menulis ke sector
- * @param buffer
- * @param sector
- */
-void writeSector(char *buffer, int sector);
 /**
  * Fungsi untuk menuliskan isi file ke filesystem
  * @param buffer isi file yang ingin ditulis

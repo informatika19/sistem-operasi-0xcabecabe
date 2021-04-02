@@ -1,16 +1,16 @@
 /**
- * filesystem.c
+ * fileIO.c
  * Alvin W., Josep M., Rehagana K.C.S.
  * 13 Maret 2021
  *
  * implementasi filesystem.h
  */
 
-#include "filesystem.h"
+#include "fileIO.h"
 
 #include "io.h"
-#include "kernel.h"
-#include "lib/lib.h"
+#include "../kernel.h"
+#include "teks.h"
 
 int getFileIndex(char *path, char parentIndex, char *dir) {
     char *entry;
@@ -96,18 +96,6 @@ int parsePath(char *path, char *parents, char *fname) {
     strncpy(fname, parents + j, 14);
 
     return div(j, 14);
-}
-
-void readSector(char *buffer, int sector) {
-    interrupt(0x13, 0x0201, buffer,                           // number, AX, BX
-              div(sector, 36) * 0x100 + mod(sector, 18) + 1,  // CX
-              mod(div(sector, 18), 2) * 0x100);               // DX
-}
-
-void writeSector(char *buffer, int sector) {
-    interrupt(0x13, 0x301, buffer,
-              div(sector, 36) * 0x100 + mod(sector, 18) + 1,
-              mod(div(sector, 18), 2) * 0x100);
 }
 
 void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {

@@ -8,11 +8,10 @@
 
 #include "shell.h"
 
-#include "filesystem.h"  // parsePath, SECTOR_SIZE
-#include "io.h"          // printNumber
-#include "kernel.h"
-#include "lib/boolean.h"
-#include "lib/string.h"
+#include "../lib/fileIO.h"  // parsePath, SECTOR_SIZE
+#include "../lib/teks.h"          // printNumber
+#include "../kernel.h"
+#include "../lib/boolean.h"
 
 int runShell() {
     char command[10 * MAXIMUM_CMD_LEN];  // kalo pointer aja takut error

@@ -12,6 +12,7 @@ LD = ld86
 BOCHS = bochs
 AS = nasm
 PY = python3
+RM = rm
 
 KSIZE = 20
 
@@ -21,9 +22,14 @@ ASM_DIR = src/asm
 C_DIR = src/c
 OUT_DIR = out
 LIB_DIR = $(C_DIR)/lib
+PROG_DIR = $(C_DIR)/programs
+PROG_OUT_DIR = $(OUT_DIR)/programs
 
 BOOTLOADER_OUT = $(OUT_DIR)/bootloader
 BOOTLOADER_ASM = $(ASM_DIR)/bootloader.asm
+
+PROG_C = $(wildcard $(PROG_DIR)/*.c)
+PROG_C_OUT = $(PROG_C:$(PROG_DIR)/%.c=$(PROG_OUT_DIR)/%.o)
 
 LIB_C = $(wildcard $(LIB_DIR)/*.c)
 LIB_C_OUT = $(LIB_C:$(LIB_DIR)/%.c=$(OUT_DIR)/%.o)
@@ -43,6 +49,8 @@ SECTORS = $(OUT_DIR)/sectors.img
 
 BOCHS_CONFIG = if2230.config
 
+.PHONY: default, img, image, programs, run, clean
+
 default: image
 
 $(OUT_DIR):
@@ -57,13 +65,16 @@ $(OUT_DIR)/%.o: $(LIB_DIR)/%.c
 $(OUT_DIR)/%.o: $(C_DIR)/%.c
 	$(CC) $(CFLAG) -o $@ $<
 
+$(PROG_OUT_DIR)/%.o: $(PROG_DIR)/%.c
+	$(CC) $(CFLAG) -o $@ $<
+
 $(LIB_ASM_OUT): $(LIB_ASM)
 	$(AS) -f as86 -o $@ $<
 
 $(KERNEL_ASM_OUT): $(KERNEL_ASM)
 	$(AS) -f as86 -o $@ $<
 
-$(KERNEL): $(KERNEL_C_OUT) $(LIB_C_OUT) $(KERNEL_ASM_OUT) $(LIB_ASM_OUT)
+$(KERNEL): $(KERNEL_C_OUT) $(KERNEL_ASM_OUT) $(LIB_ASM_OUT) $(LIB_C_OUT)
 	$(LD) -o $@ -d $(OUT_DIR)/kernel.o $^
 
 img: $(OUT_DIR) $(BOOTLOADER_OUT) $(KERNEL)
@@ -78,10 +89,12 @@ img: $(OUT_DIR) $(BOOTLOADER_OUT) $(KERNEL)
 	$(DD) if=$(FILES) of=$(OS) bs=512 conv=notrunc seek=257
 	$(DD) if=$(SECTORS) of=$(OS) bs=512 conv=notrunc seek=259
 
+programs: $(PROG_C_OUT)
+
 image: img
 
 run: img
 	$(BOCHS) -f $(BOCHS_CONFIG)
 
 clean:
-	rm -rf out/*
+	$(RM) -f out/*.o out/*.img $(BOOTLOADER_OUT) out/programs/*.o

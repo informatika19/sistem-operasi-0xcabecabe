@@ -11,6 +11,8 @@
 
 typedef char byte;
 
+#include "asm.h"
+
 #define VIDEO_SEGMENT 0xB000
 #define OFFSET_CHAR 0x8000
 #define OFFSET_COLOR 0x8001
@@ -73,5 +75,26 @@ void handleInterrupt21(int AX, int BX, int CX, int DX);
  * @param length panjang/banyak 0 yang mau diisi
  */
 void clear(char *buffer, int length);
+/**
+ * Fungsi untuk menuliskan logo ASCII
+ */
+// void printLogoASCII();
+/**
+ * Fungsi untuk menuliskan logo grafik berbentuk persegi
+ * @param sisi banyak pixel/panjang sisi pada logo
+ */
+void printLogoGrafik(int sisi);
+/**
+ * Fungsi untuk membaca sector
+ * @param buffer
+ * @param sector
+ */
+void readSector(char *buffer, int sector);
+/**
+ * Fungsi untuk menulis ke sector
+ * @param buffer
+ * @param sector
+ */
+void writeSector(char *buffer, int sector);
 
 #endif

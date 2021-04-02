@@ -8,10 +8,8 @@
 
 #include "io.h"
 
-#include "asm.h"
-#include "filesystem.h"
-#include "kernel.h"
-#include "lib/lib.h"
+#include "../kernel.h"
+#include "lib.h"
 
 void printString(char *string) {
     // Pake teletype output (basiclly yang AH=09h atau AH = 10h (?)
@@ -95,57 +93,6 @@ void bikinPersegi(int sisi, int warna, int x, int y) {
             interrupt(0x10, 0x0C00 + warna, 0x0000, i + x, j + y);
         }
     }
-}
-
-/*
-void printLogoASCII() {
-    int y = getCursorRow();
-    printString("   ___                _                    _          ");
-    printString("\n");
-    printString("  / _ \\__  _____ __ _| |__   ___  ___ __ _| |__   ___ ");
-    printString("\n");
-    printString(
-    " | | | \\ \\/ / __/ _` | '_ \\ / _ \\/ __/ _` | '_ \\ / _ \\ ");
-    printString("\n");
-    printString(" | |_| |>  | (_| (_| | |_) |  __| (_| (_| | |_) |  __/ ");
-    printString("\n");
-    printString(
-    "  \\___//_/\\_\\___\\__,_|_.__/ \\___|\\___\\__,_|_.__/ \\___| ");
-    printString("\n");
-    interrupt(0x10, 0x0200, 0x0000, 0x0000,
-    y + 6 * 0x100);  // buat nurunin kursor
-}
-*/
-
-void printLogoGrafik(int sisi) {
-    int i, j, y = getCursorRow(), setSisi = sisi / 2, radius1 = sisi / 20,
-              radius2 = sisi / 10, radius3 = sisi / 15;
-    // implementasinya sekarang masih lemot karena ada nimpa-nimpa pixel yang
-    // udah digambar sebelumnya
-    bikinPersegi(sisi, LTCYAN, 0, 0);
-    for (i = setSisi - radius1; i < (setSisi + radius1); ++i) {
-        for (j = setSisi - radius1; j < (setSisi + radius1); ++j) {
-            bikinPersegi(1, GREEN, i + 40, j - 25);
-        }
-    }
-    for (i = setSisi - radius2; i < (setSisi + radius2); ++i) {
-        for (j = setSisi - radius2; j < (setSisi + radius2); ++j) {
-            bikinPersegi(1, RED, i + 20, j - 10);
-        }
-    }
-    for (i = setSisi - radius2; i < (setSisi + radius2); ++i) {
-        for (j = setSisi - radius2; j < (setSisi + radius2); ++j) {
-            bikinPersegi(1, RED, i - 5, j + 10);
-        }
-    }
-    for (i = setSisi - radius3; i < (setSisi + radius3); ++i) {
-        for (j = setSisi - radius3; j < (setSisi + radius3); ++j) {
-            bikinPersegi(1, RED, i - 25, j);
-        }
-    }
-
-    interrupt(0x10, 0x0200, 0x0000, 0x0000,
-              y + 9 * 0x100);  // buat nurunin kursor
 }
 
 void printNumber(int number) {
