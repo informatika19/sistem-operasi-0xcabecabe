@@ -274,8 +274,6 @@ void hardLink(char cwdIdx, char *resourcePath, char *destinationPath) {
     char parents[64][14];
     int tmp = 2 * SECTOR_SIZE;
 
-    // TODO: g boleh pake interrupt langsung
-    // read sector
     readSector(dir, 0x101);
     readSector(dir + SECTOR_SIZE, 0x102);
     testDI = getFileIndex(destinationPath, cwdIdx, dir);

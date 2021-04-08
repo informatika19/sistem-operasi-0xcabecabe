@@ -95,9 +95,11 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     readSector(dir + SECTOR_SIZE, 0x102);
     readSector(sec, 0x103);
 
-    // adjust parent index ke index tujuan
     j = tokenize(path, parents, '/');
-    strncpy(fileName, parents[j - 1], 14);
+    strncpy(fileName, parents[--j], 14);
+
+    // adjust parent index ke index tujuan
+    // hapus element terakhir dari parents
     if (j != 0) {
         clear(path, strlen(path));
         strncpy(path, parents[0], strlen(parents[0]));
@@ -108,6 +110,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
         }
         parentIndex = getFileIndex(path, parentIndex, dir) & 0xFF;
     }
+
     // akibat dari path yang diberikan tidak valid
     if (parentIndex < 0) {
         *sectors = -4;
@@ -184,7 +187,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     // tulis perubahan
     writeSector(map, 0x100);
     writeSector(dir, 0x101);
-    writeSector(dir + 512, 0x102);
+    writeSector(dir + SECTOR_SIZE, 0x102);
     writeSector(sec, 0x103);
 }
 
