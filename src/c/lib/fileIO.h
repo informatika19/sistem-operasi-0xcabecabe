@@ -38,5 +38,17 @@ void readFile(char *buffer, char *path, int *result, char parentIndex);
  * @return nomor index/nomor entri file yang dicari pada sektor files
  */
 int getFileIndex(char *path, char parentIndex, char *dir);
+/**
+ * Fungsi untuk membaca sector
+ * @param buffer
+ * @param sector
+ */
+void readSector(char *buffer, int sector);
+/**
+ * Fungsi untuk menulis ke sector
+ * @param buffer
+ * @param sector
+ */
+void writeSector(char *buffer, int sector);
 
 #endif

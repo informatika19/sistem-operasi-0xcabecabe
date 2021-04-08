@@ -227,3 +227,15 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
     *(buffer + (i * SECTOR_SIZE)) = 0;
     *result = i;
 }
+
+void readSector(char *buffer, int sector) {
+    interrupt(0x13, 0x0201, buffer,                           // number, AX, BX
+              div(sector, 36) * 0x100 + mod(sector, 18) + 1,  // CX
+              mod(div(sector, 18), 2) * 0x100);               // DX
+}
+
+void writeSector(char *buffer, int sector) {
+    interrupt(0x13, 0x301, buffer,
+              div(sector, 36) * 0x100 + mod(sector, 18) + 1,
+              mod(div(sector, 18), 2) * 0x100);
+}
