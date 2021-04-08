@@ -34,7 +34,6 @@ void readFile(char *buffer, char *path, int *result, char parentIndex);
  * suatu file dengan fileName dan parentIndex tertentu
  * @param char *fileName nama dari file yang akan dicek
  * @param char parentIndex indeks dari parent  dicek
- * @param char *dir sektor files di OS
  * @return nomor index/nomor entri file yang dicari pada sektor files
  */
 int getFileIndex(char *path, char parentIndex, char *dir);
