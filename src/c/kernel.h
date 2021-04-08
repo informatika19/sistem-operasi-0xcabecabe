@@ -74,17 +74,5 @@ void handleInterrupt21(int AX, int BX, int CX, int DX);
  * @param sisi banyak pixel/panjang sisi pada logo
  */
 void printLogoGrafik(int sisi);
-/**
- * Fungsi untuk membaca sector
- * @param buffer
- * @param sector
- */
-void readSector(char *buffer, int sector);
-/**
- * Fungsi untuk menulis ke sector
- * @param buffer
- * @param sector
- */
-void writeSector(char *buffer, int sector);
 
 #endif

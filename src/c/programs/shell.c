@@ -145,12 +145,16 @@ int commandParser(char *cmd, char *argument) {
 }
 
 void cd(char *parentIndex, char *path, char *newCwdName) {
+    char dir[2 * SECTOR_SIZE];
     int tmpPI = *parentIndex, test;
-    bool found = false;
+    bool found = false, isDir = true;
 
     if (strncmp(path, ".", MAXIMUM_CMD_LEN)) {
-        if (strncmp(path, "/", MAXIMUM_CMD_LEN)) {
-            test = getFileIndex(path, *parentIndex);
+        if (strncmp(path, "/", MAXIMUM_CMD_LEN) != 0) {
+            readSector(dir, 0x101);
+            readSector(dir + SECTOR_SIZE, 0x102);
+
+            test = getFileIndex(path, *parentIndex, dir);
             tmpPI = test & 0xFF;
             found = test > -1;
         } else {
@@ -159,12 +163,13 @@ void cd(char *parentIndex, char *path, char *newCwdName) {
         }
 
         if (found) {
+            isDir = *(dir + (tmpPI * 0x10) + 1) == '\xFF';
             if (tmpPI == 0xFF) {  // cd ke root
                 *parentIndex = 0xFF;
                 strncpy(newCwdName, "/", 14);
-            } else if (isDir(path, *parentIndex)) {
+            } else if (isDir) {
                 *parentIndex = tmpPI;
-                getFileName(newCwdName, tmpPI);
+                strncpy(newCwdName, dir + (tmpPI * 0x10) + 2, 14);
             } else {
                 printString(path);
                 printString(" bukan direktori.\n");
@@ -179,25 +184,37 @@ void cd(char *parentIndex, char *path, char *newCwdName) {
 }
 
 void listDir(char *path, char parentIndex) {
-    char children[64][15];
-    int res = 0;
+    char dir[2 * SECTOR_SIZE];
+    int i, test;
 
-    res = getChildrenFiles(path, parentIndex, children);
-    if (res == -1) {
-        printString(path);
-        printString(" bukan direktori.\n");
-        return;
-    } else if (res == -2) {
-        printString(path);
-        printString(" tidak ada.\n");
-        return;
-    } else if (res < 0) {
-        printString("Terjadi kesalahan.\n");
+    readSector(dir, 0x101);
+    readSector(dir + SECTOR_SIZE, 0x102);
+
+    if (*path != '\0') {
+        test = getFileIndex(path, parentIndex, dir);
+
+        if (test == -1) {
+            printString(path);
+            printString(" tidak ada.\n");
+            return;
+        }
+
+        parentIndex = test & 0xFF;
+        if (*(dir + parentIndex + 1) != '\xFF') {
+            printString(path);
+            printString(" bukan direktori.\n");
+            return;
+        }
     }
 
-    while(res--) {
-        printString(children[res]);
-        printString("\n");
+    i = 0;
+    while (i < 1024) {
+        if (*(dir + i) == parentIndex && *(dir + i + 2) != 0) {
+            printString(dir + i + 2);
+            if (*(dir + i + 1) == '\xFF') printString("/");
+            printString("\n");
+        }
+        i += 16;
     }
 }
 
@@ -208,9 +225,9 @@ void cat(char cwdIdx, char *path) {
 
     readFile(buf, path, &res, cwdIdx);
 
-    if (res > 0) {
+    if (res > 0)
         printString(buf);
-    } else {
+    else {
         printString("Terjadi kesalahan saat membaca berkas ");
         printString(path);
     }
@@ -220,7 +237,11 @@ void cat(char cwdIdx, char *path) {
 // TODO: cek yang mau di-link file apa dir
 void cp(char cwdIdx, char *resourcePath, char *destinationPath) {
     char buf[16 * SECTOR_SIZE];
+    char dir[2 * SECTOR_SIZE];
     int res = 0;
+
+    readSector(dir, 0x101);
+    readSector(dir + SECTOR_SIZE, 0x102);
 
     readFile(buf, resourcePath, &res, cwdIdx);
     if (res <= 0) {  // read error
@@ -253,14 +274,16 @@ void hardLink(char cwdIdx, char *resourcePath, char *destinationPath) {
     char parents[64][14];
     int tmp = 2 * SECTOR_SIZE;
 
-    testDI = getFileIndex(destinationPath, cwdIdx);
-    testRI = getFileIndex(resourcePath, cwdIdx);
+    readSector(dir, 0x101);
+    readSector(dir + SECTOR_SIZE, 0x102);
+    testDI = getFileIndex(destinationPath, cwdIdx, dir);
+    testRI = getFileIndex(resourcePath, cwdIdx, dir);
     destinationIndex = testDI & 0xFF;
     resourceIndex = testRI & 0xFF;
 
     if (testDI == -1 && testRI != -1) {
         jmlParents = tokenize(destinationPath, parents, '/');
-        strncpy(fname, parents[jmlParents - 1], 14);
+        strncpy(fname, parents[--jmlParents], 14);
         if (jmlParents != 0) {
             clear(destinationPath, strlen(destinationPath));
             strncpy(destinationPath, parents[0], strlen(parents[0]));
@@ -269,13 +292,14 @@ void hardLink(char cwdIdx, char *resourcePath, char *destinationPath) {
                 strncat(destinationPath, parents[i], strlen(parents[i]));
                 strncat(destinationPath, "/", 2);
             }
-            cwdIdx = getFileIndex(destinationPath, cwdIdx) & 0xFF;
+            cwdIdx = getFileIndex(destinationPath, cwdIdx, dir) & 0xFF;
         }
 
         i = 0;
         while (*(dir + i + 2) != 0 && i < tmp) {
             i += 0x10;
         }
+
         if (*(dir + i + 2) != 0) {  // sektor files penuh
             printString("sektor penuh\n");
             goto hardLink_error;
@@ -286,9 +310,8 @@ void hardLink(char cwdIdx, char *resourcePath, char *destinationPath) {
         *(dir + i + 1) = *(dir + resourceIndex * 0x10 + 1);
         strncpy(dir + i + 2, fname, 14);
 
-        // TODO: ga boleh pake interrupt langsung
-        interrupt(0x21, 0x0003, dir, 0x101, 0);  // writeSector
-        interrupt(0x21, 0x0003, dir + 512, 0x102, 0);
+        writeSector(dir, 0x101);
+        writeSector(dir + SECTOR_SIZE, 0x102);
 
         return;
     } else {

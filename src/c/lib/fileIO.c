@@ -12,11 +12,10 @@
 #include "math.h"
 #include "teks.h"
 
-int getFileIndex(char *path, char parentIndex) {
+int getFileIndex(char *path, char parentIndex, char *dir) {
     char *entry;
     char tmpP[64][14];
     char parents[64][14];
-    char dir[2 * SECTOR_SIZE];
     bool found;
     int tmp = SECTOR_SIZE * 2;
     int i, j, jmlParents;
@@ -24,9 +23,6 @@ int getFileIndex(char *path, char parentIndex) {
     if (*path == 0) {
         return parentIndex;
     }
-
-    readSector(dir, 0x101);
-    readSector(dir + SECTOR_SIZE, 0x102);
 
     jmlParents = tokenize(path, tmpP, '/');
 
@@ -36,7 +32,7 @@ int getFileIndex(char *path, char parentIndex) {
         if (strncmp(tmpP[i], ".", 2) == 0) {
             // do nothing
         } else {
-            strncpy(parents[j], tmpP[i], 14);
+            strcpy(parents[j], tmpP[i]);
             j++;
         }
     }
@@ -112,7 +108,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
             strncat(path, parents[i], strlen(parents[i]));
             strncat(path, "/", 2);
         }
-        parentIndex = getFileIndex(path, parentIndex) & 0xFF;
+        parentIndex = getFileIndex(path, parentIndex, dir) & 0xFF;
     }
 
     // akibat dari path yang diberikan tidak valid
@@ -208,7 +204,7 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
     readSector(sec, 0x103);
 
     // file tidak ditemukan di parent atau parent tidak ada
-    test = getFileIndex(path, parentIndex);
+    test = getFileIndex(path, parentIndex, dir);
     if (test == -1) {
         *result = -1;
         return;
@@ -235,13 +231,14 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
     *result = i;
 }
 
-char *getFileName(char *dest, char fileIndex) {
-    char dir[2 * SECTOR_SIZE];
+void readSector(char *buffer, int sector) {
+    interrupt(0x13, 0x0201, buffer,                           // number, AX, BX
+              div(sector, 36) * 0x100 + mod(sector, 18) + 1,  // CX
+              mod(div(sector, 18), 2) * 0x100);               // DX
+}
 
-    readSector(dir, 0x101);
-    readSector(dir + SECTOR_SIZE, 0x102);
-
-    strncpy(dest, dir + (fileIndex * 0x10) + 2, 14);
-
-    return dest;
+void writeSector(char *buffer, int sector) {
+    interrupt(0x13, 0x301, buffer,
+              div(sector, 36) * 0x100 + mod(sector, 18) + 1,
+              mod(div(sector, 18), 2) * 0x100);
 }

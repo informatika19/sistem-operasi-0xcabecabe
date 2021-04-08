@@ -90,15 +90,3 @@ void printLogoGrafik(int sisi) {
     interrupt(0x10, 0x0200, 0x0000, 0x0000,
               y + 9 * 0x100);  // buat nurunin kursor
 }
-
-void readSector(char *buffer, int sector) {
-    interrupt(0x13, 0x0201, buffer,                           // number, AX, BX
-              div(sector, 36) * 0x100 + mod(sector, 18) + 1,  // CX
-              mod(div(sector, 18), 2) * 0x100);               // DX
-}
-
-void writeSector(char *buffer, int sector) {
-    interrupt(0x13, 0x301, buffer,
-              div(sector, 36) * 0x100 + mod(sector, 18) + 1,
-              mod(div(sector, 18), 2) * 0x100);
-}
