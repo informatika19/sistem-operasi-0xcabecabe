@@ -283,7 +283,7 @@ void hardLink(char cwdIdx, char *resourcePath, char *destinationPath) {
 
     if (testDI == -1 && testRI != -1) {
         jmlParents = tokenize(destinationPath, parents, '/');
-        strncpy(fname, parents[jmlParents - 1], 14);
+        strncpy(fname, parents[--jmlParents], 14);
         if (jmlParents != 0) {
             clear(destinationPath, strlen(destinationPath));
             strncpy(destinationPath, parents[0], strlen(parents[0]));
