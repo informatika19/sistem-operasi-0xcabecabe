@@ -92,4 +92,10 @@ char *strncat(char *dest, char *src, int n);
  */
 int tokenize(char *src, char *dest, char delim);
 
+/**
+ * Fungsi untuk convert string menjadi int 
+ * @param str string yang ingin diubah menjadi int
+ */
+int atoi (char *str);
+
 #endif

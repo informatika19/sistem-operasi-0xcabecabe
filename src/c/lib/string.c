@@ -97,3 +97,12 @@ int tokenize(char *src, char *dest, char delim) {
 
     return div(j, 14) + 1;
 }
+
+int atoi(char *str){
+    int result = 0;
+    const char *c;
+    for(c = str; *c != '\0' && *c >= '0' && *c <= '9'; ++c) {
+        result= (*c - '0') + result*10;
+    }
+    return result;
+}
