@@ -14,7 +14,7 @@ AS = nasm
 PY = python3
 RM = rm
 
-ksize = 11
+ksize = 12
 
 CFLAG = -ansi -c
 
@@ -73,9 +73,12 @@ $(out_dir)/%.o: $(c_dir)/%.c
 $(prog_out_dir)/%.o: $(prog_dir)/%.c
 	$(CC) $(CFLAG) -o $@ $<
 
-# Link program-nya dengan library dan kernel
-$(prog_out_dir)/%: $(prog_out_dir)/%.o $(lib_c_obj) $(lib_asm_obj) $(kernel_asm_obj)
+# Link program-nya dengan library dan kernel lalu dimasukin ke image os
+# Tiap kali program utility ada yg di-update, run `make clean` dlu
+$(prog_out_dir)/%: $(prog_out_dir)/%.o $(lib_c_obj) $(lib_asm_obj)
+	#$(LD) -o $@ -d $< $(lib_c_obj) $(lib_asm_obj)
 	$(LD) -o $@ -d $^
+	$(PY) tools/loadFile.py $(os) $@ 0x00
 
 # Compile lib.asm
 $(lib_asm_obj): $(lib_asm)
@@ -87,7 +90,7 @@ $(kernel_asm_obj): $(kernel_asm)
 
 # Bikin kernel, link kernel dengan lib dan file asm
 $(kernel): $(kernel_c_obj) $(kernel_asm_obj) $(lib_asm_obj) $(lib_c_obj)
-	$(LD) -o $@ -d $(out_dir)/kernel.o $^
+	$(LD) -o $@ -d $^
 
 # Bikin image file
 $(map):
@@ -101,7 +104,7 @@ $(files):
 $(sectors):
 	$(DD) if=/dev/zero of=$(sectors) bs=512 count=1
 
-$(os): $(map) $(files) $(sectors)
+$(os): $(bootloader_out) $(kernel) $(map) $(files) $(sectors)
 	$(DD) if=/dev/zero of=$@ bs=512 count=2880
 	$(DD) if=$(bootloader_out) of=$@ bs=512 count=1 conv=notrunc
 	$(DD) if=$(kernel) of=$@ bs=512 conv=notrunc seek=1
@@ -109,8 +112,7 @@ $(os): $(map) $(files) $(sectors)
 	$(DD) if=$(files) of=$@ bs=512 conv=notrunc seek=257
 	$(DD) if=$(sectors) of=$@ bs=512 conv=notrunc seek=259
 
-#img: $(out_dir) $(os) $(map) $(files) $(sectors) $(bootloader_out) $(kernel)
-img: $(out_dir) $(bootloader_out) $(kernel) $(os)
+img: $(out_dir) $(os) programs
 
 programs: $(prog_c_obj) $(prog_c_out)
 
