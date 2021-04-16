@@ -74,5 +74,14 @@ void handleInterrupt21(int AX, int BX, int CX, int DX);
  * @param sisi banyak pixel/panjang sisi pada logo
  */
 void printLogoGrafik(int sisi);
+/**
+ * Fungsi untuk mengeksekusi sebuah program
+ * @param fileName nama file
+ * @param segment tempat menaruh program di memori
+ * @param success hasil eksekusi
+ * @param parentIndex index cwd
+ */
+void executeProgram(char *fileName, int segment, int *success,
+                    char parentIndex);
 
 #endif
