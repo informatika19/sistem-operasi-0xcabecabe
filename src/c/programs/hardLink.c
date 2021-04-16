@@ -1,7 +1,7 @@
 // TODO: cek yang mau di-link file apa dir
 
 #include "../lib.h"
-int main(char *argv, int argc) {
+int main(int argc, char *argv[]) {
     char dir[2 * SECTOR_SIZE];
 
     int testDI, testRI, i = 0, jmlParents = 0;
@@ -42,7 +42,7 @@ int main(char *argv, int argc) {
         if (*(dir + i + 2) != 0) {  // sektor files penuh
             printString("sektor penuh\n");
             goto hardLink_error;
-            return;
+            return -1;
         }
 
         *(dir + i) = cwdIdx;
@@ -52,13 +52,13 @@ int main(char *argv, int argc) {
         writeSector(dir, 0x101);
         writeSector(dir + SECTOR_SIZE, 0x102);
 
-        return;
+        return -1;
     } else {
         goto hardLink_error;
-        return;
+        return -1;
     }
 
 hardLink_error:
     printString("Terjadi kesalahan saat membuat symbolic link\n");
-    return;
+    return -1;
 }

@@ -14,82 +14,105 @@ AS = nasm
 PY = python3
 RM = rm
 
-KSIZE = 20
+ksize = 11
 
 CFLAG = -ansi -c
 
-ASM_DIR = src/asm
-C_DIR = src/c
-OUT_DIR = out
-LIB_DIR = $(C_DIR)/lib
-PROG_DIR = $(C_DIR)/programs
-PROG_OUT_DIR = $(OUT_DIR)/programs
+asm_dir = src/asm
+c_dir = src/c
+out_dir = out
+lib_dir = $(c_dir)/lib
+prog_dir = $(c_dir)/programs
+prog_out_dir = $(out_dir)/programs
+lib_obj_dir = $(out_dir)/lib
 
-BOOTLOADER_OUT = $(OUT_DIR)/bootloader
-BOOTLOADER_ASM = $(ASM_DIR)/bootloader.asm
+bootloader_out = $(out_dir)/bootloader
+bootloader_asm = $(asm_dir)/bootloader.asm
 
-PROG_C = $(wildcard $(PROG_DIR)/*.c)
-PROG_C_OUT = $(PROG_C:$(PROG_DIR)/%.c=$(PROG_OUT_DIR)/%.o)
+prog_c = $(wildcard $(prog_dir)/*.c)
+prog_c_obj = $(prog_c:$(prog_dir)/%.c=$(prog_out_dir)/%.o)
+prog_c_out = $(prog_c_obj:$(prog_out_dir)/%.o=$(prog_out_dir)/%)
 
-LIB_C = $(wildcard $(LIB_DIR)/*.c)
-LIB_C_OUT = $(LIB_C:$(LIB_DIR)/%.c=$(OUT_DIR)/%.o)
-LIB_ASM = $(ASM_DIR)/lib.asm
-LIB_ASM_OUT = $(OUT_DIR)/lib_asm.o
+lib_c = $(wildcard $(lib_dir)/*.c)
+lib_c_obj = $(lib_c:$(lib_dir)/%.c=$(lib_obj_dir)/%.o)
+lib_asm = $(asm_dir)/lib.asm
+lib_asm_obj = $(lib_obj_dir)/lib_asm.o
 
-KERNEL_C = $(wildcard $(C_DIR)/*.c)
-KERNEL_ASM = $(ASM_DIR)/kernel.asm
-KERNEL_C_OUT = $(KERNEL_C:$(C_DIR)/%.c=$(OUT_DIR)/%.o)
-KERNEL_ASM_OUT = $(OUT_DIR)/kernel_asm.o
-KERNEL = $(OUT_DIR)/kernel
+kernel_c = $(wildcard $(c_dir)/*.c)
+kernel_asm = $(asm_dir)/kernel.asm
+kernel_c_obj = $(kernel_c:$(c_dir)/%.c=$(out_dir)/%.o)
+kernel_asm_obj = $(out_dir)/kernel_asm.o
+kernel = $(out_dir)/kernel
 
-OS = $(OUT_DIR)/system.img
-MAP = $(OUT_DIR)/map.img
-FILES = $(OUT_DIR)/files.img
-SECTORS = $(OUT_DIR)/sectors.img
+os = $(out_dir)/system.img
+map = $(out_dir)/map.img
+files = $(out_dir)/files.img
+sectors = $(out_dir)/sectors.img
 
 BOCHS_CONFIG = if2230.config
 
-.PHONY: default, img, image, programs, run, clean
+.PHONY: default, img, image, programs, run, clean, out_dir
 
 default: image
 
-$(OUT_DIR):
-	mkdir $@
+$(out_dir):
+	mkdir -p $(out_dir) $(prog_out_dir) $(lib_obj_dir)
 
-$(BOOTLOADER_OUT): $(BOOTLOADER_ASM)
+$(bootloader_out): $(bootloader_asm)
 	$(AS) -o $@ $<
 
-$(OUT_DIR)/%.o: $(LIB_DIR)/%.c
+# Ini buat bikin object library
+$(out_dir)/%.o: $(lib_dir)/%.c
 	$(CC) $(CFLAG) -o $@ $<
 
-$(OUT_DIR)/%.o: $(C_DIR)/%.c
+# Ini buat object kernel
+$(out_dir)/%.o: $(c_dir)/%.c
 	$(CC) $(CFLAG) -o $@ $<
 
-$(PROG_OUT_DIR)/%.o: $(PROG_DIR)/%.c
+# Bikin object program
+$(prog_out_dir)/%.o: $(prog_dir)/%.c
 	$(CC) $(CFLAG) -o $@ $<
 
-$(LIB_ASM_OUT): $(LIB_ASM)
+# Link program-nya dengan library dan kernel
+$(prog_out_dir)/%: $(prog_out_dir)/%.o $(lib_c_obj) $(lib_asm_obj) $(kernel_asm_obj)
+	$(LD) -o $@ -d $^
+
+# Compile lib.asm
+$(lib_asm_obj): $(lib_asm)
 	$(AS) -f as86 -o $@ $<
 
-$(KERNEL_ASM_OUT): $(KERNEL_ASM)
+# Compile kernel.asm
+$(kernel_asm_obj): $(kernel_asm)
 	$(AS) -f as86 -o $@ $<
 
-$(KERNEL): $(KERNEL_C_OUT) $(KERNEL_ASM_OUT) $(LIB_ASM_OUT) $(LIB_C_OUT) $(PROG_C_OUT)
-	$(LD) -o $@ -d $(OUT_DIR)/kernel.o $^
+# Bikin kernel, link kernel dengan lib dan file asm
+$(kernel): $(kernel_c_obj) $(kernel_asm_obj) $(lib_asm_obj) $(lib_c_obj)
+	$(LD) -o $@ -d $(out_dir)/kernel.o $^
 
-img: $(OUT_DIR) $(BOOTLOADER_OUT) $(KERNEL)
-	$(DD) if=/dev/zero of=$(OS) bs=512 count=2880
-	$(DD) if=/dev/zero of=$(MAP) bs=512 count=1
-	$(DD) if=/dev/zero of=$(FILES) bs=512 count=2
-	$(DD) if=/dev/zero of=$(SECTORS) bs=512 count=1
-	$(PY) -c "import sys; sys.stdout.buffer.write(b'\xFF'*$(KSIZE))" | $(DD) conv=notrunc bs=$(KSIZE) count=1 of=$(MAP)
-	$(DD) if=$(BOOTLOADER_OUT) of=$(OS) bs=512 count=1 conv=notrunc
-	$(DD) if=$(KERNEL) of=$(OS) bs=512 conv=notrunc seek=1
-	$(DD) if=$(MAP) of=$(OS) bs=512 conv=notrunc seek=256
-	$(DD) if=$(FILES) of=$(OS) bs=512 conv=notrunc seek=257
-	$(DD) if=$(SECTORS) of=$(OS) bs=512 conv=notrunc seek=259
+# Bikin image file
+$(map):
+	$(DD) if=/dev/zero of=$@ bs=512 count=1
+	$(PY) -c "import sys; sys.stdout.buffer.write(b'\xFF'*$(ksize))" | $(DD) conv=notrunc bs=$(ksize) count=1 of=$@
 
-programs: $(PROG_C_OUT)
+$(files):
+	$(DD) if=/dev/zero of=$(files) bs=512 count=2
+	$(PY) -c "import sys; sys.stdout.buffer.write(b'\xFF\xFF\x62\x69\x6E')" | $(DD) conv=notrunc bs=5 count=1 of=$(files)
+
+$(sectors):
+	$(DD) if=/dev/zero of=$(sectors) bs=512 count=1
+
+$(os): $(map) $(files) $(sectors)
+	$(DD) if=/dev/zero of=$@ bs=512 count=2880
+	$(DD) if=$(bootloader_out) of=$@ bs=512 count=1 conv=notrunc
+	$(DD) if=$(kernel) of=$@ bs=512 conv=notrunc seek=1
+	$(DD) if=$(map) of=$@ bs=512 conv=notrunc seek=256
+	$(DD) if=$(files) of=$@ bs=512 conv=notrunc seek=257
+	$(DD) if=$(sectors) of=$@ bs=512 conv=notrunc seek=259
+
+#img: $(out_dir) $(os) $(map) $(files) $(sectors) $(bootloader_out) $(kernel)
+img: $(out_dir) $(bootloader_out) $(kernel) $(os)
+
+programs: $(prog_c_obj) $(prog_c_out)
 
 image: img
 
@@ -97,4 +120,4 @@ run: img
 	$(BOCHS) -f $(BOCHS_CONFIG)
 
 clean:
-	$(RM) -f out/*.o out/*.img $(BOOTLOADER_OUT) out/programs/*.o
+	$(RM) -f out/*.o out/*.img $(bootloader_out) $(prog_c_obj) $(kernel)

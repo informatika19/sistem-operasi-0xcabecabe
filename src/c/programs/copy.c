@@ -1,7 +1,7 @@
 #include "../lib.h"
 
 // TODO: cek yang mau di-link file apa dir
-int main(char *argv, int argc) {
+int main(int argc, char *argv[]) {
     char buf[16 * SECTOR_SIZE];
     char dir[2 * SECTOR_SIZE];
     int res = 0;
@@ -18,18 +18,18 @@ int main(char *argv, int argc) {
         printString("File ");
         printString(resourcePath);
         printString(" tidak ditemukan\n");
-        return;
+        return -1;
     }
 
     writeFile(buf, destinationPath, &res, cwdIdx);
     if (res <= 0) {  // write errror
         goto cp_error;
-        return;
+        return -1;
     }
 
-    return;
+    return -1;
 
 cp_error:
     printString("Terjadi kesalahan saat menyalin file.\n");
-    return;
+    return -1;
 }

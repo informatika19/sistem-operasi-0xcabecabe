@@ -1,6 +1,6 @@
 #include "../lib.h"
 
-int main(char *argv, int argc){
+int main(int argc, char *argv[]){
     char dir[2*SECTOR_SIZE], map[SECTOR_SIZE], sec[SECTOR_SIZE];
     char emptySec[512];
 
@@ -28,7 +28,7 @@ int main(char *argv, int argc){
         if (test == -1) {
             printString(path);
             printString(" tidak ada.\n");
-            return;
+            return -1;
         }
 
         parentIndex = test & 0xFF;
@@ -37,7 +37,7 @@ int main(char *argv, int argc){
         if (*(dir + parentIndex + 1) != '\xFF') {
             printString(path);
             printString(" bukan direktori.\n");
-            return;
+            return -1;
         }
     }
 
@@ -62,7 +62,7 @@ int main(char *argv, int argc){
             *(sec+secIndex*16+j) = 0;
             j++;
         }
-        //hapus sector dir nya 
+        //hapus sector dir nya
         j = 0;
         while(*(dir + i + j) != 0 && j < 16){
             *(dir+i+j) = 0;

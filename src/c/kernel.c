@@ -7,9 +7,9 @@
 #include "kernel.h"
 
 #include "lib.h"
-#include "programs/shell.h"
 
 int main() {
+    char buf[16];
     // interrupt(0x10, 0x0003, 0, 0, 0);
     makeInterrupt21();
     // Set video mode
@@ -22,10 +22,14 @@ int main() {
     readString(0);
     interrupt(0x10, 0x0012, 0, 0, 0);
 
-    runShell();
+    clear(buf, 16);
 
-    while (true)
-        ;
+    while (true) {
+        printString("Echo chamber: ");
+        readString(buf);
+        printString(buf);
+        printString("\n");
+    }
 }
 
 void handleInterrupt21(int AX, int BX, int CX, int DX) {

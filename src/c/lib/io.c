@@ -8,7 +8,7 @@
 
 #include "io.h"
 
-#include "../kernel.h"
+#include "../lib_asm.h"
 #include "boolean.h"
 #include "math.h"
 
@@ -21,8 +21,6 @@ void printString(char *string) {
         switch (string[i]) {
             // bikin new line pas ketemu \n
             case '\n':
-                // baris = (getCursorRow() + 1) * 0x100;
-                // interrupt(0x10, 0x0200, 0x0000, 0x0000, baris);
                 // https://stackoverflow.com/questions/28839568/using-bios-interrupts-in-x86
                 interrupt(0x10, 0x0E00 + '\r', 0x0000 + WHITE, 0x0000, 0x0000);
                 interrupt(0x10, 0x0E00 + '\n', 0x0000 + WHITE, 0x0000, 0x0000);
