@@ -9,7 +9,6 @@
 #include "lib.h"
 
 int main() {
-    char buf[16];
     // interrupt(0x10, 0x0003, 0, 0, 0);
     makeInterrupt21();
     // Set video mode
@@ -22,14 +21,8 @@ int main() {
     readString(0);
     interrupt(0x10, 0x0012, 0, 0, 0);
 
-    clear(buf, 16);
-
-    while (true) {
-        printString("Echo chamber: ");
-        readString(buf);
-        printString(buf);
-        printString("\n");
-    }
+    /*executeProgram(char *fileName, int segment, int *success, char parentIndex)*/
+    executeProgram("/bin/shell", 0x5200, 0, 0xFF);
 }
 
 void handleInterrupt21(int AX, int BX, int CX, int DX) {

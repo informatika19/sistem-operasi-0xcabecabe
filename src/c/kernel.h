@@ -49,7 +49,7 @@ void printLogoGrafik(int sisi);
 /**
  * Fungsi untuk mengeksekusi sebuah program
  * @param fileName nama file
- * @param segment tempat menaruh program di memori
+ * @param segment nomor sektor program pada image file OS
  * @param success hasil eksekusi
  * @param parentIndex index cwd
  */
