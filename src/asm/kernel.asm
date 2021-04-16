@@ -58,6 +58,7 @@ _interrupt21ServiceRoutine:
 	iret
 
 ; menjalankan sebuah program
+; void launchProgram(int segment)
 _launchProgram:
     mov bp,sp
     mov bx,[bp+2]

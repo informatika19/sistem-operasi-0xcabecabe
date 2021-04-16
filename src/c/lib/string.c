@@ -73,19 +73,26 @@ char *strncat(char *dest, char *src, int n) {
     return dest;
 }
 
-int tokenize(char *src, char *dest, char delim) {
+int strntoken(char *src, char *dest, char delim, int n) {
     int i, j;
+    bool stop = false;
 
-    src = src + (1 * (*src == delim)); // remove delim at beginning
+    for (; *src == delim; src++) // remove delim at beginning
+        ;
     j = strlen(src) - 1;
     *(src + j) = *(src + j) * (*(src + j) != delim); // remove delim at end
-
     i = 0, j = 0;
-    while (*src != '\0') {
-        if (*src == delim) {
+    while (*src != '\0'  && !stop) {
+        stop = i >= n;
+        if (*src == delim || stop) {
             *(dest + j + i) = 0;
-            j += 14 * (i != 0);
+            j += n * (i != 0);
             i = 0;
+        } else if (*src == '\\') {
+            src++;
+            *(dest + j + i) = *src;
+            stop = *src == 0; // \ di akhir string
+            i += 1 * !stop;
         } else {
             *(dest + j + i) = *src;
             i++;
@@ -95,12 +102,12 @@ int tokenize(char *src, char *dest, char delim) {
 
     *(dest + j + i) = 0;
 
-    return div(j, 14) + 1;
+    return div(j, n) + 1;
 }
 
 int atoi(char *str){
     int result = 0;
-    const char *c;
+    char *c;
     for(c = str; *c != '\0' && *c >= '0' && *c <= '9'; ++c) {
         result= (*c - '0') + result*10;
     }

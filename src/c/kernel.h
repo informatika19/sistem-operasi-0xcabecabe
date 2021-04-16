@@ -31,6 +31,11 @@ void putInMemory(int segment, int address, char character);
  * interrupt 0x21 dipanggil
  */
 void makeInterrupt21();
+/**
+ * Fungsi untuk me-launch sebuah program yang sudah di-load ke memori.
+ * @param segment segmen di memori
+ */
+void launchProgram(int segment);
 
 /* *** Diimplementasikan di C *** */
 /**

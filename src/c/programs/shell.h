@@ -14,8 +14,6 @@
 
 int runShell();
 
-int commandParser(char *cmd, char *argument);
-
 void cd(char *parentIndex, char *path, char *newCwdName);
 
 void listDir(char *path, char parentIndex);

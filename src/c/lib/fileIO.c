@@ -24,7 +24,7 @@ int getFileIndex(char *path, char parentIndex, char *dir) {
         return parentIndex;
     }
 
-    jmlParents = tokenize(path, tmpP, '/');
+    jmlParents = strntoken(path, tmpP, '/', 14);
 
     // Untuk handle . (dihapus)
     i = 0, j = 0;
@@ -95,7 +95,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     readSector(dir + SECTOR_SIZE, 0x102);
     readSector(sec, 0x103);
 
-    j = tokenize(path, parents, '/');
+    j = strntoken(path, parents, '/', 14);
     strncpy(fileName, parents[--j], 14);
 
     // adjust parent index ke index tujuan

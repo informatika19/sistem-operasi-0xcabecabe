@@ -1,7 +1,9 @@
 #include "../lib.h"
 
 // TODO: cek yang mau di-link file apa dir
-int main(int argc, char *argv[]) {
+int main() {
+    int argc; char argv[5][20];
+
     char buf[16 * SECTOR_SIZE];
     char dir[2 * SECTOR_SIZE];
     int res = 0;

@@ -10,7 +10,7 @@
 
 #include "../lib.h"
 
-int runShell() {
+int main() {
     char command[10 * MAXIMUM_CMD_LEN];  // kalo pointer aja takut error
     char argv[10][MAXIMUM_CMD_LEN];
 
@@ -42,7 +42,7 @@ int runShell() {
         readString(command);
 
         // parse dan hasil parse
-        argc = commandParser(command, argv);
+        argc = strntoken(command, argv, ' ', MAXIMUM_CMD_LEN);
         if (argc < 0) {
             // TODO: bad UX because doesn't tell the error
             printString("Terjadi kesalahan saat membaca perintah\n");
@@ -74,7 +74,7 @@ int runShell() {
             if (argc != 3) {
                 printString("Penggunaan: ln <path/ke/sumber> <path/ke/tujuan>\n");
             } else {
-                hardLink(cwdIdx, argv[1], argv[2]);
+                /*hardLink(cwdIdx, argv[1], argv[2]);*/
             }
         } else if (strncmp("cwd", argv[0], MAXIMUM_CMD_LEN) == 0) {
             printNumber(cwdIdx);
@@ -92,13 +92,13 @@ int runShell() {
             if (argc != 3) {
                 printString("Penggunaan: cp <path/ke/sumber> <path/ke/tujuan>\n");
             } else {
-                cp(cwdIdx, argv[1], argv[2]);
+                /*cp(cwdIdx, argv[1], argv[2]);*/
             }
         } else if (strncmp("rm", argv[0], MAXIMUM_CMD_LEN) == 0){
             if (argc != 2){
                 printString("Penggunaan: rm <path/file>\n");
             } else {
-                rm(cwdIdx, argv[1]);
+                /*rm(cwdIdx, argv[1]);*/
             }
         } else {
             printString("Perintah ");
@@ -114,40 +114,6 @@ int runShell() {
         strcpy(hist[HIST_SIZE - 1], command);
         histc++;
     }
-}
-
-int commandParser(char *cmd, char *argument) {
-    int i, j;
-    bool stop = false;
-
-    i = 0, j = 0;
-    for (; *cmd == ' '; cmd++)
-        ;
-    while (*cmd != '\0' && !stop) {
-        stop = i >= MAXIMUM_CMD_LEN;
-        switch (*cmd) {
-            case ' ':
-                *(argument + j + i) = 0;
-                j += MAXIMUM_CMD_LEN * (i != 0);
-                i = 0;
-                break;
-            case '\\':
-                cmd++;
-                *(argument + j + i) = *(cmd);
-                stop = cmd == 0;  // \ di akhir string
-                i += 1 * !stop;
-                break;
-            default:
-                *(argument + j + i) = *cmd;
-                i++;
-        }
-
-        cmd++;
-    }
-
-    *(argument + j + i) = 0;
-
-    return stop ? -1 : (div(j, MAXIMUM_CMD_LEN) + 1);
 }
 
 void cd(char *parentIndex, char *path, char *newCwdName) {

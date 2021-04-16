@@ -1,7 +1,9 @@
 // TODO: cek yang mau di-link file apa dir
 
 #include "../lib.h"
-int main(int argc, char *argv[]) {
+int main() {
+    int argc; char argv[5][20];
+
     char dir[2 * SECTOR_SIZE];
 
     int testDI, testRI, i = 0, jmlParents = 0;
@@ -21,7 +23,7 @@ int main(int argc, char *argv[]) {
     resourceIndex = testRI & 0xFF;
 
     if (testDI == -1 && testRI != -1) {
-        jmlParents = tokenize(destinationPath, parents, '/');
+        jmlParents = strntoken(destinationPath, parents, '/', 14);
         strncpy(fname, parents[--jmlParents], 14);
         if (jmlParents != 0) {
             clear(destinationPath, strlen(destinationPath));

@@ -1,6 +1,8 @@
 #include "../lib.h"
 
-int main(int argc, char *argv[]){
+int main(){
+    int argc; char argv[5][20];
+
     char dir[2*SECTOR_SIZE], map[SECTOR_SIZE], sec[SECTOR_SIZE];
     char emptySec[512];
 
@@ -32,7 +34,7 @@ int main(int argc, char *argv[]){
         }
 
         parentIndex = test & 0xFF;
-        pathSize = tokenize(path,temp, '/');
+        pathSize = strntoken(path,temp, '/', 14);
         filename = temp[pathSize - 1];
         if (*(dir + parentIndex + 1) != '\xFF') {
             printString(path);

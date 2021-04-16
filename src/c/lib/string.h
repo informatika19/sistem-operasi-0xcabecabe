@@ -81,21 +81,23 @@ char *strcat(char *dest, char *src);
 char *strncat(char *dest, char *src, int n);
 
 /**
- * In essence, mirip dengan strtok atau split string di JS atau Python.
+ * tl;dr: mirip dengan strtok atau split string di JS atau Python.
  * Tokenize/memisahkan string berdasarkan sebuah delim. Hasilnya adalah sebuah
  * array of strings pada dest. Akan mengembalikan banyak token pada dest. Jika
- * karakter pertama atau terakhir adalah hasil delim, akan di-remove
+ * karakter beberapa pertama atau karakter terakhir hasil adalah delim, akan
+ * di-remove
  * @param src string yang ingin di-tokenize
  * @param dest array of strings berisihasil tokenizing string
  * @param delim delimiter/pemisah antar token
+ * @param n panjang maksimum setiap token + 1
  * @return banyak token pada array of strings
  */
-int tokenize(char *src, char *dest, char delim);
+int strntoken(char *src, char *dest, char delim, int n);
 
 /**
- * Fungsi untuk convert string menjadi int 
+ * Fungsi untuk convert string menjadi int
  * @param str string yang ingin diubah menjadi int
  */
-int atoi (char *str);
+int atoi(char *str);
 
 #endif

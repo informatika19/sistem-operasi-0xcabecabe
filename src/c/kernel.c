@@ -9,11 +9,11 @@
 #include "lib.h"
 
 int main() {
-    // interrupt(0x10, 0x0003, 0, 0, 0);
+    char buf[16], dest[16][16];
+    int res, i;
     makeInterrupt21();
     // Set video mode
     // http://www.ctyme.com/intr/rb-0069.htm
-    // 640x200 with 16 colors, 80x30 text resolution
     interrupt(0x10, 0x0012, 0, 0, 0);
     printLogoGrafik(140);
     printString("Pedas OS by 0xCABECABE\n");
@@ -21,7 +21,6 @@ int main() {
     readString(0);
     interrupt(0x10, 0x0012, 0, 0, 0);
 
-    /*executeProgram(char *fileName, int segment, int *success, char parentIndex)*/
     executeProgram("/bin/shell", 0x5200, 0, 0xFF);
 }
 
