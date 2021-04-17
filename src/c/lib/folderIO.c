@@ -7,8 +7,3 @@
  */
 
 #include "folderIO.h"
-
-#include "lib_asm.h"
-#include "fileIO.h"
-#include "math.h"
-#include "teks.h"

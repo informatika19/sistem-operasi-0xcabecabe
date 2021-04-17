@@ -14,21 +14,40 @@
 #define SECTOR_SIZE 512
 
 /**
- * Fungsi untuk menuliskan isi file ke filesystem
- * @param buffer isi file yang ingin ditulis
- * @param path nama file yang ingin ditulis
- * @param sectors banyak block file
- * @param parentIndex index dari cwd
+ * Fungsi untuk mendapatkan sektor tertentu
+ * @param buf untuk menampung sektor yang "diambil"
+ * @param secNo nomor sektor yang ingin diambil
+ * @return buf
  */
-void writeFile(char *buffer, char *path, int *sectors, char parentIndex);
+char *getSector(char *buf, int secNo);
 /**
- * Fungsi untuk membaca isi file di filesystem
+ * Fungsi untuk memperbarui sektor tertentu
+ * @param isi baru dari sektor
+ * @param secNo nomor sektor yang ingin diambil
+ */
+void updateSector(char *buf, int secNo);
+/**
+ * Fungsi untuk membaca file. Penjelasan nilai result setelah eksekusi:
+ * -1: path invalid
  * @param buffer buffer untuk menampung isi file
  * @param path nama file yang ingin dibaca
  * @param result hasil pembacaan file (banyak block yang dibaca)
  * @param parentIndex index dari cwd
+ * @return buffer
  */
-void readFile(char *buffer, char *path, int *result, char parentIndex);
+char *getFile(char *buffer, char *path, int *result, char parentIndex);
+/**
+ * Fungsi untuk menulis file. Penjelasan untuk nilai sectors setelah eksekusi:
+ * -1: file sudah ada
+ * -2 atau -3: tidak cukup space untuk menuliskan file
+ * -4: path invalid
+ * @param buffer isi file yang ingin ditulis
+ * @param path nama file yang ingin ditulis
+ * @param sectors banyak block file
+ * @param parentIndex index dari cwd
+ * @return sectors
+ */
+int updateFile(char *buffer, char *path, int *sectors, char parentIndex);
 /**
  * Fungsi untuk menghapus file dari filesystem
  * @param path path ke file yang ingin di hapus
@@ -44,17 +63,5 @@ void removeFile (char *path, int *result, char parentIndex);
  * @return nomor index/nomor entri file yang dicari pada sektor files
  */
 int getFileIndex(char *path, char parentIndex, char *dir);
-/**
- * Fungsi untuk membaca sector
- * @param buffer
- * @param sector
- */
-void readSector(char *buffer, int sector);
-/**
- * Fungsi untuk menulis ke sector
- * @param buffer
- * @param sector
- */
-void writeSector(char *buffer, int sector);
 
 #endif

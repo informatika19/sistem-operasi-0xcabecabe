@@ -17,19 +17,19 @@ int main(){
     char *path = argv[1];
     char cwdIdx = atoi(argv[2])&0xFF;
 
-    readSector(map, 0x100);
-    readSector(dir, 0x101);
-    readSector(dir + SECTOR_SIZE, 0x102);
-    readSector(sec, 0x103);
+    getSector(map, 0x100);
+    getSector(dir, 0x101);
+    getSector(dir + SECTOR_SIZE, 0x102);
+    getSector(sec, 0x103);
 
-    clear(emptySec, 512);
+    fillBuffer(emptySec, 512, 0);
 
     if (*path != '\0') {
         test = getFileIndex(path, cwdIdx, dir);
 
         if (test == -1) {
-            printString(path);
-            printString(" tidak ada.\n");
+            print(path);
+            print(" tidak ada.\n");
             return -1;
         }
 
@@ -37,8 +37,8 @@ int main(){
         pathSize = strntoken(path, temp, '/', 14);
         strncpy(filename, temp[pathSize - 1], 14);
         if (*(dir + parentIndex + 1) != '\xFF') {
-            printString(path);
-            printString(" bukan direktori.\n");
+            print(path);
+            print(" bukan direktori.\n");
             return -1;
         }
     }
@@ -59,7 +59,7 @@ int main(){
         j = 0;
         //hapus buffer dan file sector
         while(*(sec + secIndex*16 + j) != 0 && j < 16){
-            writeSector(emptySec,(*sec + secIndex*16 + j));
+            updateSector(emptySec,(*sec + secIndex*16 + j));
             *(map + *(sec + secIndex*16 + j)) = 0;
             *(sec+secIndex*16+j) = 0;
             j++;
@@ -73,7 +73,7 @@ int main(){
     }
 
     else{
-        printString("File tidak ada di dalam directory\n");
+        print("File tidak ada di dalam directory\n");
     }
 
 }

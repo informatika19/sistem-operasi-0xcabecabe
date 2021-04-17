@@ -35,12 +35,13 @@ int main() {
 
     while (true) {
         // set prompt
-        clear(prompt + 11, 16);
+        fillBuffer(prompt + 11, 16, 0);
+
         strncat(prompt, cwdName, strlen(cwdName));
         strncat(prompt, "> ", 2);
-        printString(prompt);
+        print(prompt);
 
-        readString(command);
+        read(command);
         if (*command == '\0') {
             continue;
         }
@@ -53,13 +54,13 @@ int main() {
             argvStart += 1 + (1 * (*argvStart == '\\'));
         }
         // isi ke argvTmp (buffer buat file argv.tmp)
-        clear(argvTmp, strlen(argvTmp));
+        fillBuffer(argvTmp, strlen(argvTmp), 0);
         strncpy(argvTmp, &cwdIdx, 1); // is dis possible?
         strncat(argvTmp, " ", 1);
         strncat(argvTmp, argvStart + 1, strlen(argvStart + 1));
         // tulis argumen ke argv.tmp
         secSize = 1;
-        writeFile(argvTmp, "argv.tmp", &secSize, 0xFF);
+        updateFile(argvTmp, "argv.tmp", &secSize, 0xFF);
 
         argc = strntoken(command, argv, ' ', MAXIMUM_CMD_LEN);
 
@@ -69,7 +70,7 @@ int main() {
         // eksekusi perintah
         if (strncmp("cd", argv[0], MAXIMUM_CMD_LEN) == 0) {
             if (argc != 2) {
-                printString("Penggunaan: cd <path/ke/direktori>\n");
+                print("Penggunaan: cd <path/ke/direktori>\n");
             } else {
                 cd(&cwdIdx, argv[1], cwdName);
             }
@@ -79,45 +80,46 @@ int main() {
             } else if (argc == 2) {
                 listDir(argv[1], cwdIdx);
             } else {
-                printString("Penggunaan: ls [path/ke/direktori]");
+                print("Penggunaan: ls [path/ke/direktori]");
             }
         } else if (strncmp("cat", argv[0], MAXIMUM_CMD_LEN) == 0) {
             if (argc != 2) {
-                printString("Penggunaan: cat <path/file>\n");
+                print("Penggunaan: cat <path/file>\n");
             } else {
                 cat(cwdIdx, argv[1]);
             }
         } else if (strncmp("ln", argv[0], MAXIMUM_CMD_LEN) == 0) {
             if (argc != 3) {
-                printString(
+                print(
                     "Penggunaan: ln <path/ke/sumber> <path/ke/tujuan>\n");
             } else {
                 /*hardLink(cwdIdx, argv[1], argv[2]);*/
             }
         } else if (strncmp("cwd", argv[0], MAXIMUM_CMD_LEN) == 0) {
             printNumber(cwdIdx);
-            printString(" - ");
-            printString(cwdName);
-            printString("\n");
+            print(" - ");
+            print(cwdName);
+            print("\n");
         } else if (strncmp("history", argv[0], MAXIMUM_CMD_LEN) == 0) {
             for (i = 0; i < HIST_SIZE; i++) {
                 if (strlen(hist[i]) != 0) {
-                    printString(hist[i]);
-                    printString("\n");
+                    print(hist[i]);
+                    print("\n");
                 }
             }
         } else if (strncmp("cp", command, MAXIMUM_CMD_LEN) == 0) {
-            executeProgram("/bin/cp", 0x1C00, 0, 0xFF);
+            exec("/bin/cp", 0x1C00, 0, 0xFF);
         } else if (strncmp("rm", argv[0], MAXIMUM_CMD_LEN) == 0) {
             if (argc != 2) {
-                printString("Penggunaan: rm <path/file>\n");
+                print("Penggunaan: rm <path/file>\n");
             } else {
                 /*rm(cwdIdx, argv[1]);*/
             }
         } else {
-            printString("Perintah ");
-            printString(argv[0]);
-            printString(" tidak dikenali.\n");
+            /*print("Perintah ");*/
+            /*print(argv[0]);*/
+            /*print(" tidak dikenali.\n");*/
+            exec("a", 0x1C00, 0, 0xFF);
         }
 
         // HISTORY
@@ -140,8 +142,8 @@ void cd(char *parentIndex, char *path, char *newCwdName) {
 
     if (strncmp(path, ".", MAXIMUM_CMD_LEN)) {
         if (strncmp(path, "/", MAXIMUM_CMD_LEN) != 0) {
-            readSector(dir, 0x101);
-            readSector(dir + SECTOR_SIZE, 0x102);
+            getSector(dir, 0x101);
+            getSector(dir + SECTOR_SIZE, 0x102);
 
             test = getFileIndex(path, *parentIndex, dir);
             tmpPI = test & 0xFF;
@@ -160,13 +162,13 @@ void cd(char *parentIndex, char *path, char *newCwdName) {
                 *parentIndex = tmpPI;
                 strncpy(newCwdName, dir + (tmpPI * 0x10) + 2, 14);
             } else {
-                printString(path);
-                printString(" bukan direktori.\n");
+                print(path);
+                print(" bukan direktori.\n");
             }
         } else {
-            printString("Direktori ");
-            printString(path);
-            printString(" tidak ditemukan.\n");
+            print("Direktori ");
+            print(path);
+            print(" tidak ditemukan.\n");
         }
     }
     return;
@@ -176,22 +178,22 @@ void listDir(char *path, char parentIndex) {
     char dir[2 * SECTOR_SIZE];
     int i, test;
 
-    readSector(dir, 0x101);
-    readSector(dir + SECTOR_SIZE, 0x102);
+    getSector(dir, 0x101);
+    getSector(dir + SECTOR_SIZE, 0x102);
 
     if (*path != '\0') {
         test = getFileIndex(path, parentIndex, dir);
 
         if (test == -1) {
-            printString(path);
-            printString(" tidak ada.\n");
+            print(path);
+            print(" tidak ada.\n");
             return;
         }
 
         parentIndex = test & 0xFF;
         if (*(dir + parentIndex + 1) != '\xFF') {
-            printString(path);
-            printString(" bukan direktori.\n");
+            print(path);
+            print(" bukan direktori.\n");
             return;
         }
     }
@@ -203,9 +205,9 @@ void listDir(char *path, char parentIndex) {
                 i += 16;
                 continue;
             }
-            printString(dir + i + 2);
-            if (*(dir + i + 1) == '\xFF') printString("/");
-            printString("\n");
+            print(dir + i + 2);
+            if (*(dir + i + 1) == '\xFF') print("/");
+            print("\n");
         }
         i += 16;
     }
@@ -216,15 +218,15 @@ void cat(char cwdIdx, char *path) {
     char buf[16 * SECTOR_SIZE];
     int res = 0;
 
-    readFile(buf, path, &res, cwdIdx);
+    getFile(buf, path, &res, cwdIdx);
 
     if (res > 0)
-        printString(buf);
+        print(buf);
     else {
-        printString("Terjadi kesalahan saat membaca berkas ");
-        printString(path);
+        print("Terjadi kesalahan saat membaca berkas ");
+        print(path);
     }
-    printString("\n");
+    print("\n");
 }
 
 void cp(char cwdIdx, char *resourcePath, char *destinationPath) {
@@ -232,18 +234,18 @@ void cp(char cwdIdx, char *resourcePath, char *destinationPath) {
     char dir[2 * SECTOR_SIZE];
     int res = 0;
 
-    readSector(dir, 0x101);
-    readSector(dir + SECTOR_SIZE, 0x102);
+    getSector(dir, 0x101);
+    getSector(dir + SECTOR_SIZE, 0x102);
 
-    readFile(buf, resourcePath, &res, cwdIdx);
+    getFile(buf, resourcePath, &res, cwdIdx);
     if (res <= 0) {  // read error
-        printString("File ");
-        printString(resourcePath);
-        printString(" tidak ditemukan\n");
+        print("File ");
+        print(resourcePath);
+        print(" tidak ditemukan\n");
         return;
     }
 
-    writeFile(buf, destinationPath, &res, cwdIdx);
+    updateFile(buf, destinationPath, &res, cwdIdx);
     if (res <= 0) {  // write errror
         goto cp_error;
         return;
@@ -252,6 +254,6 @@ void cp(char cwdIdx, char *resourcePath, char *destinationPath) {
     return;
 
 cp_error:
-    printString("Terjadi kesalahan saat menyalin file.\n");
+    print("Terjadi kesalahan saat menyalin file.\n");
     return;
 }

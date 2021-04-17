@@ -76,7 +76,6 @@ $(prog_out_dir)/%.o: $(prog_dir)/%.c
 # Link program-nya dengan library dan kernel lalu dimasukin ke image os
 # Tiap kali program utility ada yg di-update, run `make clean` dlu
 $(prog_out_dir)/%: $(prog_out_dir)/%.o $(lib_c_obj) $(lib_asm_obj)
-	#$(LD) -o $@ -d $< $(lib_c_obj) $(lib_asm_obj)
 	$(LD) -o $@ -d $^
 	$(PY) tools/loadFile.py $(os) $@ 0x00
 

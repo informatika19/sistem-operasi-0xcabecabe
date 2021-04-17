@@ -11,18 +11,18 @@ int main() {
     char *destinationPath;
     char cwdIdx = atoi(argv[3])&0xFF;
 
-    readFile(cmd, "/argv.tmp", &res, 0xFF);
+    getFile(cmd, "/argv.tmp", &res, 0xFF);
     if (res < 0) {
-        printString("Gagal menjalankan perintah cp.");
+        print("Gagal menjalankan perintah cp.");
         return -1;
     }
 
-    printString("hadeh\n");
+    print("hadeh\n");
 
     argc = strntoken(cmd, argv, ' ', 20);
 
     if (argc != 3) {
-        printString("Penggunaan: cp <path/ke/sumber> <path/ke/tujuan>\n");
+        print("Penggunaan: cp <path/ke/sumber> <path/ke/tujuan>\n");
         return -1;
     }
 
@@ -30,16 +30,16 @@ int main() {
     resourcePath = argv[1];
     destinationPath = argv[2];
 
-    readFile(buf, resourcePath, &res, cwdIdx);
+    getFile(buf, resourcePath, &res, cwdIdx);
     if (res <= 0) {  // read error
-        printString("File ");
-        printString(resourcePath);
-        printString(" tidak ditemukan\n");
+        print("File ");
+        print(resourcePath);
+        print(" tidak ditemukan\n");
         // executeProgram("/bin/shell", 0x5200, 0, 0xFF);
         return -1;
     }
 
-    writeFile(buf, destinationPath, &res, cwdIdx);
+    updateFile(buf, destinationPath, &res, cwdIdx);
     if (res <= 0) {  // write errror
         goto cp_error;
         // executeProgram("/bin/shell", 0x5200, 0, 0xFF);
@@ -50,7 +50,7 @@ int main() {
     return 0;
 
 cp_error:
-    printString("Terjadi kesalahan saat menyalin file.\n");
+    print("Terjadi kesalahan saat menyalin file.\n");
     // executeProgram("/bin/shell", 0x5200, 0, 0xFF);
     return -1;
 }

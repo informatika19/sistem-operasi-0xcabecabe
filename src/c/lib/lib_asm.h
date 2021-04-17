@@ -44,18 +44,5 @@ int getCursorCol();
  * @param DX
  */
 int interrupt(int number, int AX, int BX, int CX, int DX);
-/**
- * Fungsi untuk menulis sebuah karakter pada segment memori dengan offset
- * tertentu
- * @param segment segment memori yang ingin dituliskan karakter
- * @param address address ke memori
- * @param character karakter yang ingin dituliskan
- */
-void putInMemory(int segment, int address, char character);
-/**
- * Fungsi untuk me-launch sebuah program yang sudah di-load ke memori.
- * @param segment segmen di memori
- */
-void launchProgram(int segment);
 
 #endif

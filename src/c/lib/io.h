@@ -10,42 +10,19 @@
 #define _IO_CABECABE_H_
 
 /**
- * Fungsi menuliskan string ke output
- * @param string string yang ingin dituliskan
+ * Fungsi untuk menuliskan sebuah string ke layar.
+ * @param str string yang ingin dituliskan
  */
-void printString(char *string);
+void print(char *str);
 /**
- * Fungsi untuk membaca string dari keyboard
- * Possible buffer overflow >:((((
- * @param string string yang akan menampung bacaan dari keyboard
+ * Fungsi untuk membaca sebuah string
+ * @param buf buffer untuk "menampung" yang ingin dibaca
  */
-void readString(char *string);
+char *read(char *buf);
 /**
- * Fungsi untuk membuat persegi berkukuran sisi x sisi
- * @param sisi panjang sisi persegi
- * @param x absis untuk bagian kiri persegi
- * @param y ordinat untuk bagian atas persegi
- */
-void bikinPersegi(int sisi, int warna, int x, int y);
-/*
  * Fungsi untuk menuliskan integer menjadi char
  * @param number angka yang ingin dituliskan
  */
 void printNumber(int number);
-/**
- * Fungsi untuk mengosongkan buffer
- * @param buffer address ke buffer yang ingin dikosongkan
- * @param length panjang/banyak 0 yang mau diisi
- */
-void clear(char *buffer, int length);
-/**
- * Fungsi untuk mengeksekusi sebuah program
- * @param fileName nama file
- * @param segment nomor sektor program pada image file OS
- * @param success hasil eksekusi
- * @param parentIndex index cwd
- */
-void executeProgram(char *fileName, int segment, int *success,
-                    char parentIndex);
 
 #endif

@@ -8,8 +8,6 @@
 global _getCursorRow
 global _getCursorCol
 global _interrupt
-global _putInMemory
-global _launchProgram
 
 ;int getCursorCol()
 _getCursorRow:
@@ -58,38 +56,3 @@ intr:	int 0x00	;call the interrupt (00 will be changed above)
 	mov ah,0	;we only want AL returned
 	pop bp
 	ret
-
-; menjalankan sebuah program
-; void launchProgram(int segment)
-_launchProgram:
-    mov bp,sp
-    mov bx,[bp+2]
-
-    mov ax,cs
-    mov ds,ax
-    mov si,jump
-    mov [si+3],bx
-
-    mov ds,bx
-    mov ss,bx
-    mov es,bx
-
-    mov sp,0xfff0
-    mov bp,0xfff0
-
-jump:    jmp 0x0000:0x0000
-
-;void putInMemory (int segment, int address, char character)
-_putInMemory:
-	push bp
-	mov bp,sp
-	push ds
-	mov ax,[bp+4]
-	mov si,[bp+6]
-	mov cl,[bp+8]
-	mov ds,ax
-	mov [si],cl
-	pop ds
-	pop bp
-	ret
-

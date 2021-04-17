@@ -15,8 +15,8 @@ int main() {
     char *destinationPath = argv[2];
     char cwdIdx = atoi(argv[3])&0xFF;
 
-    readSector(dir, 0x101);
-    readSector(dir + SECTOR_SIZE, 0x102);
+    getSector(dir, 0x101);
+    getSector(dir + SECTOR_SIZE, 0x102);
     testDI = getFileIndex(destinationPath, cwdIdx, dir);
     testRI = getFileIndex(resourcePath, cwdIdx, dir);
     destinationIndex = testDI & 0xFF;
@@ -26,7 +26,7 @@ int main() {
         jmlParents = strntoken(destinationPath, parents, '/', 14);
         strncpy(fname, parents[--jmlParents], 14);
         if (jmlParents != 0) {
-            clear(destinationPath, strlen(destinationPath));
+            fillBuffer(destinationPath, strlen(destinationPath), 0);
             strncpy(destinationPath, parents[0], strlen(parents[0]));
             strncat(destinationPath, "/", 14);
             for (i = 1; i < jmlParents; ++i) {
@@ -42,7 +42,7 @@ int main() {
         }
 
         if (*(dir + i + 2) != 0) {  // sektor files penuh
-            printString("sektor penuh\n");
+            print("sektor penuh\n");
             goto hardLink_error;
             return -1;
         }
@@ -51,8 +51,8 @@ int main() {
         *(dir + i + 1) = *(dir + resourceIndex * 0x10 + 1);
         strncpy(dir + i + 2, fname, 14);
 
-        writeSector(dir, 0x101);
-        writeSector(dir + SECTOR_SIZE, 0x102);
+        updateSector(dir, 0x101);
+        updateSector(dir + SECTOR_SIZE, 0x102);
 
         return -1;
     } else {
@@ -61,6 +61,6 @@ int main() {
     }
 
 hardLink_error:
-    printString("Terjadi kesalahan saat membuat symbolic link\n");
+    print("Terjadi kesalahan saat membuat symbolic link\n");
     return -1;
 }
