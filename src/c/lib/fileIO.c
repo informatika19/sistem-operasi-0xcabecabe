@@ -231,20 +231,58 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
     *result = i;
 }
 
-void removeFile (char *path, int *result, char parentIndex) {
-    char dir[2 * SECTOR_SIZE],
-         map[SECTOR_SIZE],
-         sec[SECTOR_SIZE],
-         emptySec[512];
-    char filename[14];
+void removeFile(char *path, int *result, char parentIndex) {
+    char dir[2 * SECTOR_SIZE], map[SECTOR_SIZE], sec[SECTOR_SIZE];
+    char emptySec[512];
+    char fileName[14];
     char temp[64][14];
+
+    int test, fileIndex, n;
+    int i, j;
+    int secIndex;
+
+    bool found = false;
 
     readSector(map, 0x100);
     readSector(dir, 0x101);
     readSector(dir + SECTOR_SIZE, 0x102);
     readSector(sec, 0x103);
 
-    clear(emptySec, 512);
+    // clear(emptySec, 512);
+
+    test = getFileIndex(path, parentIndex, dir);
+    if (test == -1) {
+        printString(path);
+        printString(" tidak ada.\n");
+        *result = -1;
+        return;
+    }
+
+    fileIndex = test & 0xFF;
+    if (*(dir + fileIndex + 1) == '\xFF') {
+        printString(path);
+        printString(" adalah direktori.\n");
+        *result = -1;
+        return;
+    }
+
+    secIndex = *(dir + (fileIndex * 16) + 1);
+    j = 0;
+    // hapus buffer dan file sector
+    while (*(sec + (secIndex * 16) + j) != 0 && j < 16) {
+        // writeSector(emptySec, (*sec + secIndex * 16 + j));
+        *(map + *(sec + (secIndex * 16) + j)) = 0;
+        // *(sec + secIndex * 16 + j) = 0;
+        j++;
+    }
+
+    clear(dir + fileIndex * 16, 16);
+    clear(sec + secIndex * 16, 16);
+
+    writeSector(map, 0x100);
+    writeSector(dir, 0x101);
+    writeSector(dir + SECTOR_SIZE, 0x102);
+    writeSector(sec, 0x103);
 }
 
 void readSector(char *buffer, int sector) {

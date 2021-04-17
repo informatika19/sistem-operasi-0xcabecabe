@@ -25,7 +25,7 @@ int main(){
     clear(emptySec, 512);
 
     if (*path != '\0') {
-        test = getFileIndex(path, parentIndex, dir);
+        test = getFileIndex(path, cwdIdx, dir);
 
         if (test == -1) {
             printString(path);
@@ -35,7 +35,7 @@ int main(){
 
         parentIndex = test & 0xFF;
         pathSize = strntoken(path, temp, '/', 14);
-        (void) strncmp(filename, temp[pathSize - 1], 14);
+        strncpy(filename, temp[pathSize - 1], 14);
         if (*(dir + parentIndex + 1) != '\xFF') {
             printString(path);
             printString(" bukan direktori.\n");

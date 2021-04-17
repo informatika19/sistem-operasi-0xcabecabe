@@ -136,6 +136,7 @@ int main() {
         histc++;
 
         // remove argv.tmp
+        removeFile("argv.tmp", 0, 0xFF);
     }
 }
 
@@ -205,6 +206,10 @@ void listDir(char *path, char parentIndex) {
     i = 0;
     while (i < 1024) {
         if (*(dir + i) == parentIndex && *(dir + i + 2) != 0) {
+            if (!strncmp(dir + i + 2, "argv.tmp", 8)) {
+                i += 16;
+                continue;
+            }
             printString(dir + i + 2);
             if (*(dir + i + 1) == '\xFF') printString("/");
             printString("\n");
