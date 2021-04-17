@@ -38,5 +38,14 @@ void printNumber(int number);
  * @param length panjang/banyak 0 yang mau diisi
  */
 void clear(char *buffer, int length);
+/**
+ * Fungsi untuk mengeksekusi sebuah program
+ * @param fileName nama file
+ * @param segment nomor sektor program pada image file OS
+ * @param success hasil eksekusi
+ * @param parentIndex index cwd
+ */
+void executeProgram(char *fileName, int segment, int *success,
+                    char parentIndex);
 
 #endif

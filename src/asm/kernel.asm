@@ -5,24 +5,8 @@
 
 ;kernel.asm contains assembly functions that you can use in your kernel
 
-global _putInMemory
 global _makeInterrupt21
-global _launchProgram
 extern _handleInterrupt21
-
-;void putInMemory (int segment, int address, char character)
-_putInMemory:
-	push bp
-	mov bp,sp
-	push ds
-	mov ax,[bp+4]
-	mov si,[bp+6]
-	mov cl,[bp+8]
-	mov ds,ax
-	mov [si],cl
-	pop ds
-	pop bp
-	ret
 
 ;void makeInterrupt21()
 ;this sets up the interrupt 0x21 vector
@@ -56,23 +40,3 @@ _interrupt21ServiceRoutine:
 	pop dx
 
 	iret
-
-; menjalankan sebuah program
-; void launchProgram(int segment)
-_launchProgram:
-    mov bp,sp
-    mov bx,[bp+2]
-
-    mov ax,cs
-    mov ds,ax
-    mov si,jump
-    mov [si+3],bx
-
-    mov ds,bx
-    mov ss,bx
-    mov es,bx
-
-    mov sp,0xfff0
-    mov bp,0xfff0
-
-jump:    jmp 0x0000:0x0000

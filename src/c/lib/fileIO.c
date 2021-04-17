@@ -8,7 +8,7 @@
 
 #include "fileIO.h"
 
-#include "../lib_asm.h"
+#include "lib_asm.h"
 #include "math.h"
 #include "teks.h"
 

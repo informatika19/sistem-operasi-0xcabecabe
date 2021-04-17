@@ -9,9 +9,7 @@
 #ifndef _KERNEL_CABECABE_H_
 #define _KERNEL_CABECABE_H_
 
-typedef char byte;
-
-#include "lib_asm.h"
+#include "lib/lib_asm.h"
 
 #define VIDEO_SEGMENT 0xB000
 #define OFFSET_CHAR 0x8000
@@ -19,23 +17,10 @@ typedef char byte;
 
 /* *** Diimplementasikan di Assembly *** */
 /**
- * Fungsi untuk menulis sebuah karakter pada segment memori dengan offset
- * tertentu
- * @param segment segment memori yang ingin dituliskan karakter
- * @param address address ke memori
- * @param character karakter yang ingin dituliskan
- */
-void putInMemory(int segment, int address, char character);
-/**
  * Fungsi untuk menyiapkan interrupt vector untuk memanggil kode ketika
  * interrupt 0x21 dipanggil
  */
 void makeInterrupt21();
-/**
- * Fungsi untuk me-launch sebuah program yang sudah di-load ke memori.
- * @param segment segmen di memori
- */
-void launchProgram(int segment);
 
 /* *** Diimplementasikan di C *** */
 /**
@@ -51,14 +36,5 @@ void handleInterrupt21(int AX, int BX, int CX, int DX);
  * @param sisi banyak pixel/panjang sisi pada logo
  */
 void printLogoGrafik(int sisi);
-/**
- * Fungsi untuk mengeksekusi sebuah program
- * @param fileName nama file
- * @param segment nomor sektor program pada image file OS
- * @param success hasil eksekusi
- * @param parentIndex index cwd
- */
-void executeProgram(char *fileName, int segment, int *success,
-                    char parentIndex);
 
 #endif

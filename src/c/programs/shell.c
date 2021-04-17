@@ -54,14 +54,12 @@ int main() {
         }
         // isi ke argvTmp (buffer buat file argv.tmp)
         clear(argvTmp, strlen(argvTmp));
-        // itoa(argvTmp, cwdIdx, 3);
         strncpy(argvTmp, &cwdIdx, 1); // is dis possible?
         strncat(argvTmp, " ", 1);
         strncat(argvTmp, argvStart + 1, strlen(argvStart + 1));
         // tulis argumen ke argv.tmp
         secSize = 1;
-        // writeFile(argvTmp, "argv.tmp", &secSize, 0xFF);
-        writeFile(argvStart + 1, "argv.tmp", &secSize, 0xFF);
+        writeFile(argvTmp, "argv.tmp", &secSize, 0xFF);
 
         argc = strntoken(command, argv, ' ', MAXIMUM_CMD_LEN);
 
@@ -108,13 +106,8 @@ int main() {
                     printString("\n");
                 }
             }
-        } else if (strncmp("cp", argv[0], MAXIMUM_CMD_LEN) == 0) {
-            if (argc != 3) {
-                printString(
-                    "Penggunaan: cp <path/ke/sumber> <path/ke/tujuan>\n");
-            } else {
-                cp(cwdIdx, argv[1], argv[2]);
-            }
+        } else if (strncmp("cp", command, MAXIMUM_CMD_LEN) == 0) {
+            executeProgram("/bin/cp", 0x1C00, 0, 0xFF);
         } else if (strncmp("rm", argv[0], MAXIMUM_CMD_LEN) == 0) {
             if (argc != 2) {
                 printString("Penggunaan: rm <path/file>\n");

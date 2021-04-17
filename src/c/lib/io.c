@@ -8,9 +8,10 @@
 
 #include "io.h"
 
-#include "../lib_asm.h"
+#include "lib_asm.h"
 #include "boolean.h"
 #include "math.h"
+#include "fileIO.h"
 
 void printString(char *string) {
     // Pake teletype output (basiclly yang AH=09h atau AH = 10h (?)
@@ -115,5 +116,25 @@ void clear(char *buffer, int length) {
     int i = 0;
     for (; i < length; ++i) {
         buffer[i] = 0;
+    }
+}
+
+void executeProgram(char *filename, int segment, int *success,
+                    char parentIndex) {
+    // Buat buffer
+    int isSuccess;
+    char fileBuffer[512 * 16];
+    // Buka file dengan readFile
+    readFile(&fileBuffer, filename, &isSuccess, parentIndex);
+    // If success, salin dengan putInMemory
+    if (isSuccess > 0) {
+        // launchProgram
+        int i = 0;
+        for (i = 0; i < 512 * 16; i++) {
+            putInMemory(segment, i, fileBuffer[i]);
+        }
+        launchProgram(segment);
+    } else {
+        interrupt(0x21, 0, "File not found!\n", 0, 0);
     }
 }
