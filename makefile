@@ -122,4 +122,4 @@ run: img
 	$(BOCHS) -f $(BOCHS_CONFIG)
 
 clean:
-	$(RM) -f out/*.o out/*.img $(bootloader_out) $(prog_c_obj) $(kernel)
+	$(RM) -f out/*.o out/*.img out/lib/*.o out/programs/*.o $(bootloader_out) $(prog_c_out) $(kernel)
