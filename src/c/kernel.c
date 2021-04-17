@@ -22,6 +22,15 @@ int main() {
     interrupt(0x10, 0x0012, 0, 0, 0);
 
     executeProgram("/bin/shell", 0x5200, 0, 0xFF);
+    // while (true) {
+    //     printString("Echo chamber: ");
+    //     readString(buf);
+    //     res = strntoken(buf, dest, '/', 16);
+    //     while (res--) {
+    //         printString(dest[res]);
+    //         printString("\n");
+    //     }
+    // }
 }
 
 void handleInterrupt21(int AX, int BX, int CX, int DX) {

@@ -113,3 +113,25 @@ int atoi(char *str){
     }
     return result;
 }
+
+char *itoa(char *buf, int i, int n) {
+    char c;
+
+    if(n > 0) {
+        if (i < 0) {
+            strncat(buf, "-", 1);
+            i *= -1;
+        }
+
+        if (i < 10) {
+            c = i + '0';
+            strncat(buf, &c, 1);
+        } else {
+            itoa(buf, div(i, 10), n - 1);
+            itoa(buf, mod(i, 10), n - 1);
+        }
+
+    }
+
+    return buf;
+}

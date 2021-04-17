@@ -14,7 +14,7 @@ AS = nasm
 PY = python3
 RM = rm
 
-ksize = 12
+ksize = 13
 
 CFLAG = -ansi -c
 

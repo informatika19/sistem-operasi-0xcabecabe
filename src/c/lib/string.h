@@ -100,4 +100,13 @@ int strntoken(char *src, char *dest, char delim, int n);
  */
 int atoi(char *str);
 
+/**
+ * Konversi dari int menjadi string
+ * @param buf tempat menampung string
+ * @param i angka yang mau diubah
+ * @param n ukuran buf
+ * @return buf
+ */
+char *itoa(char *buf, int i, int n);
+
 #endif

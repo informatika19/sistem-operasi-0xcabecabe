@@ -11,43 +11,62 @@
 #include "../lib.h"
 
 int main() {
+    int secSize = 1;
     char command[10 * MAXIMUM_CMD_LEN];  // kalo pointer aja takut error
-    char argv[10][MAXIMUM_CMD_LEN];
+    char argvTmp[10 * MAXIMUM_CMD_LEN];
+    char *argvStart;
+    char argv[9][MAXIMUM_CMD_LEN];
 
     char hist[HIST_SIZE][10 * MAXIMUM_CMD_LEN];
 
-    char username[11], cwdName[14], promptHead[3], prompt[27], atSymb[2];
+    char cwdName[14], prompt[27];
     char cwdIdx = 0xFF;
+    char cwdIdxStr[3];
 
     int argc, histc = 0, i;
 
-    strncpy(username, "0xCABECABE", 11);
-    atSymb[0] = '@';
-    atSymb[1] = 0;
     cwdName[0] = '/';
     cwdName[1] = 0;
-    promptHead[0] = '>';
-    promptHead[1] = ' ';
-    promptHead[2] = 0;  // default prompt: "0xCABECABE@/> "
+
+    strncpy(prompt, "0xCABECABE", 10);
+    strncat(prompt, "@", 1);
+    strncat(prompt, cwdName, strlen(cwdName));
+    strncat(prompt, "> ", 2);  // default prompt: "0xCABECABE@/> "
 
     while (true) {
         // set prompt
-        clear(prompt, 27);
-        strncat(prompt, username, strlen(username));
-        strncat(prompt, atSymb, 1);
+        clear(prompt + 11, 16);
         strncat(prompt, cwdName, strlen(cwdName));
-        strncat(prompt, promptHead, 2);
+        strncat(prompt, "> ", 2);
         printString(prompt);
 
         readString(command);
-
-        // parse dan hasil parse
-        argc = strntoken(command, argv, ' ', MAXIMUM_CMD_LEN);
-        if (argc < 0) {
-            // TODO: bad UX because doesn't tell the error
-            printString("Terjadi kesalahan saat membaca perintah\n");
+        if (*command == '\0') {
             continue;
         }
+
+        // parse command
+        argvStart = command;
+
+        // cari tempat mulai nulis argumen, mau ada ataupun tidak
+        while (*argvStart != ' ' && *argvStart != 0) {
+            argvStart += 1 + (1 * (*argvStart == '\\'));
+        }
+        // isi ke argvTmp (buffer buat file argv.tmp)
+        clear(argvTmp, strlen(argvTmp));
+        // itoa(argvTmp, cwdIdx, 3);
+        strncpy(argvTmp, &cwdIdx, 1); // is dis possible?
+        strncat(argvTmp, " ", 1);
+        strncat(argvTmp, argvStart + 1, strlen(argvStart + 1));
+        // tulis argumen ke argv.tmp
+        secSize = 1;
+        // writeFile(argvTmp, "argv.tmp", &secSize, 0xFF);
+        writeFile(argvStart + 1, "argv.tmp", &secSize, 0xFF);
+
+        argc = strntoken(command, argv, ' ', MAXIMUM_CMD_LEN);
+
+        // cut-off command
+        *argvStart = 0;
 
         // eksekusi perintah
         if (strncmp("cd", argv[0], MAXIMUM_CMD_LEN) == 0) {
@@ -72,7 +91,8 @@ int main() {
             }
         } else if (strncmp("ln", argv[0], MAXIMUM_CMD_LEN) == 0) {
             if (argc != 3) {
-                printString("Penggunaan: ln <path/ke/sumber> <path/ke/tujuan>\n");
+                printString(
+                    "Penggunaan: ln <path/ke/sumber> <path/ke/tujuan>\n");
             } else {
                 /*hardLink(cwdIdx, argv[1], argv[2]);*/
             }
@@ -90,12 +110,13 @@ int main() {
             }
         } else if (strncmp("cp", argv[0], MAXIMUM_CMD_LEN) == 0) {
             if (argc != 3) {
-                printString("Penggunaan: cp <path/ke/sumber> <path/ke/tujuan>\n");
+                printString(
+                    "Penggunaan: cp <path/ke/sumber> <path/ke/tujuan>\n");
             } else {
-                /*cp(cwdIdx, argv[1], argv[2]);*/
+                cp(cwdIdx, argv[1], argv[2]);
             }
-        } else if (strncmp("rm", argv[0], MAXIMUM_CMD_LEN) == 0){
-            if (argc != 2){
+        } else if (strncmp("rm", argv[0], MAXIMUM_CMD_LEN) == 0) {
+            if (argc != 2) {
                 printString("Penggunaan: rm <path/file>\n");
             } else {
                 /*rm(cwdIdx, argv[1]);*/
@@ -113,6 +134,8 @@ int main() {
         }
         strcpy(hist[HIST_SIZE - 1], command);
         histc++;
+
+        // remove argv.tmp
     }
 }
 
@@ -206,5 +229,31 @@ void cat(char cwdIdx, char *path) {
     printString("\n");
 }
 
+void cp(char cwdIdx, char *resourcePath, char *destinationPath) {
+    char buf[16 * SECTOR_SIZE];
+    char dir[2 * SECTOR_SIZE];
+    int res = 0;
 
+    readSector(dir, 0x101);
+    readSector(dir + SECTOR_SIZE, 0x102);
 
+    readFile(buf, resourcePath, &res, cwdIdx);
+    if (res <= 0) {  // read error
+        printString("File ");
+        printString(resourcePath);
+        printString(" tidak ditemukan\n");
+        return;
+    }
+
+    writeFile(buf, destinationPath, &res, cwdIdx);
+    if (res <= 0) {  // write errror
+        goto cp_error;
+        return;
+    }
+
+    return;
+
+cp_error:
+    printString("Terjadi kesalahan saat menyalin file.\n");
+    return;
+}

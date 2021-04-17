@@ -20,4 +20,6 @@ void listDir(char *path, char parentIndex);
 
 void cat(char parentIndex, char *path);
 
+void cp(char cwdIdx, char *resourcePath, char *destinationPath);
+
 #endif

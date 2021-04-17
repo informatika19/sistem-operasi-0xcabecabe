@@ -7,8 +7,8 @@ int main(){
     char emptySec[512];
 
     char parentIndex;
-    char *filename;
-    char *temp;
+    char filename[14];
+    char temp[64][14];
     int i, j, test, pathSize;
     char secIndex;
 
@@ -24,7 +24,7 @@ int main(){
 
     clear(emptySec, 512);
 
-    if (path != '\0') {
+    if (*path != '\0') {
         test = getFileIndex(path, parentIndex, dir);
 
         if (test == -1) {
@@ -34,8 +34,8 @@ int main(){
         }
 
         parentIndex = test & 0xFF;
-        pathSize = strntoken(path,temp, '/', 14);
-        filename = temp[pathSize - 1];
+        pathSize = strntoken(path, temp, '/', 14);
+        (void) strncmp(filename, temp[pathSize - 1], 14);
         if (*(dir + parentIndex + 1) != '\xFF') {
             printString(path);
             printString(" bukan direktori.\n");
@@ -45,7 +45,7 @@ int main(){
 
     i = 0;
     while (i < 2*SECTOR_SIZE && found == false) {
-        if (*(dir+i)== parentIndex && *(dir+i+2) == filename){
+        if (*(dir+i)== parentIndex && strncmp(dir + i + 2, filename, 14)){
             secIndex = *dir + i + 1;
             found = true;
         }

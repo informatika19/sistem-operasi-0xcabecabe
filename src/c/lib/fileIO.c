@@ -231,6 +231,22 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
     *result = i;
 }
 
+void removeFile (char *path, int *result, char parentIndex) {
+    char dir[2 * SECTOR_SIZE],
+         map[SECTOR_SIZE],
+         sec[SECTOR_SIZE],
+         emptySec[512];
+    char filename[14];
+    char temp[64][14];
+
+    readSector(map, 0x100);
+    readSector(dir, 0x101);
+    readSector(dir + SECTOR_SIZE, 0x102);
+    readSector(sec, 0x103);
+
+    clear(emptySec, 512);
+}
+
 void readSector(char *buffer, int sector) {
     interrupt(0x13, 0x0201, buffer,                           // number, AX, BX
               div(sector, 36) * 0x100 + mod(sector, 18) + 1,  // CX
