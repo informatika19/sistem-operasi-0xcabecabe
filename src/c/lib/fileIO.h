@@ -49,7 +49,7 @@ char *getFile(char *buffer, char *path, int *result, char parentIndex);
  */
 int updateFile(char *buffer, char *path, int *sectors, char parentIndex);
 /**
- * Fungsi untuk menghapus file dari filesystem
+ * Fungsi untuk menghapus file dari filesystem. BELUM BISA MENGHAPUS FOLDER.
  * @param path path ke file yang ingin di hapus
  * @param result hasil penghapusan file (banyak block yang dihapus)
  * @param parentIndex index dari cwd

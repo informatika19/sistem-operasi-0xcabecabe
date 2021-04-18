@@ -13,19 +13,17 @@ int main() {
 
     getFile(cmd, "/argv.tmp", &res, 0xFF);
     if (res < 0) {
-        print("Gagal menjalankan perintah cp.");
-        return -1;
+        goto error;
     }
 
     argc = strntoken(cmd, argv, ' ', 20);
 
     if (argc != 3) {
-        printNumber(argc);
         print("Penggunaan: cp <path/ke/sumber> <path/ke/tujuan>\n");
-        return -1;
+        goto error;
     }
 
-    cwdIdx = *argv[0];
+    cwdIdx = atoi(argv[0]);
     resourcePath = argv[1];
     destinationPath = argv[2];
 
@@ -34,22 +32,19 @@ int main() {
         print("File ");
         print(resourcePath);
         print(" tidak ditemukan\n");
-        exec("/bin/shell", 0x3800, 0, 0xFF);
-        return -1;
+        goto error;
     }
 
     updateFile(buf, destinationPath, &res, cwdIdx);
     if (res <= 0) {  // write errror
-        goto cp_error;
-        exec("/bin/shell", 0x3800, 0, 0xFF);
-        return -1;
+        goto error;
     }
 
     exec("/bin/shell", 0x3800, 0, 0xFF);
     return 0;
 
-cp_error:
+error:
     print("Terjadi kesalahan saat menyalin file.\n");
-    // executeProgram("/bin/shell", 0x3800, 0, 0xFF);
+    exec("/bin/shell", 0x3800, 0, 0xFF);
     return -1;
 }

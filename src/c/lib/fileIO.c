@@ -109,16 +109,12 @@ void removeFile(char *path, int *result, char parentIndex) {
 
     test = getFileIndex(path, parentIndex, dir);
     if (test == -1) {
-        print(path);
-        print(" tidak ada.\n");
         *result = -1;
         return;
     }
 
     fileIndex = test & 0xFF;
     if (*(dir + fileIndex + 1) == '\xFF') {
-        print(path);
-        print(" adalah direktori.\n");
         *result = -1;
         return;
     }
