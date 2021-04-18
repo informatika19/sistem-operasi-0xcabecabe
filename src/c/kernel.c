@@ -9,8 +9,8 @@
 #include "lib.h"
 
 int main() {
-    char buf[16], dest[16][16];
-    int res, i;
+    // char buf[16], dest[16][16];
+    // int res, i;
     makeInterrupt21();
     // Set video mode
     // http://www.ctyme.com/intr/rb-0069.htm
@@ -21,7 +21,7 @@ int main() {
     readString(0);
     interrupt(0x10, 0x0012, 0, 0, 0);
 
-    executeProgram("/bin/shell", 0x5200, 0, 0xFF);
+    executeProgram("/bin/shell", 0x3800, 0, 0xFF);
     // while (true) {
     //     printString("Echo chamber: ");
     //     readString(buf);
@@ -33,8 +33,8 @@ int main() {
     // }
 
     printString("Otw gila\n");
-    /*while (true)*/
-        /*;*/
+    while (true)
+        ;
 }
 
 void clear(char *buffer, int length) {
@@ -110,17 +110,19 @@ void executeProgram(char *filename, int segment, int *success,
     // Buat buffer
     int isSuccess;
     char fileBuffer[512 * 16];
+    int i = 0;
     // Buka file dengan readFile
     readFile(&fileBuffer, filename, &isSuccess, parentIndex);
     // If success, salin dengan putInMemory
     if (isSuccess > 0) {
         // launchProgram
-        int i = 0;
         for (i = 0; i < 512 * 16; i++) {
             putInMemory(segment, i, fileBuffer[i]);
         }
+        *success = true;
         launchProgram(segment);
     } else {
+        *success = false;
         interrupt(0x21, 0, "File not found!\n", 0, 0);
     }
 }

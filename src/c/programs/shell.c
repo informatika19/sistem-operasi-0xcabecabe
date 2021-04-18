@@ -21,9 +21,10 @@ int main() {
 
     char cwdName[14], prompt[27];
     char cwdIdx = 0xFF;
+    char *aaaaaaaaaaaaaaaaaaaa;
     char cwdIdxStr[3];
 
-    int argc, histc = 0, i;
+    int argc, histc = 0, i, execRes = 0, j = 0;
 
     cwdName[0] = '/';
     cwdName[1] = 0;
@@ -36,7 +37,6 @@ int main() {
     while (true) {
         // set prompt
         fillBuffer(prompt + 11, 16, 0);
-
         strncat(prompt, cwdName, strlen(cwdName));
         strncat(prompt, "> ", 2);
         print(prompt);
@@ -53,13 +53,17 @@ int main() {
         while (*argvStart != ' ' && *argvStart != 0) {
             argvStart += 1 + (1 * (*argvStart == '\\'));
         }
-        // isi ke argvTmp (buffer buat file argv.tmp)
+
+        // remove argv.tmp
+        removeFile("argv.tmp", 0, 0xFF);
+
+        // bikin argv.tmp lagi, pertama isi ke argvTmp (buffer buat file argv.tmp)
         fillBuffer(argvTmp, strlen(argvTmp), 0);
-        strncpy(argvTmp, &cwdIdx, 1); // is dis possible?
+        fillBuffer(cwdIdxStr, 3, 0);
+        itoa(cwdIdxStr, (cwdIdx << 2) >> 2, 3);
+        strncpy(argvTmp, cwdIdxStr, 3);
         strncat(argvTmp, " ", 1);
         strncat(argvTmp, argvStart + 1, strlen(argvStart + 1));
-        // tulis argumen ke argv.tmp
-        secSize = 1;
         updateFile(argvTmp, "argv.tmp", &secSize, 0xFF);
 
         argc = strntoken(command, argv, ' ', MAXIMUM_CMD_LEN);
@@ -116,10 +120,12 @@ int main() {
                 /*rm(cwdIdx, argv[1]);*/
             }
         } else {
-            /*print("Perintah ");*/
-            /*print(argv[0]);*/
-            /*print(" tidak dikenali.\n");*/
-            exec("a", 0x1C00, 0, 0xFF);
+            exec("a", 0x6700, &execRes, 0xFF);
+            if (!execRes) {
+                print("Perintah ");
+                print(argv[0]);
+                print(" tidak dikenali.\n");
+            }
         }
 
         // HISTORY
@@ -129,9 +135,6 @@ int main() {
         }
         strcpy(hist[HIST_SIZE - 1], command);
         histc++;
-
-        // remove argv.tmp
-        removeFile("argv.tmp", 0, 0xFF);
     }
 }
 

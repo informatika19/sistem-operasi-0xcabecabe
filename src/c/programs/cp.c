@@ -17,11 +17,10 @@ int main() {
         return -1;
     }
 
-    print("hadeh\n");
-
     argc = strntoken(cmd, argv, ' ', 20);
 
     if (argc != 3) {
+        printNumber(argc);
         print("Penggunaan: cp <path/ke/sumber> <path/ke/tujuan>\n");
         return -1;
     }
@@ -35,22 +34,22 @@ int main() {
         print("File ");
         print(resourcePath);
         print(" tidak ditemukan\n");
-        // executeProgram("/bin/shell", 0x5200, 0, 0xFF);
+        exec("/bin/shell", 0x3800, 0, 0xFF);
         return -1;
     }
 
     updateFile(buf, destinationPath, &res, cwdIdx);
     if (res <= 0) {  // write errror
         goto cp_error;
-        // executeProgram("/bin/shell", 0x5200, 0, 0xFF);
+        exec("/bin/shell", 0x3800, 0, 0xFF);
         return -1;
     }
 
-    // executeProgram("/bin/shell", 0x5200, 0, 0xFF);
+    exec("/bin/shell", 0x3800, 0, 0xFF);
     return 0;
 
 cp_error:
     print("Terjadi kesalahan saat menyalin file.\n");
-    // executeProgram("/bin/shell", 0x5200, 0, 0xFF);
+    // executeProgram("/bin/shell", 0x3800, 0, 0xFF);
     return -1;
 }
