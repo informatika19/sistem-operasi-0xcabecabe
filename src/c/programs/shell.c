@@ -126,7 +126,7 @@ int main() {
             if (argc != 2) {
                 print("Penggunaan: rm <path/file>\n");
             } else {
-                /*rm(cwdIdx, argv[1]);*/
+                // rm(cwdIdx, argv[1]);
             }
         } else {
             exec("a", 0x3001, &execRes, 0xFF);

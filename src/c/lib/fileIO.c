@@ -129,9 +129,10 @@ void removeFile(char *path, int *result, char parentIndex) {
         j++;
     }
 
+    j = *(dir + fileIndex * 16 + 1);
     for (i = 0; i < 16; ++i) {
         *(dir + fileIndex * 16 + i) = 0;
-        *(sec + fileIndex * 16 + i) = 0;
+        *(sec + j * 16 + i) = 0;
     }
 
     updateSector(map, 0x100);
