@@ -9,8 +9,7 @@
 #include "lib.h"
 
 int main() {
-    // char buf[16], dest[16][16];
-    // int res, i;
+    int res;
     makeInterrupt21();
     // Set video mode
     // http://www.ctyme.com/intr/rb-0069.htm
@@ -21,16 +20,11 @@ int main() {
     readString(0);
     interrupt(0x10, 0x0012, 0, 0, 0);
 
-    executeProgram("/bin/shell", 0x2000, 0, 0xFF);
-    // while (true) {
-    //     printString("Echo chamber: ");
-    //     readString(buf);
-    //     res = strntoken(buf, dest, '/', 16);
-    //     while (res--) {
-    //         printString(dest[res]);
-    //         printString("\n");
-    //     }
-    // }
+    res = 1;
+
+    // writeFile("255", "argv.tmp", &res, 0xFF);
+
+    executeProgram("/bin/shell", 0x3000, 0, 0xFF);
 
     printString("Otw gila\n");
     while (true)
@@ -133,6 +127,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     bool alreadyExists = false, parentExists = (parentIndex == '\xFF');
     char map[SECTOR_SIZE], dir[2 * SECTOR_SIZE], sec[SECTOR_SIZE];
     char fileName[14], parents[64][14];
+    char sectorBuffer[512];
     /*
     -1 file sudah ada
     -2 tidak cukup entri di sektor files
@@ -219,7 +214,8 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     // isi sektornya
     i = 0;
     while (i < sectorNeeded) {
-        writeSector(buffer + (i * SECTOR_SIZE), sectorsToUse[i]);
+        strncpy(sectorBuffer, buffer + (i * SECTOR_SIZE), 512);
+        writeSector(sectorBuffer, sectorsToUse[i]);
         *(map + sectorsToUse[i]) = 0xFF;
         ++i;
     }

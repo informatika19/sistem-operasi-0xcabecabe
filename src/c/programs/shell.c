@@ -59,7 +59,9 @@ int main() {
         // bikin argv.tmp lagi, pertama isi ke argvTmp (buffer buat file argv.tmp)
         execRes = sendArguments(argvStart + 1, cwdIdx);
         if (execRes != 0) {
-            print("Kesalahan.\n");
+            print("Kesalahan ketika memahami perintah ");
+            print(command);
+            print(".\n");
             continue;
         }
 
@@ -109,7 +111,7 @@ int main() {
                 }
             }
         } else if (strncmp("cp", command, MAXIMUM_CMD_LEN) == 0) {
-            exec("/bin/cp", 0x1C00, 0, 0xFF);
+            exec("/bin/cp", 0x3001, 0, 0xFF);
         } else if (strncmp("rm", argv[0], MAXIMUM_CMD_LEN) == 0) {
             if (argc != 2) {
                 print("Penggunaan: rm <path/file>\n");
@@ -117,7 +119,7 @@ int main() {
                 /*rm(cwdIdx, argv[1]);*/
             }
         } else {
-            exec("a", 0x6700, &execRes, 0xFF);
+            exec("a", 0x3001, &execRes, 0xFF);
             if (!execRes) {
                 print("Perintah ");
                 print(argv[0]);
