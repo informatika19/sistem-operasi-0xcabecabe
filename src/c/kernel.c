@@ -22,7 +22,7 @@ int main() {
 
     res = 1;
 
-    // writeFile("255", "argv.tmp", &res, 0xFF);
+    writeFile("255", "argv.tmp", &res, 0xFF);
 
     executeProgram("/bin/shell", 0x3000, 0, 0xFF);
 

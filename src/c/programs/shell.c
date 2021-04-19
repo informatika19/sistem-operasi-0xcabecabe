@@ -12,37 +12,47 @@
 
 int main() {
     int secSize = 1;
-    char command[10 * MAXIMUM_CMD_LEN];  // kalo pointer aja takut error
-    char argvTmp[10 * MAXIMUM_CMD_LEN];
+    char command[10 * 20];  // kalo pointer doang takut error
+    char argv[9][20];
     char *argvStart;
-    char argv[9][MAXIMUM_CMD_LEN];
 
-    char hist[HIST_SIZE][10 * MAXIMUM_CMD_LEN];
+    char hist[HIST_SIZE][10 * 20];
 
     char cwdName[14], prompt[27];
-    char cwdIdx = 0xFF;
-    char *aaaaaaaaaaaaaaaaaaaa;
     char cwdIdxStr[3];
 
-    int argc, histc = 0, i, execRes = 0, j = 0;
+    char cwdIdx;
+    int argc;
+    int histc = 0;
+    int i;
+    int execRes = 0;
 
-    cwdName[0] = '/';
-    cwdName[1] = 0;
+    cwdIdx = 0xFF;
 
     fillBuffer(prompt, 27, 0);
     strncpy(prompt, "0xCABECABE", 10);
     strncat(prompt, "@", 1);
-    strncat(prompt, "/", 1);
-    strncat(prompt, "> ", 2);  // default prompt: "0xCABECABE@/> "
 
     while (true) {
+        // baca cwdIdx
+        argc = getArguments(argv);
+        if (argc < 0) {
+            print("Error starting shell.\n");
+            while (true) // udah ngehang aja di sini
+                ;
+        }
+        cwdIdx = atoi(argv[0]) & 0xFF;
+
+        // baca nama path
+        getCwdName(cwdName, cwdIdx);
+
         // set prompt
         fillBuffer(prompt + 11, 16, 0);
         strncat(prompt, cwdName, strlen(cwdName));
         strncat(prompt, "> ", 2);
         print(prompt);
 
-        fillBuffer(command, 10 * MAXIMUM_CMD_LEN, 0);
+        fillBuffer(command, 10 * 20, 0);
         read(command);
         if (*command == '\0') {
             continue;
@@ -65,19 +75,19 @@ int main() {
             continue;
         }
 
-        argc = strntoken(command, argv, ' ', MAXIMUM_CMD_LEN);
+        argc = strntoken(command, argv, ' ', 20);
 
         // cut-off command
         *argvStart = 0;
 
         // eksekusi perintah
-        if (strncmp("cd", argv[0], MAXIMUM_CMD_LEN) == 0) {
+        if (strncmp("cd", argv[0], 20) == 0) {
             if (argc != 2) {
                 print("Penggunaan: cd <path/ke/direktori>\n");
             } else {
                 cd(&cwdIdx, argv[1], cwdName);
             }
-        } else if (strncmp("ls", argv[0], MAXIMUM_CMD_LEN) == 0) {
+        } else if (strncmp("ls", argv[0], 20) == 0) {
             if (argc == 1) {
                 listDir("", cwdIdx);
             } else if (argc == 2) {
@@ -85,34 +95,34 @@ int main() {
             } else {
                 print("Penggunaan: ls [path/ke/direktori]");
             }
-        } else if (strncmp("cat", argv[0], MAXIMUM_CMD_LEN) == 0) {
+        } else if (strncmp("cat", argv[0], 20) == 0) {
             if (argc != 2) {
                 print("Penggunaan: cat <path/file>\n");
             } else {
                 cat(cwdIdx, argv[1]);
             }
-        } else if (strncmp("ln", argv[0], MAXIMUM_CMD_LEN) == 0) {
+        } else if (strncmp("ln", argv[0], 20) == 0) {
             if (argc != 3) {
                 print(
                     "Penggunaan: ln <path/ke/sumber> <path/ke/tujuan>\n");
             } else {
                 /*hardLink(cwdIdx, argv[1], argv[2]);*/
             }
-        } else if (strncmp("cwd", argv[0], MAXIMUM_CMD_LEN) == 0) {
+        } else if (strncmp("cwd", argv[0], 20) == 0) {
             printNumber(cwdIdx);
             print(" - ");
             print(cwdName);
             print("\n");
-        } else if (strncmp("history", argv[0], MAXIMUM_CMD_LEN) == 0) {
+        } else if (strncmp("history", argv[0], 20) == 0) {
             for (i = 0; i < HIST_SIZE; i++) {
                 if (strlen(hist[i]) != 0) {
                     print(hist[i]);
                     print("\n");
                 }
             }
-        } else if (strncmp("cp", command, MAXIMUM_CMD_LEN) == 0) {
+        } else if (strncmp("cp", command, 20) == 0) {
             exec("/bin/cp", 0x3001, 0, 0xFF);
-        } else if (strncmp("rm", argv[0], MAXIMUM_CMD_LEN) == 0) {
+        } else if (strncmp("rm", argv[0], 20) == 0) {
             if (argc != 2) {
                 print("Penggunaan: rm <path/file>\n");
             } else {
@@ -142,8 +152,8 @@ void cd(char *parentIndex, char *path, char *newCwdName) {
     int tmpPI = *parentIndex, test;
     bool found = false, isDir = true;
 
-    if (strncmp(path, ".", MAXIMUM_CMD_LEN)) {
-        if (strncmp(path, "/", MAXIMUM_CMD_LEN) != 0) {
+    if (strncmp(path, ".", 20)) {
+        if (strncmp(path, "/", 20) != 0) {
             getSector(dir, 0x101);
             getSector(dir + SECTOR_SIZE, 0x102);
 
@@ -157,12 +167,9 @@ void cd(char *parentIndex, char *path, char *newCwdName) {
 
         if (found) {
             isDir = *(dir + (tmpPI * 0x10) + 1) == '\xFF';
-            if (tmpPI == 0xFF) {  // cd ke root
-                *parentIndex = 0xFF;
-                strncpy(newCwdName, "/", 14);
-            } else if (isDir) {
-                *parentIndex = tmpPI;
-                strncpy(newCwdName, dir + (tmpPI * 0x10) + 2, 14);
+            test = 1;
+            if (isDir || tmpPI == 0xFF) {  // cd ke root
+                sendArguments("", tmpPI);
             } else {
                 print(path);
                 print(" bukan direktori.\n");
@@ -229,4 +236,20 @@ void cat(char cwdIdx, char *path) {
         print(path);
     }
     print("\n");
+}
+
+char *getCwdName(char *cwdName, char cwdIdx) {
+    char files[2 * SECTOR_SIZE];
+    if (cwdIdx == '\xFF') {
+        cwdName[0] = '/';
+        cwdName[1] = 0;
+    } else {
+
+        getSector(files, 0x101);
+        getSector(files + 512, 0x102);
+
+        strncpy(cwdName, files + (cwdIdx * 16) + 2, 13);
+    }
+
+    return cwdName;
 }

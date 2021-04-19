@@ -12,8 +12,6 @@
 #define MAXIMUM_CMD_LEN 10
 #define HIST_SIZE 5
 
-int runShell();
-
 void cd(char *parentIndex, char *path, char *newCwdName);
 
 void listDir(char *path, char parentIndex);
@@ -21,5 +19,7 @@ void listDir(char *path, char parentIndex);
 void cat(char parentIndex, char *path);
 
 void cp(char cwdIdx, char *resourcePath, char *destinationPath);
+
+char *getCwdName(char *cwdName, char cwdIdx);
 
 #endif
