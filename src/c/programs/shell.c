@@ -50,13 +50,11 @@ int main() {
         fillBuffer(prompt + 11, 16, 0);
         strncat(prompt, cwdName, strlen(cwdName));
         strncat(prompt, "> ", 2);
-        print(prompt);
 
-        fillBuffer(command, 10 * 20, 0);
-        read(command);
-        if (*command == '\0') {
-            continue;
-        }
+        do {
+            print(prompt);
+            read(command);
+        } while (*command == 0);
 
         // parse command
         argvStart = command;

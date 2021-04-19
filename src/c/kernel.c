@@ -127,7 +127,6 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     bool alreadyExists = false, parentExists = (parentIndex == '\xFF');
     char map[SECTOR_SIZE], dir[2 * SECTOR_SIZE], sec[SECTOR_SIZE];
     char fileName[14], parents[64][14];
-    char sectorBuffer[512];
     /*
     -1 file sudah ada
     -2 tidak cukup entri di sektor files
@@ -214,8 +213,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     // isi sektornya
     i = 0;
     while (i < sectorNeeded) {
-        strncpy(sectorBuffer, buffer + (i * SECTOR_SIZE), 512);
-        writeSector(sectorBuffer, sectorsToUse[i]);
+        writeSector(buffer + (i * SECTOR_SIZE), sectorsToUse[i]);
         *(map + sectorsToUse[i]) = 0xFF;
         ++i;
     }

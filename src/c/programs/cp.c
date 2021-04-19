@@ -12,7 +12,7 @@ int main() {
     int res;
     char *resourcePath;
     char *destinationPath;
-    char cwdIdx = atoi(argv[3])&0xFF;
+    char cwdIdx;
 
     argc = getArguments(argv);
 
@@ -42,11 +42,11 @@ int main() {
         goto error;
     }
 
+exec_shell:
+    sendArguments("", cwdIdx);
     exec("/bin/shell", 0x3000, 0, 0xFF);
-    return 0;
 
 error:
     print("Terjadi kesalahan saat menyalin file.\n");
-    exec("/bin/shell", 0x3000, 0, 0xFF);
-    return -1;
+    goto exec_shell;
 }
