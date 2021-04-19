@@ -1,9 +1,12 @@
-#include "../lib.h"
+#include "../lib/fileIO.h"
+#include "../lib/teks.h"
+#include "../lib/utilities.h"
 
 // TODO: cek yang mau di-link file apa dir
 int main() {
     char cmd[10 * 20];
-    int argc; char argv[5][20];
+    char argv[5][20];
+    int argc;
 
     char buf[16 * SECTOR_SIZE];
     int res;
@@ -11,19 +14,18 @@ int main() {
     char *destinationPath;
     char cwdIdx = atoi(argv[3])&0xFF;
 
-    getFile(cmd, "/argv.tmp", &res, 0xFF);
-    if (res < 0) {
+    argc = getArguments(argv);
+
+    if (argc < 0) {
         goto error;
     }
-
-    argc = strntoken(cmd, argv, ' ', 20);
 
     if (argc != 3) {
         print("Penggunaan: cp <path/ke/sumber> <path/ke/tujuan>\n");
         goto error;
     }
 
-    cwdIdx = atoi(argv[0]);
+    cwdIdx = atoi(argv[0]) & 0xFF;
     resourcePath = argv[1];
     destinationPath = argv[2];
 
@@ -40,11 +42,11 @@ int main() {
         goto error;
     }
 
-    exec("/bin/shell", 0x3800, 0, 0xFF);
+    exec("/bin/shell", 0x3000, 0, 0xFF);
     return 0;
 
 error:
     print("Terjadi kesalahan saat menyalin file.\n");
-    exec("/bin/shell", 0x3800, 0, 0xFF);
+    exec("/bin/shell", 0x3000, 0, 0xFF);
     return -1;
 }

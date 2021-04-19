@@ -9,7 +9,7 @@
 #ifndef _SHELL_CABECABE_H_
 #define _SHELL_CABECABE_H_
 
-#define MAXIMUM_CMD_LEN 20
+#define MAXIMUM_CMD_LEN 10
 #define HIST_SIZE 5
 
 int runShell();

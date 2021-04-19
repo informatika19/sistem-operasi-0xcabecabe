@@ -21,7 +21,7 @@ int main() {
     readString(0);
     interrupt(0x10, 0x0012, 0, 0, 0);
 
-    executeProgram("/bin/shell", 0x3800, 0, 0xFF);
+    executeProgram("/bin/shell", 0x2000, 0, 0xFF);
     // while (true) {
     //     printString("Echo chamber: ");
     //     readString(buf);

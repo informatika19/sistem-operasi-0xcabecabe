@@ -25,4 +25,19 @@ char *fillBuffer(char *buf, int n, char filler);
  * @param parentIndex index cwd
  */
 void exec(char *fileName, int segment, int *success, char parentIndex);
+/**
+ * Fungsi untuk mengirimkan argumen untuk suatu program. Current working
+ * directory index akan dianggap sebagai argumen pertama (indeks 0).
+ * @param argv string berisi argumen yang mau dikirim (dipisahkan spasi)
+ * @param cwdIndex current working directory index
+ * @return 0 jika berhasil, -1 jika gagal
+ */
+int sendArguments(char *argv, char cwdIndex);
+/**
+ * Fungsi untuk menerima argumen yang dikirimkan. Panjang string maksimum
+ * setiap argumen yang dibaca adalah 19 karakter.
+ * @param argv array of string untuk menampung argumen-argumen
+ * @return banyak argumen yang dibaca, jika gagal akan return -1
+ */
+int getArguments(char *argv);
 #endif

@@ -29,9 +29,10 @@ int main() {
     cwdName[0] = '/';
     cwdName[1] = 0;
 
+    fillBuffer(prompt, 27, 0);
     strncpy(prompt, "0xCABECABE", 10);
     strncat(prompt, "@", 1);
-    strncat(prompt, cwdName, strlen(cwdName));
+    strncat(prompt, "/", 1);
     strncat(prompt, "> ", 2);  // default prompt: "0xCABECABE@/> "
 
     while (true) {
@@ -41,6 +42,7 @@ int main() {
         strncat(prompt, "> ", 2);
         print(prompt);
 
+        fillBuffer(command, 10 * MAXIMUM_CMD_LEN, 0);
         read(command);
         if (*command == '\0') {
             continue;
@@ -54,17 +56,12 @@ int main() {
             argvStart += 1 + (1 * (*argvStart == '\\'));
         }
 
-        // remove argv.tmp
-        removeFile("argv.tmp", 0, 0xFF);
-
         // bikin argv.tmp lagi, pertama isi ke argvTmp (buffer buat file argv.tmp)
-        fillBuffer(argvTmp, strlen(argvTmp), 0);
-        fillBuffer(cwdIdxStr, 3, 0);
-        itoa(cwdIdxStr, (cwdIdx << 2) >> 2, 3);
-        strncpy(argvTmp, cwdIdxStr, 3);
-        strncat(argvTmp, " ", 1);
-        strncat(argvTmp, argvStart + 1, strlen(argvStart + 1));
-        updateFile(argvTmp, "argv.tmp", &secSize, 0xFF);
+        execRes = sendArguments(argvStart + 1, cwdIdx);
+        if (execRes != 0) {
+            print("Kesalahan.\n");
+            continue;
+        }
 
         argc = strntoken(command, argv, ' ', MAXIMUM_CMD_LEN);
 
@@ -230,33 +227,4 @@ void cat(char cwdIdx, char *path) {
         print(path);
     }
     print("\n");
-}
-
-void cp(char cwdIdx, char *resourcePath, char *destinationPath) {
-    char buf[16 * SECTOR_SIZE];
-    char dir[2 * SECTOR_SIZE];
-    int res = 0;
-
-    getSector(dir, 0x101);
-    getSector(dir + SECTOR_SIZE, 0x102);
-
-    getFile(buf, resourcePath, &res, cwdIdx);
-    if (res <= 0) {  // read error
-        print("File ");
-        print(resourcePath);
-        print(" tidak ditemukan\n");
-        return;
-    }
-
-    updateFile(buf, destinationPath, &res, cwdIdx);
-    if (res <= 0) {  // write errror
-        goto cp_error;
-        return;
-    }
-
-    return;
-
-cp_error:
-    print("Terjadi kesalahan saat menyalin file.\n");
-    return;
 }
