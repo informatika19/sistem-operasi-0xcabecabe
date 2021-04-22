@@ -6,13 +6,17 @@
 int main() {
     char cmd[10 * 20];
     char argv[5][20];
+    char paths[64][14];
+    char dir[1024];
     int argc;
 
     char buf[16 * SECTOR_SIZE];
-    int res;
     char *resourcePath;
     char *destinationPath;
     char cwdIdx;
+
+    int res, test;
+    char temp;
 
     argc = getArguments(argv);
 
@@ -30,6 +34,24 @@ int main() {
     resourcePath = argv[1];
     destinationPath = argv[2];
 
+    getSector(dir, 0x101);
+    getSector(dir + 512, 0x102);
+    test = getFileIndex(destinationPath, cwdIdx, dir);
+
+    // if (test != -1) {
+    //     // artinya udah ada file dengan nama sama
+    //     temp = test & 0xFF;
+    //     if (*(dir + temp * 16 + 1) != '\xFF') {
+    //         print(destinationPath);
+    //         print(" sudah ada.\n");
+    //         goto error;
+    //     }
+
+    //     // dapetin nama file buat destination path
+    //     res = strntoken(resourcePath, paths, '/', 14);
+    //     strncat(destinationPath, paths[res - 1], 14);
+    // }
+
     getFile(buf, resourcePath, &res, cwdIdx);
     if (res <= 0) {  // read error
         print("File ");
@@ -46,7 +68,7 @@ int main() {
 
 exec_shell:
     sendArguments("", cwdIdx);
-    exec("/bin/shell", 0x3002, 0, 0xFF);
+    exec("/bin/shell", 0x2002, 0, 0xFF);
 
 error:
     goto exec_shell;

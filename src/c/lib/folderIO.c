@@ -29,7 +29,6 @@ void createFolder(char *fileName, int *success, char parentIndex) {
     getSector(dir + 512, 0x102);
 
     // nyari tempat kosong di sector
-    fileIndex = test & 0xFF;
     for (i=0;i * 16 <SECTOR_SIZE;i++) {
         if (*(dir + i * 16 + 2) == 0) {
             break;
@@ -39,7 +38,7 @@ void createFolder(char *fileName, int *success, char parentIndex) {
     // print("berhasil nyari tempat kosong \n");
     // perlu cari sektor kosong?
     // (test) FF (nama file)
-    *(dir + i * 16) = fileIndex;
+    *(dir + i * 16) = parentIndex;
     *(dir + i * 16 + 1) = 0xFF;
     strncpy(dir + i * 16 + 2, fileName, 14);
 

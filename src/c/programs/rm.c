@@ -40,8 +40,6 @@ int main(){
 
     // ntar bedain kalo delete file atau folder
     removeFile(path, &result, cwdIdx);
-    printNumber(result);
-    print("\n");
     if (result == -2) {
         if (!isDeletingFolder) {
             print(path);
@@ -62,7 +60,7 @@ int main(){
 
 exec_shell:
     sendArguments("", cwdIdx);
-    exec("/bin/shell", 0x3002, 0, 0xFF);
+    exec("/bin/shell", 0x2002, 0, 0xFF);
 
 error:
     // print("Terjadi kesalahan saat menghapus file");

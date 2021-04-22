@@ -57,7 +57,7 @@ int getArguments(char *argv) {
     char cmd[512];
     int res, i;
 
-    getFile(cmd, "/argv.tmp", &res, 0xFF);
+    getFile(cmd, "argv.tmp", &res, 0xFF);
     if (res < 0) {
         return -1;
     }

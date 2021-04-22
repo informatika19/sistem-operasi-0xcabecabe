@@ -24,7 +24,7 @@ int main() {
 
     writeFile("255", "argv.tmp", &res, 0xFF);
 
-    executeProgram("/bin/shell", 0x3000, 0, 0xFF);
+    executeProgram("/bin/shell", 0x2000, 0, 0xFF);
 
     printString("Otw gila\n");
     while (true)
@@ -263,7 +263,7 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
     entry = dir + (i * 0x10);
 
     // bukan file
-    if (*(entry + 1) > 0x1F) {
+    if (*(entry + 1) > '\x1F') {
         *result = -1;
         return;
     }
