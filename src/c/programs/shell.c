@@ -78,6 +78,8 @@ int main() {
         // cut-off command
         *argvStart = 0;
 
+        // exec(command, 0x3001, 0, 0x00);
+
         // eksekusi perintah
         if (strncmp("cd", argv[0], 20) == 0) {
             if (argc != 2) {
@@ -94,11 +96,7 @@ int main() {
                 print("Penggunaan: ls [path/ke/direktori]");
             }
         } else if (strncmp("cat", argv[0], 20) == 0) {
-            if (argc != 2) {
-                print("Penggunaan: cat <path/file>\n");
-            } else {
-                cat(cwdIdx, argv[1]);
-            }
+            exec("/bin/cat", 0x3001, 0, 0xFF);
         } else if (strncmp("ln", argv[0], 20) == 0) {
             exec("/bin/ln", 0x3001, 0, 0xFF);
         } else if (strncmp("cwd", argv[0], 20) == 0) {
@@ -115,12 +113,10 @@ int main() {
             }
         } else if (strncmp("cp", command, 20) == 0) {
             exec("/bin/cp", 0x3001, 0, 0xFF);
-        } else if (strncmp("rm", argv[0], 20) == 0) {
-            if (argc != 2) {
-                print("Penggunaan: rm <path/file>\n");
-            } else {
-                // rm(cwdIdx, argv[1]);
-            }
+        } else if (strncmp("rm", command, 20) == 0) {
+            exec("/bin/rm", 0x3001, 0, 0xFF);
+        } else if (strncmp("mkdir", command, 5) == 0) {
+            exec("/bin/mkdir", 0x3001, 0, 0xFF);
         } else {
             exec("a", 0x3001, &execRes, 0xFF);
             if (!execRes) {

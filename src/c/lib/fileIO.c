@@ -8,6 +8,7 @@
 
 #include "fileIO.h"
 
+#include "io.h"
 #include "lib_asm.h"
 #include "math.h"
 #include "teks.h"
@@ -112,8 +113,8 @@ void removeFile(char *path, int *result, char parentIndex) {
     }
 
     fileIndex = test & 0xFF;
-    if (*(dir + fileIndex + 1) == '\xFF') {
-        *result = -1;
+    if (*(dir + fileIndex * 16 + 1) > '\x1F') {
+        *result = -2;
         return;
     }
 
@@ -121,9 +122,7 @@ void removeFile(char *path, int *result, char parentIndex) {
     j = 0;
     // hapus buffer dan file sector
     while (*(sec + (secIndex * 16) + j) != 0 && j < 16) {
-        // writeSector(emptySec, (*sec + secIndex * 16 + j));
         *(map + *(sec + (secIndex * 16) + j)) = 0;
-        // *(sec + secIndex * 16 + j) = 0;
         j++;
     }
 

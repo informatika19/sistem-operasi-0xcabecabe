@@ -1,6 +1,7 @@
 // TODO: FINISH ME
 
 #include "../lib/fileIO.h"
+#include "../lib/folderIO.h"
 #include "../lib/teks.h"
 #include "../lib/utilities.h"
 
@@ -39,8 +40,23 @@ int main(){
 
     // ntar bedain kalo delete file atau folder
     removeFile(path, &result, cwdIdx);
-    if (result == -1) {
-        print("Terjadi kesalahan saat menghapus file");
+    printNumber(result);
+    print("\n");
+    if (result == -2) {
+        if (!isDeletingFolder) {
+            print(path);
+            print(" adalah sebuah folder.\n");
+            goto error;
+        }
+
+        removeFolder(path, &result, cwdIdx);
+        if (result == 0) {
+            goto exec_shell;
+        }
+    }
+
+    if (result < 0) {
+        print("Terjadi kesalahan saat menghapus file.\n");
         goto error;
     }
 
