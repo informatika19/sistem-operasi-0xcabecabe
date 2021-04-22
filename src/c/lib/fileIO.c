@@ -100,8 +100,6 @@ void removeFile(char *path, int *result, char parentIndex) {
     int i, j;
     int secIndex;
 
-    bool found = false;
-
     getSector(map, 0x100);
     getSector(dir, 0x101);
     getSector(dir + 512, 0x102);

@@ -22,8 +22,8 @@
  */
 void makeInterrupt21();
 /**
- * Fungsi untuk menulis sebuah karakter pada segment memori dengan offset
- * tertentu
+ * Fungsi untuk menaruh sebuah byte di memori. Perhitungan adalah:
+ * segment * (2 ** 4) + address
  * @param segment segment memori yang ingin dituliskan karakter
  * @param address address ke memori
  * @param character karakter yang ingin dituliskan

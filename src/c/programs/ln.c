@@ -11,12 +11,30 @@ int main() {
     char fname[14];
     char parents[64][14];
     int tmp = 2 * SECTOR_SIZE;
-    char *resourcePath = argv[1];
-    char *destinationPath = argv[2];
-    char cwdIdx = atoi(argv[3])&0xFF;
+
+    char *resourcePath;
+    char *destinationPath;
+    char cwdIdx;
+
+    argc = getArguments(argv);
+
+    if (argc < 0) {
+        print("Terjadi kesalahan saat mendapatkan argumen perintah.\n");
+        goto error;
+    }
+
+    if (argc != 3) {
+        print("Penggunaan: ln <path/ke/sumber> <path/ke/tujuan>\n");
+        goto error;
+    }
+
+    cwdIdx = atoi(argv[0]) & 0xFF;
+    resourcePath = argv[1];
+    destinationPath = argv[2];
 
     getSector(dir, 0x101);
     getSector(dir + SECTOR_SIZE, 0x102);
+
     testDI = getFileIndex(destinationPath, cwdIdx, dir);
     testRI = getFileIndex(resourcePath, cwdIdx, dir);
     destinationIndex = testDI & 0xFF;
@@ -43,8 +61,7 @@ int main() {
 
         if (*(dir + i + 2) != 0) {  // sektor files penuh
             print("sektor penuh\n");
-            goto hardLink_error;
-            return -1;
+            goto error;
         }
 
         *(dir + i) = cwdIdx;
@@ -54,13 +71,25 @@ int main() {
         updateSector(dir, 0x101);
         updateSector(dir + SECTOR_SIZE, 0x102);
 
-        return -1;
+        goto exec_shell;
+
+exec_shell:
+        sendArguments("", cwdIdx);
+        exec("/bin/shell", 0x3002, 0, 0xFF);
+
     } else {
-        goto hardLink_error;
-        return -1;
+        if (testDI != -1) {
+            print(destinationPath);
+            print(" sudah ada.\n");
+        }
+        if (testRI == -1) {
+            print(resourcePath);
+            print(" tidak ada.\n");
+        }
+        goto error;
     }
 
-hardLink_error:
-    print("Terjadi kesalahan saat membuat symbolic link\n");
-    return -1;
+error:
+    // print("Terjadi kesalahan saat membuat symbolic link\n");
+    goto exec_shell;
 }

@@ -100,12 +100,7 @@ int main() {
                 cat(cwdIdx, argv[1]);
             }
         } else if (strncmp("ln", argv[0], 20) == 0) {
-            if (argc != 3) {
-                print(
-                    "Penggunaan: ln <path/ke/sumber> <path/ke/tujuan>\n");
-            } else {
-                /*hardLink(cwdIdx, argv[1], argv[2]);*/
-            }
+            exec("/bin/ln", 0x3001, 0, 0xFF);
         } else if (strncmp("cwd", argv[0], 20) == 0) {
             printNumber(cwdIdx);
             print(" - ");

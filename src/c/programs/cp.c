@@ -17,6 +17,7 @@ int main() {
     argc = getArguments(argv);
 
     if (argc < 0) {
+        print("Terjadi kesalahan saat mendapatkan argumen perintah.\n");
         goto error;
     }
 
@@ -39,14 +40,14 @@ int main() {
 
     updateFile(buf, destinationPath, &res, cwdIdx);
     if (res <= 0) {  // write errror
+        print("Terjadi kesalahan saat menyalin file.\n");
         goto error;
     }
 
 exec_shell:
     sendArguments("", cwdIdx);
-    exec("/bin/shell", 0x3000, 0, 0xFF);
+    exec("/bin/shell", 0x3002, 0, 0xFF);
 
 error:
-    print("Terjadi kesalahan saat menyalin file.\n");
     goto exec_shell;
 }
