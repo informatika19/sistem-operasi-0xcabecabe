@@ -7,6 +7,7 @@
 #include "kernel.h"
 
 #include "lib.h"
+#include "lib/io.h"
 
 int main() {
     int res;
@@ -106,7 +107,7 @@ void executeProgram(char *filename, int segment, int *success,
     // Buka file dengan readFile
     readFile(&fileBuffer, filename, success, parentIndex);
     // If success, salin dengan putInMemory
-    if (*success) {
+    if (*success > 0) {
         // launchProgram
         int i = 0;
         for (i = 0; i < 512 * 16; i++) {
@@ -155,7 +156,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
             strncat(path, parents[i], strlen(parents[i]));
             strncat(path, "/", 2);
         }
-        parentIndex = getFileIndex(path, parentIndex, dir) & 0xFF;
+        parentIndex = getFileIndex(path, parentIndex, dir);
     }
 
     // akibat dari path yang diberikan tidak valid
@@ -164,11 +165,13 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
         return;
     }
 
+    parentIndex &= 0xFF;
+
     // ngecek file dengan yang sama di parent index yang sama udah ada atau
     // belum
     i = 0;
+    parentExists = parentExists || *(dir + parentIndex * 16 + 2) != 0;
     while (i < 2 * SECTOR_SIZE && !alreadyExists) {
-        parentExists = !parentExists ? *(dir + i) == parentIndex : parentExists;
         alreadyExists = *(dir + i) == parentIndex &&
                         strncmp(dir + i + 2, fileName, 13) == 0;
         i += 0x10;

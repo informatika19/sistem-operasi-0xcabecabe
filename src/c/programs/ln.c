@@ -16,6 +16,8 @@ int main() {
     char *destinationPath;
     char cwdIdx;
 
+    char oldIdx;
+
     argc = getArguments(argv);
 
     if (argc < 0) {
@@ -29,6 +31,7 @@ int main() {
     }
 
     cwdIdx = atoi(argv[0]) & 0xFF;
+    oldIdx = cwdIdx;
     resourcePath = argv[1];
     destinationPath = argv[2];
 
@@ -74,7 +77,7 @@ int main() {
         goto exec_shell;
 
 exec_shell:
-        sendArguments("", cwdIdx);
+        sendArguments("", oldIdx);
         exec("/bin/shell", 0x2000, 0, 0xFF);
 
     } else {

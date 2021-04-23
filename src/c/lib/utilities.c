@@ -24,10 +24,10 @@ char *fillBuffer(char *buf, int n, char filler) {
 
 void exec(char *fileName, int segment, int *success, char parentIndex) {
     interrupt(0x21, parentIndex * 0x100 + 0x06, fileName, segment, success);
-    if (*success) {
-        while (true)
-            ;
-    }
+    // if (*success) {
+    //     while (true)
+    //         ;
+    // }
 
     return;
 }

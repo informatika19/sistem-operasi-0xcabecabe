@@ -8,6 +8,8 @@
 
 #include "folderIO.h"
 #include "fileIO.h"
+#include "utilities.h"
+#include "teks.h"
 
 void createFolder(char *fileName, int *success, char parentIndex) {
     char dir[2 * 512];
@@ -17,7 +19,6 @@ void createFolder(char *fileName, int *success, char parentIndex) {
 
     int test, fileIndex;
     int i;
-    int j;
 
     test = getFileIndex(fileName, parentIndex, dir);
     if (test != -1) {
@@ -35,8 +36,6 @@ void createFolder(char *fileName, int *success, char parentIndex) {
         }
     }
 
-    // print("berhasil nyari tempat kosong \n");
-    // perlu cari sektor kosong?
     // (test) FF (nama file)
     *(dir + i * 16) = parentIndex;
     *(dir + i * 16 + 1) = 0xFF;
@@ -79,10 +78,8 @@ void removeFolder(char *path, int *success, char parentIndex) {
                 childName = dir + j * 16 + 2;
                 if(*(dir + j * 16 + 1) > '\x1F'){
                     removeFolder(childName, success, fileIndex);
-                    printNumber(*success);
                 } else {
                     removeFile(childName, success, fileIndex);
-                    printNumber(*success);
                 }
             }
             j++;
@@ -96,9 +93,7 @@ void removeFolder(char *path, int *success, char parentIndex) {
         return;
     }
 
-    for (i = 0; i < 16 && *(dir + fileIndex * 16 + i); ++i) {
-        *(dir + fileIndex * 16 + i) = 0;
-    }
+    fillBuffer(dir + fileIndex * 16, 16, 0);
 
     updateSector(dir, 0x101);
     updateSector(dir + 512, 0x102);

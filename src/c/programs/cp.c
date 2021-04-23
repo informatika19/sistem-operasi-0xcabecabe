@@ -41,8 +41,8 @@ int main() {
 
     if (test != -1) {
         // artinya udah ada file dengan nama sama
-        temp = test & 0xFF;
-        if (temp == '\xFF' || *(dir + temp * 16 + 1) != '\xFF') {
+        temp = test & 0xFF; // parent index
+        if (temp != '\xFF' && *(dir + temp * 16 + 1) != '\xFF') {
             print(destinationPath);
             print(" sudah ada.\n");
             goto error;
@@ -50,6 +50,7 @@ int main() {
 
         // dapetin nama file buat destination path
         res = strntoken(resourcePath, paths, '/', 14);
+        strncat(destinationPath, "/", 1);
         strncat(destinationPath, paths[res - 1], 14);
     }
 
@@ -63,7 +64,22 @@ int main() {
 
     updateFile(buf, destinationPath, &res, cwdIdx);
     if (res <= 0) {  // write errror
-        print("Terjadi kesalahan saat menyalin file.\n");
+        switch (res) {
+            case -1:
+                print(destinationPath);
+                print(" sudah ada.\n");
+                break;
+            case -2:
+            case -3:
+                print("File system penuh.\n");
+                break;
+            case -4:
+                print(destinationPath);
+                print(" invalid.\n");
+                break;
+            default:
+                print("Terjadi kesalahan saat menyalin file.\n");
+        }
         goto error;
     }
 exec_shell:

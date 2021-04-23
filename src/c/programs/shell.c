@@ -52,6 +52,7 @@ int main() {
         strncat(prompt, "> ", 2);
 
         do {
+            fillBuffer(command, 200, 0);
             print(prompt);
             read(command);
         } while (*command == 0);
@@ -78,8 +79,6 @@ int main() {
         // cut-off command
         *argvStart = 0;
 
-        // exec(command, 0x2000, 0, 0x00);
-
         // eksekusi perintah
         if (strncmp("cd", argv[0], 20) == 0) {
             if (argc != 2) {
@@ -95,37 +94,16 @@ int main() {
             } else {
                 print("Penggunaan: ls [path/ke/direktori]");
             }
-        } else if (strncmp("cat", argv[0], 20) == 0) {
-            exec("/bin/cat", 0x2000, 0, 0xFF);
-        } else if (strncmp("ln", argv[0], 20) == 0) {
-            exec("/bin/ln", 0x2000, 0, 0xFF);
         } else if (strncmp("cwd", argv[0], 20) == 0) {
             printNumber(cwdIdx);
             print(" - ");
             print(cwdName);
             print("\n");
-        } else if (strncmp("history", argv[0], 20) == 0) {
-            for (i = 0; i < HIST_SIZE; i++) {
-                if (strlen(hist[i]) != 0) {
-                    print(hist[i]);
-                    print("\n");
-                }
-            }
-        } else if (strncmp("cp", command, 20) == 0) {
-            exec("/bin/cp", 0x2000, 0, 0xFF);
-        } else if (strncmp("rm", command, 20) == 0) {
-            exec("/bin/rm", 0x2000, 0, 0xFF);
-        } else if (strncmp("mkdir", command, 5) == 0) {
-            exec("/bin/mkdir", 0x2000, 0, 0xFF);
-        } else if (strncmp("mv", command, 2) == 0) {
-            exec("mv", 0x2000, 0, 0x00);
         } else {
-            exec("a", 0x2000, &execRes, 0xFF);
-            if (!execRes) {
-                print("Perintah ");
-                print(argv[0]);
-                print(" tidak dikenali.\n");
-            }
+            exec(command, 0x2000, &execRes, 0x00);
+            print("Perintah ");
+            print(command);
+            print(" tidak dikenali.\n");
         }
 
         // HISTORY

@@ -1,6 +1,7 @@
 
 #include "../lib/fileIO.h"
 #include "../lib/utilities.h"
+#include "../lib/teks.h"
 
 int main() {
     // mv asal tujuan
@@ -35,24 +36,75 @@ int main() {
     resourcePath = argv[1];
     destinationPath = argv[2];
 
+    if (strncmp(resourcePath, destinationPath, 14) == 0) {
+        print(resourcePath);
+        print(" dan ");
+        print(destinationPath);
+        print(" adalah file yang sama.");
+        goto error;
+    }
+
     getSector(dir, 0x101);
     getSector(dir + 512, 0x102);
     desTest = getFileIndex(destinationPath, cwdIdx, dir);
     resTest = getFileIndex(resourcePath, cwdIdx, dir);
 
-    if (resTest != -1) {
-        // artinya udah ada file asal dengan nama sama
-        temp = resTest & 0xFF;
-        //kasus file destination belum ada (desTest == -1)
-        if (temp == '\xFF' || *(dir + temp * 16 + 1) != '\xFF') {
+    // file sumber tidak ada
+    if (resTest == -1) {
+        print(resourcePath);
+        print(" tidak ada.\n");
+        goto error;
+    }
+
+    // artinya udah ada file tujuan dengan nama sama
+    // "benerin" destination path
+    if (desTest != -1) {
+        temp = desTest & 0xFF;
+
+        if (temp != '\xFF' && *(dir + temp * 16 + 1) != '\xFF') {
+            // destination path = directory (copy abis tu remove)
             // TODO: parse file buat kasus a/b/c
-            strncpy((dir + resTest*16 + 2), destinationPath, 14);
-            goto exec_shell;
+            print(destinationPath);
+            print(" sudah ada.\n");
+            goto error;
         }
 
         // dapetin nama file buat destination path
         res = strntoken(resourcePath, paths, '/', 14);
+        strncat(destinationPath, "/", 1);
         strncat(destinationPath, paths[res - 1], 14);
+    }
+
+    getFile(buf, resourcePath,&res,cwdIdx);
+    if (res <= 0) {
+        print(resourcePath);
+        print(" tidak ada.\n");
+        goto error;
+    }
+    updateFile(buf,destinationPath,&res,cwdIdx);
+    if (res <= 0) {
+        print("Terjadi kesalahan saaat memindahkan file.\n");
+        goto error;
+    }
+    removeFile(resourcePath, &res, cwdIdx);
+    if (res <= 0) {  // write errror
+        switch (res) {
+            case -1:
+                print(destinationPath);
+                print(" sudah ada.\n");
+                break;
+            case -2:
+            case -3:
+                print("File system penuh.\n");
+                break;
+            case -4:
+                print(destinationPath);
+                print(" invalid.\n");
+                break;
+            default:
+                print("Terjadi kesalahan saat menyalin file.\n");
+        }
+        goto error;
     }
 
     exec_shell:
