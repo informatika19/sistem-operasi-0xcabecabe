@@ -1,4 +1,4 @@
-# OS Pedas
+# OS Sambalado
 **Oleh 0xcabecabe**
 > Terasa pedas, terasa panas
 
@@ -25,3 +25,16 @@ Josep Marcello | 13519164
 
 ### Install dan jalankan
 `make run`
+
+
+## Parameter Program Utility
+Jika berada di antara `[]`, artinya argumen opsional\
+| nama | argumen 1 | argumen 2 |
+|------|-----------|-----------|
+| mv   |path/nama folder/file asal | path/nama folder/file tujuan |
+| mkdir | path/nama folder baru |
+| rm   | [-r] | path/ke/file (atau folder jika menggunakan `-r`)|
+| cp | path/ke/file asal | path/ke/file tujuan |
+| cat | path/ke/file | N/A |
+| ln  | path/ke/sumber | path/ke/tujuan |
+| echo | [pesan] | N/A |
