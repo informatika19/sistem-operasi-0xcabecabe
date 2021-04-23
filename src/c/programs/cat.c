@@ -1,7 +1,7 @@
 // TODO: cek dia direktori atau file
 
 #include "../lib/fileIO.h"
-#include "../lib/string.h"
+#include "../lib/teks.h"
 #include "../lib/utilities.h"
 
 int main() {
@@ -14,7 +14,7 @@ int main() {
     char cmd[512];
 
     argc = getArguments(argv);
-    if (argc < 2) {
+    if (argc != 2) {
         print("Penggunaan: cat <file>\n");
         goto error;
     }
@@ -36,7 +36,7 @@ int main() {
 
 exec_shell:
     sendArguments("", cwdIdx);
-    exec("/bin/shell", 0x2002, 0, 0xFF);
+    exec("/bin/shell", 0x2000, 0, 0xFF);
 
 error:
     goto exec_shell;

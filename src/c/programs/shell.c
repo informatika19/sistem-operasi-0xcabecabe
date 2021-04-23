@@ -78,7 +78,7 @@ int main() {
         // cut-off command
         *argvStart = 0;
 
-        // exec(command, 0x2001, 0, 0x00);
+        // exec(command, 0x2000, 0, 0x00);
 
         // eksekusi perintah
         if (strncmp("cd", argv[0], 20) == 0) {
@@ -96,9 +96,9 @@ int main() {
                 print("Penggunaan: ls [path/ke/direktori]");
             }
         } else if (strncmp("cat", argv[0], 20) == 0) {
-            exec("/bin/cat", 0x2001, 0, 0xFF);
+            exec("/bin/cat", 0x2000, 0, 0xFF);
         } else if (strncmp("ln", argv[0], 20) == 0) {
-            exec("/bin/ln", 0x2001, 0, 0xFF);
+            exec("/bin/ln", 0x2000, 0, 0xFF);
         } else if (strncmp("cwd", argv[0], 20) == 0) {
             printNumber(cwdIdx);
             print(" - ");
@@ -112,13 +112,15 @@ int main() {
                 }
             }
         } else if (strncmp("cp", command, 20) == 0) {
-            exec("/bin/cp", 0x2001, 0, 0xFF);
+            exec("/bin/cp", 0x2000, 0, 0xFF);
         } else if (strncmp("rm", command, 20) == 0) {
-            exec("/bin/rm", 0x2001, 0, 0xFF);
+            exec("/bin/rm", 0x2000, 0, 0xFF);
         } else if (strncmp("mkdir", command, 5) == 0) {
-            exec("/bin/mkdir", 0x2001, 0, 0xFF);
+            exec("/bin/mkdir", 0x2000, 0, 0xFF);
+        } else if (strncmp("mv", command, 2) == 0) {
+            exec("mv", 0x2000, 0, 0x00);
         } else {
-            // exec("a", 0x2001, &execRes, 0xFF);
+            exec("a", 0x2000, &execRes, 0xFF);
             if (!execRes) {
                 print("Perintah ");
                 print(argv[0]);
@@ -209,22 +211,6 @@ void listDir(char *path, char parentIndex) {
         }
         i += 16;
     }
-}
-
-// TODO: cek dia direktori apa file?
-void cat(char cwdIdx, char *path) {
-    char buf[16 * SECTOR_SIZE];
-    int res = 0;
-
-    getFile(buf, path, &res, cwdIdx);
-
-    if (res > 0)
-        print(buf);
-    else {
-        print("Terjadi kesalahan saat membaca berkas ");
-        print(path);
-    }
-    print("\n");
 }
 
 char *getCwdName(char *cwdName, char cwdIdx) {

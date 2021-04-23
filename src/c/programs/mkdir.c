@@ -49,7 +49,7 @@ int main() {
 
     exec_shell:
         sendArguments("", cwdIdx);
-        exec("/bin/shell", 0x2002, 0, 0xFF);
+        exec("/bin/shell", 0x2000, 0, 0xFF);
 
     error:
     // print("Terjadi kesalahan saat menghapus file");

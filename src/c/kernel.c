@@ -102,22 +102,19 @@ void printLogoGrafik(int sisi) {
 void executeProgram(char *filename, int segment, int *success,
                     char parentIndex) {
     // Buat buffer
-    int isSuccess;
     char fileBuffer[512 * 16];
-    int i = 0;
     // Buka file dengan readFile
-    readFile(&fileBuffer, filename, &isSuccess, parentIndex);
+    readFile(&fileBuffer, filename, success, parentIndex);
     // If success, salin dengan putInMemory
-    if (isSuccess > 0) {
+    if (*success) {
         // launchProgram
+        int i = 0;
         for (i = 0; i < 512 * 16; i++) {
             putInMemory(segment, i, fileBuffer[i]);
         }
-        *success = true;
         launchProgram(segment);
     } else {
-        *success = false;
-        interrupt(0x21, 0, "File not found!\n", 0, 0);
+        interrupt(0x21, 0, "File not found!", 0, 0);
     }
 }
 

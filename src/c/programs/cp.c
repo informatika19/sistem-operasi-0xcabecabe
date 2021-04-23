@@ -30,6 +30,7 @@ int main() {
         goto error;
     }
 
+    // print("setelah cek argc\n");
     cwdIdx = atoi(argv[0]) & 0xFF;
     resourcePath = argv[1];
     destinationPath = argv[2];
@@ -38,19 +39,19 @@ int main() {
     getSector(dir + 512, 0x102);
     test = getFileIndex(destinationPath, cwdIdx, dir);
 
-    // if (test != -1) {
-    //     // artinya udah ada file dengan nama sama
-    //     temp = test & 0xFF;
-    //     if (*(dir + temp * 16 + 1) != '\xFF') {
-    //         print(destinationPath);
-    //         print(" sudah ada.\n");
-    //         goto error;
-    //     }
+    if (test != -1) {
+        // artinya udah ada file dengan nama sama
+        temp = test & 0xFF;
+        if (temp == '\xFF' || *(dir + temp * 16 + 1) != '\xFF') {
+            print(destinationPath);
+            print(" sudah ada.\n");
+            goto error;
+        }
 
-    //     // dapetin nama file buat destination path
-    //     res = strntoken(resourcePath, paths, '/', 14);
-    //     strncat(destinationPath, paths[res - 1], 14);
-    // }
+        // dapetin nama file buat destination path
+        res = strntoken(resourcePath, paths, '/', 14);
+        strncat(destinationPath, paths[res - 1], 14);
+    }
 
     getFile(buf, resourcePath, &res, cwdIdx);
     if (res <= 0) {  // read error
@@ -65,10 +66,9 @@ int main() {
         print("Terjadi kesalahan saat menyalin file.\n");
         goto error;
     }
-
 exec_shell:
     sendArguments("", cwdIdx);
-    exec("/bin/shell", 0x2002, 0, 0xFF);
+    exec("/bin/shell", 0x2000, 0, 0xFF);
 
 error:
     goto exec_shell;

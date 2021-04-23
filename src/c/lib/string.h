@@ -51,10 +51,10 @@ int strncmp(char *s1, char *s2, int n);
 char *strcpy(char *dest, char *src);
 
 /**
- * Fungsi untuk menyalin string sebanyak n
+ * Fungsi untuk menyalin string sebanyak n karakter
  * @param dest tempat untuk menampung string salinan
  * @param src string yang akan disalin
- * @param n banyak string yang ingin disalin
+ * @param n banyak karakter string yang ingin disalin
  * @return string di dest
  */
 char *strncpy(char *dest, char *src, int n);
