@@ -115,7 +115,7 @@ void executeProgram(char *filename, int segment, int *success,
         }
         launchProgram(segment);
     } else {
-        interrupt(0x21, 0, "File not found!", 0, 0);
+        interrupt(0x21, 0, "File not found!\n", 0, 0);
     }
 }
 

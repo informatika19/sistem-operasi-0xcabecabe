@@ -12,6 +12,7 @@
 #include "lib_asm.h"
 #include "math.h"
 #include "teks.h"
+#include "utilities.h"
 
 char *getSector(char *buf, int secNo) {
     interrupt(0x21, 0x0002, buf, secNo, 0);
@@ -65,7 +66,7 @@ int getFileIndex(char *path, char parentIndex, char *dir) {
         // iterasi dalam file buat nyari yang parentIndexnya sesuai
         //      kalo ketemu, cari yang namanya sama strncmp(entry+2,...)
         //          kalo namanya ga sama, found = true
-        if (strncmp(parents[j], "..", 14) == 0) {
+        if (strncmp(parents[j], "..", 3) == 0) {
             found = true;  // kasus .. sebagai elemen terakhir di parents
             if (parentIndex != '\xFF') {
                 parentIndex = *(dir + (parentIndex * 0x10)) & 0xFF;
@@ -75,9 +76,8 @@ int getFileIndex(char *path, char parentIndex, char *dir) {
             i = 0;
             while (!found && i < tmp) {
                 entry = dir + i;
-                found = *entry == parentIndex
-                            ? strncmp(entry + 2, parents[j], 14) == 0
-                            : found;
+                found = *entry == parentIndex &&
+                        strncmp(entry + 2, parents[j], 14) == 0;
                 i += 0x10;
             }
             // kalo gaada file yang parentIndex dan namanya sesuai di path
@@ -119,17 +119,16 @@ void removeFile(char *path, int *result, char parentIndex) {
     }
 
     secIndex = *(dir + (fileIndex * 16) + 1);
-    j = 0;
+    i = 0;
     // hapus buffer dan file sector
-    while (*(sec + (secIndex * 16) + j) != 0 && j < 16) {
-        *(map + *(sec + (secIndex * 16) + j)) = 0;
-        j++;
+    while (*(sec + (secIndex * 16) + i) != 0 && i < 16) {
+        *(map + *(sec + (secIndex * 16) + i)) = 0;
+        *(sec + secIndex * 16 + i) = 0;
+        i++;
     }
 
-    j = *(dir + fileIndex * 16 + 1);
     for (i = 0; i < 16; ++i) {
         *(dir + fileIndex * 16 + i) = 0;
-        *(sec + j * 16 + i) = 0;
     }
 
     updateSector(map, 0x100);
