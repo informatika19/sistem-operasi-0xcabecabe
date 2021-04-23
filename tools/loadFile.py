@@ -10,15 +10,6 @@ Program load file untuk memasukkan file ke dalam system.img
 
 import sys
 
-# TODO kalo pake path selain root
-# def strncmp(s1: bytes, s2: bytes, n: int) -> int:
-#     i = 0
-#     while s1[i] and s1[i] == s2[i] and i < n:
-#         print(s1[i], s2[i])
-#         i += 1
-
-#     return s1[i] - s2[i] * (i < n)
-
 if __name__ == '__main__':
     stderr = sys.stderr
 
@@ -43,29 +34,29 @@ if __name__ == '__main__':
     with open(filePath, 'rb') as f:
         fileContent = f.read()
 
-    fileBuffers: list[bytes] = [fileContent[i:512+i]
-                                for i in range(0, len(fileContent), 512)]
+    fileBuffers = [fileContent[i:512+i]
+                   for i in range(0, len(fileContent), 512)]
 
     imgContent: bytes = b''
     with open(diskImagePath, 'rb') as f:
         imgContent = f.read()
 
-    imgSectors: list[bytes] = [imgContent[i:512+i]
-                               for i in range(0, len(imgContent), 512)]
+    imgSectors = [imgContent[i:512+i]
+                  for i in range(0, len(imgContent), 512)]
 
     # read map sector, files sectors, sectors sector
     mapSec: bytes = imgSectors[0x100]
-    filesSec: list[bytes] = [imgSectors[0x101] + imgSectors[0x102]]
+    filesSec = [imgSectors[0x101] + imgSectors[0x102]]
     filesSec = [filesSec[0][i:16+i] for i in range(0, len(filesSec[0]), 16)]
-    sectorsSec: list[bytes] = [imgSectors[0x103][i:16+i]
-                               for i in range(0, len(imgSectors[0x103]), 16)]
+    sectorsSec = [imgSectors[0x103][i:16+i]
+                  for i in range(0, len(imgSectors[0x103]), 16)]
 
     sectorsNeeded: int = len(fileBuffers)
 
     # Ngitungin banyak sector yang kosong dan milih mana sector yang bakal
     # dipake buat nyimpen data file
     sectorsFree = 0
-    freeSectorsNo: list[int] = []
+    freeSectorsNo = []
 
     for i in range(len(mapSec)):
         b = mapSec[i]
@@ -86,7 +77,7 @@ sektor dibutuhkan: {sectorsNeeded}", file=stderr)
         i += 1
     filesEntry: int = i
 
-    tmp: list[int] = list(mapSec)
+    tmp = list(mapSec)
 
     # tulis ke sektor isi dari file
     i = 0
