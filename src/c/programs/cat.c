@@ -14,12 +14,12 @@ int main() {
     char cmd[512];
 
     argc = getArguments(argv);
+    cwdIdx = atoi(argv[0]) & 0xFF;
     if (argc != 2) {
         print("Penggunaan: cat <file>\n");
         goto error;
     }
 
-    cwdIdx = atoi(argv[0]) & 0xFF;
     path = argv[1];
 
     getFile(buf, path, &res, cwdIdx);

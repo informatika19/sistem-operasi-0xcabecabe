@@ -77,7 +77,7 @@ int main() {
         argc = strntoken(command, argv, ' ', 20);
 
         // cut-off command
-        *argvStart = 0;
+        // *argvStart = 0;
 
         // eksekusi perintah
         if (strncmp("cd", argv[0], 20) == 0) {
@@ -100,9 +100,9 @@ int main() {
             print(cwdName);
             print("\n");
         } else {
-            exec(command, 0x2000, &execRes, 0x00);
+            exec(argv[0], 0x2000, &execRes, 0x00);
             print("Perintah ");
-            print(command);
+            print(argv[0]);
             print(" tidak dikenali.\n");
         }
 

@@ -151,10 +151,10 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     if (j != 0) {
         clear(path, strlen(path));
         strncpy(path, parents[0], strlen(parents[0]));
-        strncat(path, "/", 14);
+        strncat(path, "/", 1);
         for (i = 1; i < j; ++i) {
             strncat(path, parents[i], strlen(parents[i]));
-            strncat(path, "/", 2);
+            strncat(path, "/", 1);
         }
         parentIndex = getFileIndex(path, parentIndex, dir);
     }
@@ -167,7 +167,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
 
     parentIndex &= 0xFF;
 
-    // ngecek file dengan yang sama di parent index yang sama udah ada atau
+    // ngecek file dengan nama yang sama di parent index yang sama udah ada atau
     // belum
     i = 0;
     parentExists = parentExists || *(dir + parentIndex * 16 + 2) != 0;

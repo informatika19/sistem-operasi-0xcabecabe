@@ -25,23 +25,24 @@ int main() {
         goto error;
     }
 
+    cwdIdx = atoi(argv[0]) & 0xFF;
     if (argc != 3) {
         print("Penggunaan: cp <path/ke/sumber> <path/ke/tujuan>\n");
         goto error;
     }
 
     // print("setelah cek argc\n");
-    cwdIdx = atoi(argv[0]) & 0xFF;
     resourcePath = argv[1];
     destinationPath = argv[2];
 
     getSector(dir, 0x101);
     getSector(dir + 512, 0x102);
-    test = getFileIndex(destinationPath, cwdIdx, dir);
+    test = getFileIndex(destinationPath, cwdIdx, dir); // nguji udh ada/blm
 
     if (test != -1) {
         // artinya udah ada file dengan nama sama
         temp = test & 0xFF; // parent index
+        // kalo yang sama bukan folder, copy gagal
         if (temp != '\xFF' && *(dir + temp * 16 + 1) != '\xFF') {
             print(destinationPath);
             print(" sudah ada.\n");

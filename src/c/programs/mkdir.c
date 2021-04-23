@@ -1,6 +1,6 @@
 #include "../lib/folderIO.h"
 #include "../lib/utilities.h"
-#include "../lib/string.h"
+#include "../lib/teks.h"
 
 int main() {
     int argc; char argv[5][20];
@@ -17,6 +17,11 @@ int main() {
     cwdIdx = atoi(argv[0]) & 0xFF;
 
     res = strntoken(argv[1], parents, '/', 14);
+
+    if (argc != 2) {
+        print("Penggunaan: mkdir <path/nama folder baru>\n");
+        goto error;
+    }
 
     // mkdir a/b/c/d
     // argv[1] == "a/b/c/d"

@@ -27,12 +27,12 @@ int main() {
         goto error;
     }
 
+    cwdIdx = atoi(argv[0]) & 0xFF;
     if (argc < 0) {
         print("Terjadi kesalahan saat mendapatkan argumen perintah.\n");
         goto error;
     }
 
-    cwdIdx = atoi(argv[0]) & 0xFF;
     resourcePath = argv[1];
     destinationPath = argv[2];
 

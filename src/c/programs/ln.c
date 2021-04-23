@@ -25,13 +25,13 @@ int main() {
         goto error;
     }
 
+    cwdIdx = atoi(argv[0]) & 0xFF;
+    oldIdx = cwdIdx;
     if (argc != 3) {
         print("Penggunaan: ln <path/ke/sumber> <path/ke/tujuan>\n");
         goto error;
     }
 
-    cwdIdx = atoi(argv[0]) & 0xFF;
-    oldIdx = cwdIdx;
     resourcePath = argv[1];
     destinationPath = argv[2];
 

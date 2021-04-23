@@ -29,12 +29,12 @@ int main(){
         goto error;
     }
 
+    cwdIdx = atoi(argv[0]) & 0xFF;
     if (argc < 2 || argc > 3) {
-        print("Penggunaan: rm [-r] <path/ke/file>");
+        print("Penggunaan: rm [-r] <path/ke/file>\n");
         goto error;
     }
 
-    cwdIdx = atoi(argv[0]) & 0xFF;
     isDeletingFolder = strncmp(argv[1], "-r", 2) == 0;
     path = argv[1 + isDeletingFolder];
 
